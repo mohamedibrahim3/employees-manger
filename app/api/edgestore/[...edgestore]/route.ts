@@ -4,7 +4,7 @@ import { createEdgeStoreNextHandler } from "@edgestore/server/adapters/next/app"
 const es = initEdgeStore.create();
 
 const edgeStoreRouter = es.router({
-  myPublicImages: es.imageBucket().beforeDelete(({ ctx, fileInfo }) => {
+  MyEmployeesManager: es.imageBucket().beforeDelete(({ ctx, fileInfo }) => {
     console.log("Deleting file:", fileInfo);
     return true; // Allow deletion
   }),
