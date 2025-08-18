@@ -1,0 +1,39 @@
+{
+    "actualWork": "Tenetur nisi ducimus.",
+    "administration": "operations",
+    "birthDate": "2024-08-15",
+    "email": "your.email+fakedata25318@gmail.com",
+    "hiringDate": "2025-08-14",
+    "hiringType": "full-time",
+    "maritalStatus": "widowed",
+    "name": "Fiona Prosacco-Tremblay",
+    "nationalId": "Tenetur sequi nostrum alias inventore.",
+    "nickName": "Geraldine5",
+    "notes": "234",
+    "phoneNumber": "220",
+    "profession": "Iste omnis facilis laborum magnam.",
+    "relationships": [
+        {
+           "birthDate": "2026-04-17",
+           "birthPlace": "15612 Shanahan-Feest Mills",
+           "name": "Missouri Runte",
+           "nationalId": "Nostrum facere repudiandae.",
+           "notes": "Eligendi eius quam.",
+           "profession": "Quasi voluptate dicta expedita neque quia dicta tenetur minima.",
+           "relationshipType": "father",
+           "residenceLocation": "Atque vitae necessitatibus repudiandae repudiandae alias id recusandae numquam quos.",
+           "spouseName": "Pink.Braun"
+        },
+        {
+            "birthDate": "2026-04-17",
+           "birthPlace": "15612 Shanahan-Feest Mills",
+           "name": "Missouri Runte",
+           "nationalId": "Nostrum facere repudiandae.",
+           "notes": "Eligendi eius quam.",
+           "profession": "Quasi voluptate dicta expedita neque quia dicta tenetur minima.",
+           "relationshipType": "father",
+           "residenceLocation": "Atque vitae necessitatibus repudiandae repudiandae alias id recusandae numquam quos.",
+           "spouseName": "Pink.Braun"
+        }
+    ]
+}

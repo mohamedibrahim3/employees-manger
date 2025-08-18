@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String  @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionToken String   @unique
+  userId       String   @db.Uuid
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String?
+  email         String?   @unique
+  username      String    @unique
+  password      String
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Employee {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // Basic Information (وثيقة تعارف)
+  name              String // الاسم (رباعي)
+  nickName          String // اسم الشهرة
+  profession        String // المهنة
+  birthDate         DateTime // تاريخ الميلاد
+  nationalId        String   @unique // رقم الهوية الوطنية
+  maritalStatus     String // الحالة الاجتماعية (متزوج/أعزب)
+  residenceLocation String // العنوان التفصيلي
+  hiringDate        DateTime // تاريخ التعيين
+  hiringType        String // نوع التعيين (دوام كامل/جزئي)
+  email             String?  @unique // البريد
+  administration    String // الادارة
+  actualWork        String // العمل الفعلي
+  phoneNumber       String // رقم الهاتف
+  personalImageUrl  String?  @map("personal_image_url")
+  idFrontImageUrl   String?  @map("id_front_image_url")
+  idBackImageUrl    String?  @map("id_back_image_url")
+  notes             String // ملاحظات
+
+  // Relationships
+  relationships Relationship[] // العلاقات
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("employees")
+}
+
+model Relationship {
+  id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId String @db.Uuid
+
+  relationshipType  String // نوع العلاقة (أب/أم/أخ/أخت)
+  name              String // اسم الزوج/الزوجة
+  nationalId        String?   @unique // رقم الهوية الوطنية
+  birthDate         DateTime? // تاريخ الميلاد
+  birthPlace        String? // مكان الميلاد
+  profession        String? // المهنة
+  spouseName        String? // اسم الزوج/الزوجة
+  residenceLocation String? // محل الاقامة للعمل
+  notes             String? // ملاحظات
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("relationships")
+}
