@@ -32,6 +32,8 @@ const EmployeeImages: React.FC<EmployeeImagesProps> = ({
     [key: string]: boolean;
   }>({});
 
+  console.log(personalImageUrl, idFrontImageUrl, idBackImageUrl);
+
   const handleImageError = (imageUrl: string) => {
     setImageErrors((prev) => ({ ...prev, [imageUrl]: true }));
     setLoadingImages((prev) => ({ ...prev, [imageUrl]: false }));
@@ -134,10 +136,10 @@ const EmployeeImages: React.FC<EmployeeImagesProps> = ({
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {images.map((image, index) => {
         const IconComponent = image.icon;
-        const imageHeight = image.aspectRatio === "square" ? "h-48" : "h-32";
         const hasError = imageErrors[image.url!];
         const isLoading = loadingImages[image.url!];
 
+        console.log(isLoading);
         return (
           <div key={index} className="space-y-3">
             <div className="flex items-center gap-2 mb-2">
@@ -148,11 +150,9 @@ const EmployeeImages: React.FC<EmployeeImagesProps> = ({
             </div>
 
             <div className="relative group overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
-              <div
-                className={`flex items-center justify-center ${imageHeight}`}
-              >
+              <div className="relative w-full">
                 {hasError ? (
-                  <div className="flex flex-col items-center justify-center text-gray-400 p-4">
+                  <div className="flex flex-col items-center justify-center text-gray-400 p-4 min-h-[200px]">
                     <AlertCircle className="w-8 h-8 mb-2" />
                     <p className="text-xs text-center">فشل في تحميل الصورة</p>
                     <Button
@@ -167,14 +167,17 @@ const EmployeeImages: React.FC<EmployeeImagesProps> = ({
                 ) : (
                   <>
                     {isLoading && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100 min-h-[200px]">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
                       </div>
                     )}
-                    <img
+                    <Image
                       src={image.url!}
                       alt={image.description}
-                      className={`w-full ${imageHeight} object-cover transition-transform group-hover:scale-105 ${
+                      width={0}
+                      height={0}
+                      sizes="100vw"
+                      className={`w-full h-auto transition-transform group-hover:scale-105 ${
                         isLoading ? "opacity-0" : "opacity-100"
                       }`}
                       onError={() => handleImageError(image.url!)}
@@ -187,7 +190,7 @@ const EmployeeImages: React.FC<EmployeeImagesProps> = ({
               </div>
 
               {!hasError && !isLoading && (
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-opacity flex items-center justify-center">
+                <div className="absolute inset-0  bg-opacity-0 group-hover:bg-opacity-40 transition-opacity flex items-center justify-center">
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                     <Button
                       size="sm"

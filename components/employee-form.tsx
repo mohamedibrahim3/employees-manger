@@ -112,7 +112,7 @@ const EmployeeForm = ({
       signal: AbortSignal;
       onProgressChange: (progress: number) => void;
     }) => {
-      const res = await edgestore.myPublicImages.upload({
+      const res = await edgestore.MyEmployeesManager.upload({
         file,
         signal,
         onProgressChange,
@@ -138,7 +138,7 @@ const EmployeeForm = ({
 
       // Try to delete from EdgeStore in the background (optional)
       // If this fails, it's not critical - the image just becomes orphaned
-      edgestore.myPublicImages
+      edgestore.MyEmployeesManager
         .delete({
           url: imageUrl,
         })
