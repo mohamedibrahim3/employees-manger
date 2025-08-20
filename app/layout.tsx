@@ -1,7 +1,7 @@
 import "./globals.css";
 import { Rubik } from "next/font/google";
 import NextAuthProvider from "@/components/providers/session-provider";
-import { APP_NAME, APP_DESCRIPTION, SERVER_URL } from "@/lib/constants";
+import { APP_NAME_FULL as APP_NAME, APP_DESCRIPTION, SERVER_URL } from "@/lib/constants";
 import { Toaster } from "sonner";
 import { EdgeStoreProvider } from "@/lib/edgestore";
 
