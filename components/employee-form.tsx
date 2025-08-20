@@ -939,7 +939,7 @@ const EmployeeForm = ({
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push("/")}
+            onClick={() => router.push("/employees")}
           >
             رجوع
           </Button>
