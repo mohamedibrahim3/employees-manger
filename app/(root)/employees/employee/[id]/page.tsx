@@ -1,4 +1,8 @@
 import { getEmployeeById } from "@/lib/actions/employee.actions";
+import { unstable_noStore as noStore } from "next/cache";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 import React from "react";
 import {
   Card,
@@ -15,6 +19,7 @@ import EmployeeImages from "@/components/EmployeeImages";
 const EmployeeDetailsPage = async (props: {
   params: Promise<{ id: string }>;
 }) => {
+  noStore();
   const { id } = await props.params;
 
   const result = await getEmployeeById(id);

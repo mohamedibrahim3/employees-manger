@@ -3,10 +3,14 @@ import { EmployeesTable } from "@/components/employees-table";
 import { getEmployees } from "@/lib/actions/employee.actions";
 import Link from "next/link";
 import { Employee } from "@/types";
+import { unstable_noStore as noStore } from "next/cache";
 
+// ✅ إزالة الduplicate وإضافة settings صحيحة
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const EmployeesPage = async () => {
+  noStore();
   const employeesData = await getEmployees();
 
   const employees: Employee[] = (employeesData?.employees ?? []).map(

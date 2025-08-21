@@ -2,9 +2,9 @@
 
 import { prisma } from "@/db/prisma";
 import { revalidatePath } from "next/cache";
+import { unstable_noStore as noStore } from "next/cache"; // أضف ده
 import { z } from "zod";
 import { createEmployeeApiSchema } from "../validators";
-// import { saveImageUrl, getUserImages, deleteImageUrl } from "@/lib/db";
 
 interface Relationship {
   relationshipType: string;
@@ -72,8 +72,9 @@ export async function createEmployee(
       });
     }
 
-    revalidatePath("/");
-    revalidatePath("/", "page");
+    revalidatePath("/employees"); // المسار الجديد
+    revalidatePath("/"); // الصفحة الرئيسية
+    revalidatePath("/employees", "page");
 
     return { success: true, employee };
   } catch (error) {
@@ -145,8 +146,10 @@ export const updateEmployee = async (
       });
     }
 
-    revalidatePath("/");
-    revalidatePath("/", "page");
+    revalidatePath("/employees"); // المسار الجديد
+    revalidatePath("/"); // الصفحة الرئيسية  
+    revalidatePath("/employees", "page");
+    revalidatePath(`/employees/${id}`); // صفحة تفاصيل الموظف
     return { success: true, employee };
   } catch (error) {
     console.error("Error updating employee:", error);
@@ -158,6 +161,7 @@ export const updateEmployee = async (
 };
 
 export const getEmployees = async () => {
+  noStore();
   try {
     const employees = await prisma.employee.findMany({
       orderBy: {
@@ -181,9 +185,11 @@ export const deleteEmployee = async (id: string) => {
     });
 
     // Revalidate multiple paths to ensure cache is cleared
-    revalidatePath("/");
-    revalidatePath("/", "page");
-    revalidatePath("/", "layout");
+    // ✅ إضافة revalidation للمسارات الصحيحة
+    revalidatePath("/employees"); // المسار الجديد
+    revalidatePath("/"); // الصفحة الرئيسية
+    revalidatePath("/employees", "page");
+    revalidatePath("/employees", "layout");
     return { success: true };
   } catch (error) {
     console.error("Error deleting employee:", error);
@@ -192,6 +198,7 @@ export const deleteEmployee = async (id: string) => {
 };
 
 export const getEmployeeById = async (id: string) => {
+  noStore();
   try {
     const employee = await prisma.employee.findUnique({
       where: { id },

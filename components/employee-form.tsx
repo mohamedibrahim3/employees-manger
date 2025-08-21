@@ -252,7 +252,10 @@ const EmployeeForm = ({
         toast(
           type === "Update" ? "تم تحديث الموظف بنجاح" : "تم إنشاء الموظف بنجاح"
         );
-        router.push("/");
+      // ✅ استخدام hard redirect للتأكد التام
+      setTimeout(() => {
+        window.location.href = "/employees";
+      }, 1000); // انتظار لإظهار الtoast
       } else {
         toast(
           result.error ||
@@ -954,7 +957,7 @@ const EmployeeForm = ({
               onClick={async () => {
                 const { success } = await deleteEmployee(employeeId || "");
                 if (success) {
-                  router.push("/");
+                  router.push("/employees");
                 }
               }}
             >
