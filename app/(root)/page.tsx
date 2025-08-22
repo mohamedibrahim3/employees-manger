@@ -26,7 +26,7 @@ const Page = async () => {
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto space-y-8">
         <h1 className="text-4xl font-bold text-gray-900 text-center">
-          برنامج الموارد البشرية
+  برنامج الموارد البشرية الخاص بجهاز تعمير سيناء
         </h1>
 
         <div className="flex justify-center">
