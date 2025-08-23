@@ -2,7 +2,7 @@
 
 import { prisma } from "@/db/prisma";
 import { revalidatePath } from "next/cache";
-import { unstable_noStore as noStore } from "next/cache"; // أضف ده
+import { unstable_noStore as noStore } from "next/cache";
 import { z } from "zod";
 import { createEmployeeApiSchema } from "../validators";
 
@@ -178,6 +178,33 @@ export const getEmployees = async () => {
     return { success: false, error: "حدث خطأ أثناء جلب البيانات" };
   }
 };
+
+export const getEmployeesBySearch = async (name: string, administration: string) => {
+  noStore();
+  try {
+    const employees = await prisma.employee.findMany({
+      where: {
+        name: {
+          contains: name,
+          mode: "insensitive",
+        },
+        administration: administration,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        relationships: true,
+      },
+    });
+
+    return { success: true, employees };
+  } catch (error) {
+    console.error("Error searching employees:", error);
+    return { success: false, error: "حدث خطأ أثناء البحث" };
+  }
+};
+
 export const deleteEmployee = async (id: string) => {
   try {
     await prisma.employee.delete({

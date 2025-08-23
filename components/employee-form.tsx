@@ -75,7 +75,9 @@ interface EmployeeData {
   }[];
 }
 
-type FormData = z.infer<typeof createEmployeeFormSchema>;
+type FormData = Omit<z.infer<typeof createEmployeeFormSchema>, "status"> & {
+  status: "active" | "inactive" | "suspended" | "retired";
+};
 
 const EmployeeForm = ({
   type,
@@ -155,7 +157,7 @@ const EmployeeForm = ({
   };
 
   // Form state management
-  const form = useForm<FormData>({
+  const form = useForm<FormData, any, FormData>({
     resolver: zodResolver(createEmployeeFormSchema),
     defaultValues: {
       name: employee?.name || "",
@@ -165,7 +167,7 @@ const EmployeeForm = ({
         ? new Date(employee.birthDate).toISOString().split("T")[0]
         : "",
       nationalId: employee?.nationalId || "",
-      maritalStatus: employee?.maritalStatus || "",
+      maritalStatus: employee?.maritalStatus || "single",
       residenceLocation: employee?.residenceLocation || "",
       hiringDate: employee?.hiringDate
         ? new Date(employee.hiringDate).toISOString().split("T")[0]
@@ -181,8 +183,8 @@ const EmployeeForm = ({
       backIdCard: employee?.idBackImageUrl || "",
       relationships:
         employee?.relationships?.map((rel) => ({
-          relationshipType: rel.relationshipType,
-          name: rel.name,
+          relationshipType: rel.relationshipType || "",
+          name: rel.name || "",
           nationalId: rel.nationalId || "",
           birthDate: rel.birthDate
             ? new Date(rel.birthDate).toISOString().split("T")[0]
@@ -193,6 +195,9 @@ const EmployeeForm = ({
           residenceLocation: rel.residenceLocation || "",
           notes: rel.notes || "",
         })) || [],
+      status:
+        (employee as any)?.status ||
+        "active", // Ensure status is always present and valid
     },
   });
 
@@ -296,8 +301,8 @@ const EmployeeForm = ({
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
               المعلومات الأساسية
-            </CardTitle>
-            <CardDescription>تفاصيل الموظف الشخصية والمهنية</CardDescription>
+            </CardTitle>تفاصيل الموظف الشخصية والمهنية
+            <CardDescription></CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

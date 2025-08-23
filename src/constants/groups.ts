@@ -1,4 +1,3 @@
-// ✅ Array واحد فيه الإدارات + المناطق
 export const ADMINISTRATIONS_AND_REGIONS = [
   "نظم المعلومات والتحول الرقمي",
   "الشئون المالية",
