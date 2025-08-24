@@ -16,6 +16,16 @@ import Link from "next/link";
 import { formateHiringType, formateMaritalStatus } from "@/lib/utils";
 import EmployeeImages from "@/components/EmployeeImages";
 
+const RELATIONSHIP_LABELS: Record<string, string> = {
+  father: "بيانات الأب",
+  mother: "بيانات الأم",
+  spouse: "بيانات الزوج/الزوجة",
+  son: "بيانات الابن",
+  daughter: "بيانات الابنة",
+  brother: "بيانات الأخ",
+  sister: "بيانات الأخت",
+};
+
 const EmployeeDetailsPage = async (props: {
   params: Promise<{ id: string }>;
 }) => {
@@ -178,7 +188,7 @@ const EmployeeDetailsPage = async (props: {
               {employee.notes && (
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">
-                    ملاحظات
+                    ملاحظات امنيه
                   </label>
                   <p className="text-gray-900 bg-gray-50 p-3 rounded-md">
                     {employee.notes}
@@ -257,7 +267,7 @@ const EmployeeDetailsPage = async (props: {
                     >
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-semibold text-gray-900">
-                          {relationship.relationshipType}
+                          {RELATIONSHIP_LABELS[relationship.relationshipType] || relationship.relationshipType}
                         </h3>
                         <span className="text-sm text-gray-500">
                           #{index + 1}

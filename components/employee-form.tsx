@@ -713,7 +713,7 @@ const EmployeeForm = ({
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>الملاحظات الامنية</FormLabel>
+                  <FormLabel>الملاحظات الامنية *</FormLabel>
                   <FormControl>
                     <Textarea placeholder="أدخل أي ملاحظات إضافية" {...field} />
                   </FormControl>
@@ -830,9 +830,9 @@ const EmployeeForm = ({
                     name={`relationships.${index}.nationalId`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>رقم الهوية الوطنية *</FormLabel>
+                        <FormLabel>رقم البطاقة *</FormLabel>
                         <FormControl>
-                          <Input placeholder="أدخل رقم الهوية" {...field} />
+                          <Input placeholder="أدخل رقم البطاقة" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

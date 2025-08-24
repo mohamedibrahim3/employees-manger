@@ -189,7 +189,7 @@ export function EmployeesTable({
                   <span dir="rtl">{employee.profession}</span>
                 </p>
                 <p>
-                  <span className="font-medium">رقم الهوية:</span>{" "}
+                  <span className="font-medium">رقم البطاقة:</span>{" "}
                   {employee.nationalId}
                 </p>
                 <p>

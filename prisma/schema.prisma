@@ -70,7 +70,7 @@ model Employee {
   nickName          String // اسم الشهرة
   profession        String // المهنة
   birthDate         DateTime // تاريخ الميلاد
-  nationalId        String   @unique // رقم الهوية الوطنية
+  nationalId        String   @unique // رقم البطاقة
   maritalStatus     String // الحالة الاجتماعية (متزوج/أعزب)
   residenceLocation String // العنوان التفصيلي
   hiringDate        DateTime // تاريخ التعيين
@@ -100,7 +100,7 @@ model Relationship {
 
   relationshipType  String // نوع العلاقة (أب/أم/أخ/أخت)
   name              String // اسم الزوج/الزوجة
-  nationalId        String?   @unique // رقم الهوية الوطنية
+  nationalId        String?   @unique //  رقم البطاقة
   birthDate         DateTime? // تاريخ الميلاد
   birthPlace        String? // مكان الميلاد
   profession        String? // المهنة
