@@ -737,7 +737,7 @@ const EmployeeForm = ({
             {fields.map((field, index) => (
               <div key={field.id} className="border rounded-lg p-4 space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-semibold">Relationship #{index + 1}</h4>
+                  <h4 className="font-semibold">البيانات العائليه رقم {index + 1}</h4>
                   <Button
                     type="button"
                     variant="outline"
