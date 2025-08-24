@@ -527,9 +527,6 @@ const EmployeeForm = ({
                         <SelectItem value="منطقة تعمير الاسماعيليه">
                           منطقة تعمير الاسماعيليه
                         </SelectItem>
-                        <SelectItem value="منطقة تعميرالقنطره">
-                          منطقة تعميرالقنطره
-                        </SelectItem>
                         <SelectItem value="منطقة تعمير القنطرة شرق">
                           منطقة تعمير القنطرة شرق
                         </SelectItem>
