@@ -24,14 +24,13 @@ const Page = async ({ searchParams }: { searchParams: { [key: string]: string | 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
-      {/* العناصر الزخرفية للخلفية */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-600/20 rounded-full blur-3xl"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-purple-400/10 to-pink-600/10 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="relative z-10 w-full max-w-none px-6 lg:px-12 xl:px-16 py-12 space-y-12">
+      <div className="relative z-10 w-full max-w-none px-4 lg:px-8 xl:px-12 py-12 space-y-12">
         {/* Header Section */}
         <div className="text-center space-y-6">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-2xl mb-6 animate-pulse">
@@ -58,11 +57,6 @@ const Page = async ({ searchParams }: { searchParams: { [key: string]: string | 
               <div className="absolute top-6 right-6 w-3 h-3 bg-green-400 rounded-full"></div>
               
               <div className="mb-6">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl mb-4">
-                  <svg className="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                </div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">قوة الجهاز الإجمالية</h2>
                 <div className="text-6xl font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
                   {toArabicDigits(employees.length)}
@@ -99,13 +93,13 @@ const Page = async ({ searchParams }: { searchParams: { [key: string]: string | 
               <table className="w-full">
                 <thead className="bg-gradient-to-r from-gray-50 to-blue-50">
                   <tr>
-                    <th className="px-12 py-8 text-right text-xl font-bold text-gray-800 border-b-2 border-blue-200 w-1/2">
+                    <th className="px-6 py-4 text-right text-xl font-bold text-gray-800 border-b-2 border-blue-200 w-1/2">
                       الإدارة / المنطقة
                     </th>
-                    <th className="px-12 py-8 text-right text-xl font-bold text-gray-800 border-b-2 border-blue-200 w-1/4">
+                    <th className="px-6 py-4 text-right text-xl font-bold text-gray-800 border-b-2 border-blue-200 w-1/4">
                       عدد الموظفين
                     </th>
-                    <th className="px-12 py-8 text-right text-xl font-bold text-gray-800 border-b-2 border-blue-200 w-1/4">
+                    <th className="px-6 py-4 text-right text-xl font-bold text-gray-800 border-b-2 border-blue-200 w-1/4">
                       إجراء
                     </th>
                   </tr>
@@ -120,13 +114,13 @@ const Page = async ({ searchParams }: { searchParams: { [key: string]: string | 
                           index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
                         }`}
                       >
-                        <td className="px-12 py-8 text-gray-900 font-semibold text-xl group-hover:text-blue-900 transition-colors duration-300">
+                        <td className="px-6 py-4 text-gray-900 font-semibold text-xl group-hover:text-blue-900 transition-colors duration-300">
                           <div className="flex items-center">
                             <div className="w-3 h-10 bg-gradient-to-b from-blue-400 to-purple-400 rounded-full ml-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             {admin}
                           </div>
                         </td>
-                        <td className="px-12 py-8">
+                        <td className="px-6 py-4">
                           <div className="flex items-center">
                             <span className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl text-blue-700 font-bold text-xl ml-4">
                               {toArabicDigits(emps.length)}
@@ -134,7 +128,7 @@ const Page = async ({ searchParams }: { searchParams: { [key: string]: string | 
                             <span className="text-gray-600 text-lg">موظف</span>
                           </div>
                         </td>
-                        <td className="px-12 py-8">
+                        <td className="px-6 py-4">
                           <Link
                             href={`/groups/administration/${encodeURIComponent(admin)}`}
                             className="group/link inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 hover:from-purple-500 hover:to-blue-500"
