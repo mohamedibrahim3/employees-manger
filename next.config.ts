@@ -4,11 +4,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["bcryptjs"],
 
   images: {
-    domains: [
-      "files.edgestore.dev",
-      "localhost",
-      "127.0.0.1",
-    ],
+    domains: ["files.edgestore.dev", "localhost", "127.0.0.1"],
     remotePatterns: [
       {
         protocol: "https",

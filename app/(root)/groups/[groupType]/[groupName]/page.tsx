@@ -10,25 +10,39 @@ export const revalidate = 0;
 import type { Employee } from "@/types";
 
 const toArabicDigits = (num: number) => {
-  return num.toString().replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[parseInt(d)]);
+  return num.toString().replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[Number(d)]);
 };
 
-const GroupPage = async ({ params }: { params: { groupType: string; groupName: string } }) => {
+const GroupPage = async ({ params }: any) => {
+  // خليها any عشان نتجنّب تعارض PageProps في نسخ Next الحديثة
   noStore();
-  const { groupType, groupName } = params;
+  const { groupType, groupName } = params || {};
 
-  const decodedGroupName = decodeURIComponent(groupName);
+  const decodedGroupName = typeof groupName === "string" ? decodeURIComponent(groupName) : "";
 
   const employeesData = await getEmployees();
-  const employees: Employee[] = (employeesData?.employees || []).map((emp: any) => ({
-    ...emp,
-    birthDate: emp.birthDate instanceof Date ? emp.birthDate.toISOString().split("T")[0] : emp.birthDate,
-    hiringDate: emp.hiringDate instanceof Date ? emp.hiringDate.toISOString().split("T")[0] : emp.hiringDate,
-    relationships: emp.relationships?.map((rel: any) => ({
-      ...rel,
-      birthDate: rel.birthDate instanceof Date ? rel.birthDate.toISOString().split("T")[0] : rel.birthDate,
-    })) ?? [],
-  }));
+  const rawEmployees = employeesData?.employees || [];
+
+  // Normalize to Employee[] as best-effort
+  const employees: Employee[] = (rawEmployees as any[]).map((emp: any) => {
+    const normalizeDate = (d: any) => {
+      if (!d) return undefined;
+      if (d instanceof Date) return d.toISOString().split("T")[0];
+      if (typeof d === "string") return d;
+      return undefined;
+    };
+
+    return {
+      ...emp,
+      birthDate: normalizeDate(emp.birthDate) as any,
+      hiringDate: normalizeDate(emp.hiringDate) as any,
+      relationships:
+        (emp.relationships || []).map((rel: any) => ({
+          ...rel,
+          birthDate: normalizeDate(rel.birthDate) as any,
+        })) || [],
+    } as Employee;
+  });
 
   if (!["administration", "region"].includes(groupType)) {
     return (
@@ -58,13 +72,12 @@ const GroupPage = async ({ params }: { params: { groupType: string; groupName: s
   });
 
   const groupTitle = groupType === "administration" ? "الإدارة" : "المنطقة";
-  const groupIcon = groupType === "administration" 
-    ? (
+  const groupIcon =
+    groupType === "administration" ? (
       <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
         <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd"></path>
       </svg>
-    )
-    : (
+    ) : (
       <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
         <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"></path>
       </svg>
@@ -81,26 +94,22 @@ const GroupPage = async ({ params }: { params: { groupType: string; groupName: s
       </div>
 
       <div className="relative z-10 w-full max-w-none px-6 lg:px-12 xl:px-16 py-12 space-y-8">
-        
         {/* Header Section */}
         <div className="text-center space-y-6 mb-12">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-2xl mb-6">
             {groupIcon}
           </div>
-          
+
           <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent leading-tight">
             موظفون {groupTitle}
           </h1>
-          <p className="text-2xl text-blue-600 font-bold">
-            {decodedGroupName}
-          </p>
+          <p className="text-2xl text-blue-600 font-bold">{decodedGroupName}</p>
           <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mx-auto"></div>
         </div>
 
         {/* Stats and Navigation Bar */}
         <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden border border-white/20 p-8">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
-            
             {/* Statistics Section */}
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl mb-4">
@@ -153,9 +162,7 @@ const GroupPage = async ({ params }: { params: { groupType: string; groupName: s
                 <div className="flex items-center space-x-4 space-x-reverse">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
                   <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <h2 className="text-3xl font-bold text-white mr-4">
-                    قائمة موظفي {decodedGroupName}
-                  </h2>
+                  <h2 className="text-3xl font-bold text-white mr-4">قائمة موظفي {decodedGroupName}</h2>
                 </div>
               </div>
             </div>
@@ -173,7 +180,7 @@ const GroupPage = async ({ params }: { params: { groupType: string; groupName: s
             </div>
             <h3 className="text-3xl font-bold text-gray-600 mb-4">لا يوجد موظفين</h3>
             <p className="text-xl text-gray-500 mb-8">
-              لم يتم العثور على أي موظفين في {groupTitle} "{decodedGroupName}"
+              لم يتم العثور على أي موظفين في {groupTitle} «{decodedGroupName}»
             </p>
             <Link href="/employees/create">
               <Button className="px-8 py-4 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
@@ -189,9 +196,7 @@ const GroupPage = async ({ params }: { params: { groupType: string; groupName: s
             <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
             <span className="text-lg">عرض بيانات {groupTitle}: {decodedGroupName}</span>
           </div>
-          <p className="text-gray-500">
-            آخر تحديث: {new Date().toLocaleDateString('ar-EG')} - {new Date().toLocaleTimeString('ar-EG')}
-          </p>
+          <p className="text-gray-500">آخر تحديث: {new Date().toLocaleDateString("ar-EG")} - {new Date().toLocaleTimeString("ar-EG")}</p>
         </div>
       </div>
     </div>

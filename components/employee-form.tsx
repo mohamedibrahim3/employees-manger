@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import type { Resolver } from "react-hook-form";
 import {
   Card,
   CardContent,
@@ -38,7 +39,7 @@ import {
   createEmployeeFormSchema,
 } from "@/lib/validators";
 import { updateEmployee } from "@/lib/actions/employee.actions";
-import { EdgeStoreProvider, useEdgeStore } from "@/lib/edgestore";
+import { useEdgeStore } from "@/lib/edgestore";
 import { SingleImageDropzone } from "./upload/single-image";
 import { UploaderProvider } from "./upload/uploader-provider";
 import { useState } from "react";
@@ -75,9 +76,8 @@ interface EmployeeData {
   }[];
 }
 
-type FormData = Omit<z.infer<typeof createEmployeeFormSchema>, "status"> & {
-  status: "active" | "inactive" | "suspended" | "retired";
-};
+// ✅ التعديل الأساسي: استخدام النوع من المخطط مباشرة
+type FormData = z.infer<typeof createEmployeeFormSchema>;
 
 const EmployeeForm = ({
   type,
@@ -156,9 +156,9 @@ const EmployeeForm = ({
     }
   };
 
-  // Form state management
-  const form = useForm<FormData, any, FormData>({
-    resolver: zodResolver(createEmployeeFormSchema),
+  // ✅ التعديل الأساسي: إزالة المعاملات الإضافية من useForm
+  const form = useForm<FormData>({
+    resolver: zodResolver(createEmployeeFormSchema) as unknown as Resolver<FormData>,
     defaultValues: {
       name: employee?.name || "",
       nickName: employee?.nickName || "",
@@ -195,9 +195,7 @@ const EmployeeForm = ({
           residenceLocation: rel.residenceLocation || "",
           notes: rel.notes || "",
         })) || [],
-      status:
-        (employee as any)?.status ||
-        "active", // Ensure status is always present and valid
+      status: (employee as any)?.status || "active", // Now properly typed
     },
   });
 
@@ -257,10 +255,10 @@ const EmployeeForm = ({
         toast(
           type === "Update" ? "تم تحديث الموظف بنجاح" : "تم إنشاء الموظف بنجاح"
         );
-      // ✅ استخدام hard redirect للتأكد التام
-      setTimeout(() => {
-        window.location.href = "/employees";
-      }, 1000); // انتظار لإظهار الtoast
+        // ✅ استخدام hard redirect للتأكد التام
+        setTimeout(() => {
+          window.location.href = "/employees";
+        }, 1000); // انتظار لإظهار الtoast
       } else {
         toast(
           result.error ||
@@ -301,8 +299,8 @@ const EmployeeForm = ({
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
               المعلومات الأساسية
-            </CardTitle>تفاصيل الموظف الشخصية والمهنية
-            <CardDescription></CardDescription>
+            </CardTitle>
+            <CardDescription>تفاصيل الموظف الشخصية والمهنية</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -503,8 +501,8 @@ const EmployeeForm = ({
                         <SelectItem value="الشئون القانونية">
                           الشئون القانونية
                         </SelectItem>
-                        <SelectItem value="التنميه المتكاملة">
-                          التنميه المتكاملة
+                        <SelectItem value="التنمية المتكاملة">
+                          التنمية المتكاملة
                         </SelectItem>
                         <SelectItem value="مكتب رئيس الجهاز">
                           مكتب رئيس الجهاز

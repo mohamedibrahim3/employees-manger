@@ -1,8 +1,7 @@
 "use server";
 
 import { prisma } from "@/db/prisma";
-import { revalidatePath } from "next/cache";
-import { unstable_noStore as noStore } from "next/cache";
+import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 import { z } from "zod";
 import { createEmployeeApiSchema } from "../validators";
 
@@ -28,6 +27,8 @@ export async function createEmployee(
       name: validatedData.name,
       nickName: validatedData.nickName,
       profession: validatedData.profession,
+      // validatedData.birthDate should already be a Date (from the schema),
+      // but we wrap with new Date(...) as a safe normalization if a string slipped through.
       birthDate: new Date(validatedData.birthDate),
       nationalId: validatedData.nationalId,
       maritalStatus: validatedData.maritalStatus,
@@ -49,7 +50,7 @@ export async function createEmployee(
       relationships = validatedData.relationships.map((rel) => ({
         relationshipType: rel.relationshipType,
         name: rel.name,
-        nationalId: rel.nationalId || null, // Changed from "" to null
+        nationalId: rel.nationalId || null,
         birthDate: rel.birthDate ? new Date(rel.birthDate) : null,
         birthPlace: rel.birthPlace || undefined,
         profession: rel.profession || undefined,
@@ -64,6 +65,7 @@ export async function createEmployee(
     });
 
     if (relationships.length > 0) {
+      // createMany is fine if fields match DB nullable types
       await prisma.relationship.createMany({
         data: relationships.map((rel: Relationship) => ({
           employeeId: employee.id,
@@ -72,9 +74,11 @@ export async function createEmployee(
       });
     }
 
-    revalidatePath("/employees"); // المسار الجديد
-    revalidatePath("/"); // الصفحة الرئيسية
-    revalidatePath("/employees", "page");
+    // Revalidate the relevant pages (call takes only the path)
+    revalidatePath("/employees");
+    revalidatePath("/");
+    // optional: revalidate specific employee page if you want it to appear immediately
+    revalidatePath(`/employees/${employee.id}`);
 
     return { success: true, employee };
   } catch (error) {
@@ -118,7 +122,7 @@ export const updateEmployee = async (
       relationships = validatedData.relationships.map((rel) => ({
         relationshipType: rel.relationshipType,
         name: rel.name,
-        nationalId: rel.nationalId || null, // Changed from "" to null
+        nationalId: rel.nationalId || null,
         birthDate: rel.birthDate ? new Date(rel.birthDate) : null,
         birthPlace: rel.birthPlace || undefined,
         profession: rel.profession || undefined,
@@ -146,10 +150,11 @@ export const updateEmployee = async (
       });
     }
 
-    revalidatePath("/employees"); // المسار الجديد
-    revalidatePath("/"); // الصفحة الرئيسية  
-    revalidatePath("/employees", "page");
-    revalidatePath(`/employees/${id}`); // صفحة تفاصيل الموظف
+    // Revalidate affected paths
+    revalidatePath("/employees");
+    revalidatePath("/");
+    revalidatePath(`/employees/${id}`);
+
     return { success: true, employee };
   } catch (error) {
     console.error("Error updating employee:", error);
@@ -211,12 +216,9 @@ export const deleteEmployee = async (id: string) => {
       where: { id },
     });
 
-    // Revalidate multiple paths to ensure cache is cleared
-    // ✅ إضافة revalidation للمسارات الصحيحة
-    revalidatePath("/employees"); // المسار الجديد
-    revalidatePath("/"); // الصفحة الرئيسية
-    revalidatePath("/employees", "page");
-    revalidatePath("/employees", "layout");
+    // Revalidate relevant paths (single param each)
+    revalidatePath("/employees");
+    revalidatePath("/");
     return { success: true };
   } catch (error) {
     console.error("Error deleting employee:", error);
