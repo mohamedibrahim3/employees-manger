@@ -1,4 +1,3 @@
-// app/(root)/page.tsx
 import Link from "next/link";
 import { getEmployees } from "@/lib/actions/employee.actions";
 import { unstable_noStore as noStore } from "next/cache";
@@ -61,7 +60,7 @@ const Page = async () => {
 
               <div className="mb-6">
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">قوة الجهاز الإجمالية</h2>
-                <div className="text-6xl font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                <div className="text-6xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2 tracking-wide">
                   {toArabicDigits(employeesList.length)}
                 </div>
                 <p className="text-lg text-gray-600 font-semibold">موظف نشط</p>

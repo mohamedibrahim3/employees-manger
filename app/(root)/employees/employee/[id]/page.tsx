@@ -65,8 +65,6 @@ const EmployeeDetailsPage = async (props: {
             العودة إلى قائمة الموظفين
           </Link>
         </div>
-
-        {/* Employee Images Section */}
         {(employee.personalImageUrl ||
           employee.idFrontImageUrl ||
           employee.idBackImageUrl) && (
@@ -184,22 +182,17 @@ const EmployeeDetailsPage = async (props: {
                   {employee.residenceLocation}
                 </p>
               </div>
-
-              {employee.notes && (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    ملاحظات امنيه
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-3 rounded-md">
-                    {employee.notes}
-                  </p>
-                </div>
-              )}
+            </div>
+            <div className="flex justify-end mt-4">
+              <Link
+                href={`/employees/${id}/security-notes`}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                عرض/تعديل الملاحظات الأمنية
+              </Link>
             </div>
           </CardContent>
         </Card>
-
-        {/* Work Information */}
         <Card>
           <CardHeader>
             <CardTitle className="text-xl text-gray-900">
