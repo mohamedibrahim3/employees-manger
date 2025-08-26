@@ -65,8 +65,6 @@ const EmployeeDetailsPage = async (props: {
             العودة إلى قائمة الموظفين
           </Link>
         </div>
-
-        {/* Employee Images Section */}
         {(employee.personalImageUrl ||
           employee.idFrontImageUrl ||
           employee.idBackImageUrl) && (
@@ -184,11 +182,7 @@ const EmployeeDetailsPage = async (props: {
                   {employee.residenceLocation}
                 </p>
               </div>
-
-              {/* شيلت عرض notes هنا */}
             </div>
-
-            {/* أضفت الزرار هنا */}
             <div className="flex justify-end mt-4">
               <Link
                 href={`/employees/${id}/security-notes`}
@@ -199,8 +193,6 @@ const EmployeeDetailsPage = async (props: {
             </div>
           </CardContent>
         </Card>
-
-        {/* Work Information */}
         <Card>
           <CardHeader>
             <CardTitle className="text-xl text-gray-900">

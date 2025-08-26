@@ -1,4 +1,3 @@
-// app/(root)/page.tsx
 import Link from "next/link";
 import { getEmployees } from "@/lib/actions/employee.actions";
 import { unstable_noStore as noStore } from "next/cache";
