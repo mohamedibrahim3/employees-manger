@@ -39,7 +39,7 @@ export async function createEmployee(
       actualWork: validatedData.actualWork,
       phoneNumber: validatedData.phoneNumber,
       email: validatedData.email || null,
-      notes: validatedData.notes || "",
+      notes: validatedData.notes || "", // خليها فارغة
       personalImageUrl: validatedData.personalImageUrl || null,
       idFrontImageUrl: validatedData.idFrontImageUrl || null,
       idBackImageUrl: validatedData.idBackImageUrl || null,
@@ -111,7 +111,7 @@ export const updateEmployee = async (
       administration: validatedData.administration,
       actualWork: validatedData.actualWork,
       phoneNumber: validatedData.phoneNumber,
-      ...(validatedData.notes && { notes: validatedData.notes }),
+      notes: validatedData.notes || "", // خليها فارغة
       personalImageUrl: validatedData.personalImageUrl || null,
       idFrontImageUrl: validatedData.idFrontImageUrl || null,
       idBackImageUrl: validatedData.idBackImageUrl || null,
@@ -244,5 +244,34 @@ export const getEmployeeById = async (id: string) => {
   } catch (error) {
     console.error("Error fetching employee:", error);
     return { success: false, error: "حدث خطأ أثناء جلب البيانات" };
+  }
+};
+
+// إضافة الـ functions الجديدة
+export const updateEmployeeNotes = async (id: string, notes: string) => {
+  try {
+    const employee = await prisma.employee.update({
+      where: { id },
+      data: { notes },
+    });
+    revalidatePath(`/employees/${id}`);
+    revalidatePath(`/employees/${id}/security-notes`);
+    return { success: true, employee };
+  } catch (error) {
+    console.error("Error updating notes:", error);
+    return { success: false, error: "حدث خطأ أثناء تحديث الملاحظات" };
+  }
+};
+
+export const getEmployeeNotes = async (id: string) => {
+  noStore();
+  try {
+    const employee = await prisma.employee.findUnique({
+      where: { id },
+      select: { notes: true },
+    });
+    return { success: true, notes: employee?.notes || "" };
+  } catch (error) {
+    return { success: false, error: "خطأ في جلب الملاحظات" };
   }
 };

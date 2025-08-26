@@ -1,12 +1,10 @@
-import z from "zod";
+import { z } from "zod";
 
-/* ✅ Schema تسجيل الدخول */
 export const signInSchema = z.object({
   username: z.string().min(1, "Username is required"),
   password: z.string().min(6, "Password must be at least 6 characters long"),
 });
 
-/* ✅ Schema بتاع الفورم (قبل التحويل) */
 export const createEmployeeFormSchema = z.object({
   name: z.string().min(2, "الاسم مطلوب"),
   nickName: z.string().min(1, "اسم الشهرة مطلوب"),
@@ -21,7 +19,7 @@ export const createEmployeeFormSchema = z.object({
   administration: z.string().min(1, "الإدارة مطلوبة"),
   actualWork: z.string().min(1, "العمل الفعلي مطلوب"),
   phoneNumber: z.string().min(1, "رقم الهاتف مطلوب"),
-  notes: z.string().min(1, "الملاحظات الامنية مطلوبة"),
+  notes: z.string().optional(),
   status: z.enum(["active", "inactive", "suspended", "retired"]).default("active"),
   personalPhoto: z.any().optional(),
   frontIdCard: z.any().optional(),
@@ -41,7 +39,6 @@ export const createEmployeeFormSchema = z.object({
   ),
 });
 
-/* ✅ Schema بتاع الـAPI (بعد التحويل) */
 export const createEmployeeApiSchema = z.object({
   name: z.string().min(2, "الاسم مطلوب"),
   nickName: z.string().min(1, "اسم الشهرة مطلوب"),
@@ -56,7 +53,7 @@ export const createEmployeeApiSchema = z.object({
   administration: z.string().min(1, "الإدارة مطلوبة"),
   actualWork: z.string().min(1, "العمل الفعلي مطلوب"),
   phoneNumber: z.string().min(1, "رقم الهاتف مطلوب"),
-  notes: z.string().min(1, "الملاحظات الامنية مطلوبة"),
+  notes: z.string().optional(), // ✅ التعديل: خليناها اختيارية
   status: z.enum(["active", "inactive", "suspended", "retired"]).default("active"),
   personalImageUrl: z.string().optional(),
   idFrontImageUrl: z.string().optional(),
@@ -76,7 +73,6 @@ export const createEmployeeApiSchema = z.object({
   ).optional().default([]),
 });
 
-/* ✅ Employee Type للاستخدام في الكومبوننتس */
 export const employeeSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -92,20 +88,20 @@ export const employeeSchema = z.object({
   administration: z.string(),
   actualWork: z.string(),
   phoneNumber: z.string(),
-  notes: z.string(),
+  notes: z.string().optional(),
   status: z.enum(["active", "inactive", "suspended", "retired"]).default("active"),
   personalImageUrl: z.string().optional(),
   idFrontImageUrl: z.string().optional(),
   idBackImageUrl: z.string().optional(),
-  createdAt: z.string(), // ISO string format
-  updatedAt: z.string(), // ISO string format
+  createdAt: z.string(),
+  updatedAt: z.string(),
   relationships: z.array(
     z.object({
       id: z.string().optional(),
       relationshipType: z.string(),
       name: z.string(),
       nationalId: z.string().optional(),
-      birthDate: z.string().optional().nullable(), // ISO string format
+      birthDate: z.string().optional().nullable(),
       birthPlace: z.string().optional(),
       profession: z.string().optional(),
       spouseName: z.string().optional(),
@@ -115,12 +111,10 @@ export const employeeSchema = z.object({
   ).optional().default([]),
 });
 
-/* ✅ Type definitions */
 export type Employee = z.infer<typeof employeeSchema>;
 export type CreateEmployeeForm = z.infer<typeof createEmployeeFormSchema>;
 export type CreateEmployeeApi = z.infer<typeof createEmployeeApiSchema>;
 
-/* ✅ Transform function (من الفورم → للـAPI) */
 export function transformEmployeeFormToApi(
   data: CreateEmployeeForm
 ): CreateEmployeeApi {
@@ -132,6 +126,7 @@ export function transformEmployeeFormToApi(
     personalImageUrl: data.personalPhoto ? URL.createObjectURL(data.personalPhoto) : undefined,
     idFrontImageUrl: data.frontIdCard ? URL.createObjectURL(data.frontIdCard) : undefined,
     idBackImageUrl: data.backIdCard ? URL.createObjectURL(data.backIdCard) : undefined,
+    notes: data.notes,
     relationships: data.relationships?.map((r) => ({
       ...r,
       birthDate: r.birthDate ? new Date(r.birthDate) : null,
@@ -139,7 +134,6 @@ export function transformEmployeeFormToApi(
   };
 }
 
-/* ✅ Status Helper Functions */
 export const getStatusLabel = (status: Employee["status"]) => {
   const statusLabels = {
     active: "نشط",

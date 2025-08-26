@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { Resolver } from "react-hook-form";
 import {
@@ -42,7 +43,6 @@ import { updateEmployee } from "@/lib/actions/employee.actions";
 import { useEdgeStore } from "@/lib/edgestore";
 import { SingleImageDropzone } from "./upload/single-image";
 import { UploaderProvider } from "./upload/uploader-provider";
-import { useState } from "react";
 
 // Define the API data type that matches your Prisma schema
 interface EmployeeData {
@@ -76,7 +76,6 @@ interface EmployeeData {
   }[];
 }
 
-// ✅ التعديل الأساسي: استخدام النوع من المخطط مباشرة
 type FormData = z.infer<typeof createEmployeeFormSchema>;
 
 const EmployeeForm = ({
@@ -90,6 +89,7 @@ const EmployeeForm = ({
 }) => {
   const router = useRouter();
   const { edgestore } = useEdgeStore();
+  const [goToNotes, setGoToNotes] = useState(false); // State للتنقل للملاحظات
 
   // State for uploaded images
   const [personalPhotoUrl, setPersonalPhotoUrl] = useState<string | undefined>(
@@ -130,16 +130,12 @@ const EmployeeForm = ({
     setImageUrl: (url: string | undefined) => void
   ) => {
     if (imageUrl) {
-      // Ask for confirmation
       const confirmed = window.confirm("هل أنت متأكد من حذف هذه الصورة؟");
       if (!confirmed) return;
 
-      // Remove from UI state immediately for better UX
       setImageUrl(undefined);
       toast("تم إزالة الصورة من النموذج");
 
-      // Try to delete from EdgeStore in the background (optional)
-      // If this fails, it's not critical - the image just becomes orphaned
       edgestore.MyEmployeesManager
         .delete({
           url: imageUrl,
@@ -148,15 +144,11 @@ const EmployeeForm = ({
           console.log("Image deleted from EdgeStore successfully");
         })
         .catch((error) => {
-          console.warn(
-            "Could not delete from EdgeStore (non-critical):",
-            error
-          );
+          console.warn("Could not delete from EdgeStore (non-critical):", error);
         });
     }
   };
 
-  // ✅ التعديل الأساسي: إزالة المعاملات الإضافية من useForm
   const form = useForm<FormData>({
     resolver: zodResolver(createEmployeeFormSchema) as unknown as Resolver<FormData>,
     defaultValues: {
@@ -177,7 +169,6 @@ const EmployeeForm = ({
       administration: employee?.administration || "",
       actualWork: employee?.actualWork || "",
       phoneNumber: employee?.phoneNumber || "",
-      notes: employee?.notes || "",
       personalPhoto: employee?.personalImageUrl || "",
       frontIdCard: employee?.idFrontImageUrl || "",
       backIdCard: employee?.idBackImageUrl || "",
@@ -195,7 +186,7 @@ const EmployeeForm = ({
           residenceLocation: rel.residenceLocation || "",
           notes: rel.notes || "",
         })) || [],
-      status: (employee as any)?.status || "active", // Now properly typed
+      status: (employee as any)?.status || "active",
     },
   });
 
@@ -204,10 +195,8 @@ const EmployeeForm = ({
     name: "relationships",
   });
 
-  // Handle form submission
   const onSubmit: SubmitHandler<FormData> = async (values) => {
     try {
-      // Transform form data to match the API schema
       const transformedData: EmployeeData = {
         name: values.name,
         nickName: values.nickName,
@@ -222,7 +211,7 @@ const EmployeeForm = ({
         administration: values.administration,
         actualWork: values.actualWork,
         phoneNumber: values.phoneNumber,
-        notes: values.notes || "",
+        notes: "",
         personalImageUrl: personalPhotoUrl,
         idFrontImageUrl: idFrontUrl,
         idBackImageUrl: idBackUrl,
@@ -230,7 +219,7 @@ const EmployeeForm = ({
           relationshipType: rel.relationshipType,
           name: rel.name,
           nationalId: rel.nationalId || "",
-          birthDate: new Date(rel.birthDate as string),
+          birthDate: rel.birthDate ? new Date(rel.birthDate) : null,
           birthPlace: rel.birthPlace || undefined,
           profession: rel.profession || undefined,
           spouseName: rel.spouseName || undefined,
@@ -251,14 +240,18 @@ const EmployeeForm = ({
         );
       }
 
-      if (result.success) {
+      if (result.success && result.employee) {
         toast(
           type === "Update" ? "تم تحديث الموظف بنجاح" : "تم إنشاء الموظف بنجاح"
         );
-        // ✅ استخدام hard redirect للتأكد التام
+        // إذا ضغطت على زرار الملاحظات، ننقل لصفحة الملاحظات
         setTimeout(() => {
-          window.location.href = "/employees";
-        }, 1000); // انتظار لإظهار الtoast
+          if (goToNotes) {
+            window.location.href = `/employees/${result.employee.id}/security-notes`;
+          } else {
+            window.location.href = "/employees";
+          }
+        }, 1000);
       } else {
         toast(
           result.error ||
@@ -268,6 +261,7 @@ const EmployeeForm = ({
         );
       }
     } catch (error) {
+      console.error("Submit error:", error);
       toast(
         type === "Update"
           ? "حدث خطأ أثناء تحديث الموظف"
@@ -367,14 +361,13 @@ const EmployeeForm = ({
                 name="nationalId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel> رقم البطاقة *</FormLabel>
+                    <FormLabel>رقم البطاقة *</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
                         placeholder="ادخل رقم البطاقة"
                         {...field}
                         onChange={(e) => {
-                          // Only allow numeric input
                           const value = e.target.value.replace(/[^0-9]/g, "");
                           field.onChange(value);
                         }}
@@ -452,7 +445,7 @@ const EmployeeForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="full-time">دائم </SelectItem>
+                        <SelectItem value="full-time">دائم</SelectItem>
                         <SelectItem value="temporary">مؤقت</SelectItem>
                         <SelectItem value="secondment">معار</SelectItem>
                         <SelectItem value="mandate">ندب</SelectItem>
@@ -470,7 +463,7 @@ const EmployeeForm = ({
                 name="administration"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>الاداره والمنطقة التابع لها*</FormLabel>
+                    <FormLabel>الإدارة والمنطقة التابع لها *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -478,43 +471,31 @@ const EmployeeForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="اﻹداره المركزيه للمشروعات">
-                          اﻹداره المركزيه للمشروعات
+                        <SelectItem value="الإدارة المركزية للمشروعات">
+                          الإدارة المركزية للمشروعات
                         </SelectItem>
-                        <SelectItem value="اﻹداره العامة للشئون المالية">
-                          اﻹداره العامة للشئون المالية
+                        <SelectItem value="الإدارة العامة للشئون المالية">
+                          الإدارة العامة للشئون المالية
                         </SelectItem>
-                        <SelectItem value="اﻹداره العامة للشئون اﻹداريه">
-                          اﻹداره العامة للشئون اﻹداريه
+                        <SelectItem value="الإدارة العامة للشئون الإدارية">
+                          الإدارة العامة للشئون الإدارية
                         </SelectItem>
                         <SelectItem value="نظم المعلومات والتحول الرقمي">
                           نظم المعلومات والتحول الرقمي
                         </SelectItem>
-                        <SelectItem value="المكتب الفني">
-                          المكتب الفني
-                        </SelectItem>
-                        <SelectItem value="العلاقات العامة">
-                          العلاقات العامة
-                        </SelectItem>
-                        <SelectItem value="اﻷمن">اﻷمن</SelectItem>
+                        <SelectItem value="المكتب الفني">المكتب الفني</SelectItem>
+                        <SelectItem value="العلاقات العامة">العلاقات العامة</SelectItem>
+                        <SelectItem value="الأمن">الأمن</SelectItem>
                         <SelectItem value="التعاقدات">التعاقدات</SelectItem>
-                        <SelectItem value="الشئون القانونية">
-                          الشئون القانونية
-                        </SelectItem>
-                        <SelectItem value="التنمية المتكاملة">
-                          التنمية المتكاملة
-                        </SelectItem>
-                        <SelectItem value="مكتب رئيس الجهاز">
-                          مكتب رئيس الجهاز
-                        </SelectItem>
+                        <SelectItem value="الشئون القانونية">الشئون القانونية</SelectItem>
+                        <SelectItem value="التنمية المتكاملة">التنمية المتكاملة</SelectItem>
+                        <SelectItem value="مكتب رئيس الجهاز">مكتب رئيس الجهاز</SelectItem>
                         <SelectItem value="مكتب نائب رئيس الجهاز">
                           مكتب نائب رئيس الجهاز
                         </SelectItem>
-                        <SelectItem value="التخطيط والمتابعه">
-                          التخطيط والمتابعه
-                        </SelectItem>
-                        <SelectItem value="منطقه تعمير شمال سيناء">
-                          منطقه تعمير شمال سيناء
+                        <SelectItem value="التخطيط والمتابعة">التخطيط والمتابعة</SelectItem>
+                        <SelectItem value="منطقة تعمير شمال سيناء">
+                          منطقة تعمير شمال سيناء
                         </SelectItem>
                         <SelectItem value="منطقة تعمير جنوب سيناء">
                           منطقة تعمير جنوب سيناء
@@ -522,8 +503,8 @@ const EmployeeForm = ({
                         <SelectItem value="منطقة تعمير بورسعيد">
                           منطقة تعمير بورسعيد
                         </SelectItem>
-                        <SelectItem value="منطقة تعمير الاسماعيليه">
-                          منطقة تعمير الاسماعيليه
+                        <SelectItem value="منطقة تعمير الإسماعيلية">
+                          منطقة تعمير الإسماعيلية
                         </SelectItem>
                         <SelectItem value="منطقة تعمير القنطرة شرق">
                           منطقة تعمير القنطرة شرق
@@ -586,9 +567,7 @@ const EmployeeForm = ({
             </div>
 
             {/* Three upload fields for personal photo and two for ID */}
-
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Personal Photo */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">الصورة الشخصية</label>
                 {personalPhotoUrl ? (
@@ -603,9 +582,7 @@ const EmployeeForm = ({
                       variant="destructive"
                       size="sm"
                       className="absolute top-2 right-2"
-                      onClick={() =>
-                        removeImage(personalPhotoUrl, setPersonalPhotoUrl)
-                      }
+                      onClick={() => removeImage(personalPhotoUrl, setPersonalPhotoUrl)}
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -626,11 +603,8 @@ const EmployeeForm = ({
                 )}
               </div>
 
-              {/* ID Front */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  صورة البطاقة (أمامي)
-                </label>
+                <label className="text-sm font-medium">صورة البطاقة (أمامي)</label>
                 {idFrontUrl ? (
                   <div className="relative">
                     <img
@@ -664,11 +638,8 @@ const EmployeeForm = ({
                 )}
               </div>
 
-              {/* ID Back */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  صورة البطاقة (خلفي)
-                </label>
+                <label className="text-sm font-medium">صورة البطاقة (خلفي)</label>
                 {idBackUrl ? (
                   <div className="relative">
                     <img
@@ -702,20 +673,6 @@ const EmployeeForm = ({
                 )}
               </div>
             </div>
-
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الملاحظات الامنية *</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="أدخل أي ملاحظات إضافية" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </CardContent>
         </Card>
 
@@ -732,7 +689,7 @@ const EmployeeForm = ({
             {fields.map((field, index) => (
               <div key={field.id} className="border rounded-lg p-4 space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-semibold">البيانات العائليه رقم {index + 1}</h4>
+                  <h4 className="font-semibold">البيانات العائلية رقم {index + 1}</h4>
                   <Button
                     type="button"
                     variant="outline"
@@ -750,7 +707,7 @@ const EmployeeForm = ({
                     name={`relationships.${index}.relationshipType`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel> نوع العلاقة *</FormLabel>
+                        <FormLabel>نوع العلاقة *</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           value={field.value}
@@ -762,35 +719,24 @@ const EmployeeForm = ({
                           </FormControl>
                           <SelectContent>
                             {(() => {
-                              const currentRelationships =
-                                form.watch("relationships") || [];
-                              const currentValue = form.watch(
-                                `relationships.${index}.relationshipType`
-                              );
+                              const currentRelationships = form.watch("relationships") || [];
+                              const currentValue = form.watch(`relationships.${index}.relationshipType`);
                               const hasFather = currentRelationships.some(
-                                (rel, idx) =>
-                                  idx !== index &&
-                                  rel.relationshipType === "father"
+                                (rel, idx) => idx !== index && rel.relationshipType === "father"
                               );
                               const hasMother = currentRelationships.some(
-                                (rel, idx) =>
-                                  idx !== index &&
-                                  rel.relationshipType === "mother"
+                                (rel, idx) => idx !== index && rel.relationshipType === "mother"
                               );
 
                               return (
                                 <>
-                                  {(!hasFather ||
-                                    currentValue === "father") && (
+                                  {(!hasFather || currentValue === "father") && (
                                     <SelectItem value="father">أب</SelectItem>
                                   )}
-                                  {(!hasMother ||
-                                    currentValue === "mother") && (
+                                  {(!hasMother || currentValue === "mother") && (
                                     <SelectItem value="mother">أم</SelectItem>
                                   )}
-                                  <SelectItem value="spouse">
-                                    زوج/زوجة
-                                  </SelectItem>
+                                  <SelectItem value="spouse">زوج/زوجة</SelectItem>
                                   <SelectItem value="son">ابن</SelectItem>
                                   <SelectItem value="daughter">ابنة</SelectItem>
                                   <SelectItem value="brother">أخ</SelectItem>
@@ -854,7 +800,7 @@ const EmployeeForm = ({
                     name={`relationships.${index}.birthPlace`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>مكان الميلاد </FormLabel>
+                        <FormLabel>مكان الميلاد</FormLabel>
                         <FormControl>
                           <Input placeholder="أدخل مكان الميلاد" {...field} />
                         </FormControl>
@@ -883,12 +829,9 @@ const EmployeeForm = ({
                     name={`relationships.${index}.spouseName`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>اسم الزوج/الزوجة </FormLabel>
+                        <FormLabel>اسم الزوج/الزوجة</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="أدخل اسم الزوج/الزوجة"
-                            {...field}
-                          />
+                          <Input placeholder="أدخل اسم الزوج/الزوجة" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -937,7 +880,7 @@ const EmployeeForm = ({
           </CardContent>
         </Card>
 
-        {/* Submit Button */}
+        {/* Submit and Navigation Buttons */}
         <div className="flex justify-start space-x-4">
           <Button
             type="button"
@@ -946,8 +889,16 @@ const EmployeeForm = ({
           >
             رجوع
           </Button>
-          <Button type="submit">
+          <Button type="submit" onClick={() => setGoToNotes(false)}>
             {type === "Update" ? "تحديث الموظف" : "تسجيل موظف جديد"}
+          </Button>
+          <Button
+            type="submit"
+            variant="secondary"
+            onClick={() => setGoToNotes(true)}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            {type === "Update" ? "تحديث وإضافة ملاحظات أمنية" : "تسجيل وإضافة ملاحظات أمنية"}
           </Button>
           {type === "Update" && employeeId && (
             <Button
@@ -955,7 +906,7 @@ const EmployeeForm = ({
               variant="destructive"
               size="sm"
               onClick={async () => {
-                const { success } = await deleteEmployee(employeeId || "");
+                const { success } = await deleteEmployee(employeeId);
                 if (success) {
                   router.push("/employees");
                 }
