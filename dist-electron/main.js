@@ -33,68 +33,96 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-const electron_1 = require("electron");
+
+const { app, BrowserWindow, Menu, shell } = require("electron");
 const isDev = __importStar(require("electron-is-dev"));
 const path = __importStar(require("path"));
+const fs = __importStar(require("fs"));
+
 let mainWindow;
+
 function createWindow() {
+    // تحديد مسار قاعدة البيانات
+    const dbPath = path.join(app.getPath("userData"), "db.sqlite");
+    process.env.DATABASE_URL = `file:${dbPath}`;
+
+    // التأكد من وجود ملف db.sqlite
+    if (!fs.existsSync(dbPath)) {
+        fs.writeFileSync(dbPath, "");
+        console.log(`Created SQLite database at: ${dbPath}`);
+    }
+
+    // تحديد مسار folder الصور
+    const imagesPath = path.join(app.getPath("userData"), "images");
+    if (!fs.existsSync(imagesPath)) {
+        fs.mkdirSync(imagesPath, { recursive: true });
+        console.log(`Created images folder at: ${imagesPath}`);
+    }
+
     // Create the browser window
-    mainWindow = new electron_1.BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 1200,
         height: 800,
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
-            // Add preload script if needed
-            // preload: path.join(__dirname, 'preload.js')
+            // preload: path.join(__dirname, 'preload.js'),
         },
-        icon: path.join(__dirname, '../public/icon.png'), // Add your app icon
-        show: false, // Don't show until ready
+        icon: path.join(__dirname, '../public/icon.png'),
+        show: false,
         titleBarStyle: 'default',
     });
+
     // Load the app
     const startUrl = isDev
         ? 'http://localhost:3000'
         : `file://${path.join(__dirname, '../out/index.html')}`;
     mainWindow.loadURL(startUrl);
+
     // Show window when ready to prevent visual flash
     mainWindow.once('ready-to-show', () => {
         mainWindow.show();
-        // Open DevTools in development
         if (isDev) {
             mainWindow.webContents.openDevTools();
         }
     });
+
     // Handle window closed
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
+
     // Handle external links
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-        electron_1.shell.openExternal(url);
+        shell.openExternal(url);
         return { action: 'deny' };
     });
 }
+
 // App event handlers
-electron_1.app.whenReady().then(createWindow);
-electron_1.app.on('window-all-closed', () => {
+app.whenReady().then(createWindow);
+
+app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
-        electron_1.app.quit();
+        app.quit();
     }
 });
-electron_1.app.on('activate', () => {
-    if (electron_1.BrowserWindow.getAllWindows().length === 0) {
+
+app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
         createWindow();
     }
 });
+
 // Security: Prevent new window creation
-electron_1.app.on('web-contents-created', (event, contents) => {
+app.on('web-contents-created', (event, contents) => {
     contents.on('new-window', (navigationEvent, navigationUrl) => {
         event.preventDefault();
-        electron_1.shell.openExternal(navigationUrl);
+        shell.openExternal(navigationUrl);
     });
 });
-// Optional: Create application menu
+
+// Create application menu
 const createMenu = () => {
     const template = [
         {
@@ -104,7 +132,7 @@ const createMenu = () => {
                     label: 'Quit',
                     accelerator: process.platform === 'darwin' ? 'Cmd+Q' : 'Ctrl+Q',
                     click: () => {
-                        electron_1.app.quit();
+                        app.quit();
                     }
                 }
             ]
@@ -131,10 +159,10 @@ const createMenu = () => {
             ]
         }
     ];
-    const menu = electron_1.Menu.buildFromTemplate(template);
-    electron_1.Menu.setApplicationMenu(menu);
+    const menu = Menu.buildFromTemplate(template);
+    Menu.setApplicationMenu(menu);
 };
-electron_1.app.whenReady().then(() => {
+
+app.whenReady().then(() => {
     createMenu();
 });
-//# sourceMappingURL=main.js.map

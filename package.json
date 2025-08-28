@@ -1,7 +1,7 @@
 {
   "name": "users-mangment",
   "version": "0.1.0",
-   "main": "dist-electron/main.js",
+  "main": "dist-electron/main.js",
   "homepage": "./",
   "private": true,
   "scripts": {
@@ -20,16 +20,25 @@
     "dist": "npm run build && npm run electron:build && electron-builder --publish=never"
   },
   "build": {
-    "appId": "com.yourcompany.yourapp",
-    "productName": "Your App Name",
+    "appId": "com.yourcompany.employees-manager",
+    "productName": "Employees Manager",
     "directories": {
       "output": "dist"
     },
     "files": [
       "out/**/*",
       "dist-electron/**/*",
-      "node_modules/**/*",
       "package.json"
+    ],
+    "extraFiles": [
+      {
+        "from": "db.sqlite",
+        "to": "db.sqlite"
+      },
+      {
+        "from": "public/images",
+        "to": "images"
+      }
     ],
     "mac": {
       "category": "public.app-category.productivity",
@@ -46,17 +55,15 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
-    "@edgestore/react": "^0.5.3",
-    "@edgestore/server": "^0.5.3",
     "@hookform/resolvers": "^5.2.1",
-    "@neondatabase/serverless": "^1.0.1",
-    "@prisma/client": "^6.13.0",
+    "@prisma/client": "^6.15.0",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-select": "^2.2.5",
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@uploadthing/react": "^7.3.2",
     "bcryptjs": "^3.0.2",
+    "better-sqlite3": "^12.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "electron-is-dev": "^3.0.1",

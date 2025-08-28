@@ -3,7 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/header";
 import MobileNav from "@/components/mobile-nav";
-import { EdgeStoreProvider } from "@/lib/edgestore";
 
 export default function RootLayout({
   children,
@@ -78,7 +77,6 @@ export default function RootLayout({
         <main className="flex-1 w-full container mx-auto py-8 sm:py-10 px-4">
           {/* ✨ [IMPROVEMENT] Modern "card" style for the main content */}
           <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg p-6 sm:p-8">
-            <EdgeStoreProvider>{children}</EdgeStoreProvider>
           </div>
         </main>
 

@@ -15,10 +15,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-export function SignInForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+export function SignInForm({ className, ...props }: React.ComponentProps<"div">) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -40,11 +37,11 @@ export function SignInForm({
       if (result?.error) {
         setError("اسم المستخدم أو كلمة المرور غير صحيحة");
       } else {
-        router.push("/"); // Redirect to your protected page
+        router.push("/");
         router.refresh();
       }
     } catch (error) {
-      setError("Something went wrong");
+      setError("حدث خطأ غير متوقع");
     }
 
     setLoading(false);
@@ -56,46 +53,36 @@ export function SignInForm({
         <CardHeader>
           <CardTitle>تسجيل الدخول إلى حسابك</CardTitle>
           <CardDescription>
-            أدخل اسم المستخدم أدناه لتسجيل الدخول إلى حسابك
+            أدخل اسم المستخدم وكلمة المرور لتسجيل الدخول
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-3">
-                <Label htmlFor="username">اسم المستخدم</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="أدخل اسم المستخدم الخاص بك"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="grid gap-3">
-                <div className="flex items-center">
-                  <Label htmlFor="password">كلمة المرور</Label>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <div className="flex flex-col gap-3">
-                {error && (
-                  <div className="text-red-500 text-sm text-center">
-                    {error}
-                  </div>
-                )}
-                <Button type="submit" className="w-full cursor-pointer">
-                  {loading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
-                </Button>
-              </div>
+            <div className="grid gap-3">
+              <Label htmlFor="username">اسم المستخدم</Label>
+              <Input
+                id="username"
+                type="text"
+                placeholder="أدخل اسم المستخدم الخاص بك"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
             </div>
+            <div className="grid gap-3">
+              <Label htmlFor="password">كلمة المرور</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            {error && <div className="text-red-500 text-sm text-center">{error}</div>}
+            <Button type="submit" className="w-full">
+              {loading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
+            </Button>
           </form>
         </CardContent>
       </Card>

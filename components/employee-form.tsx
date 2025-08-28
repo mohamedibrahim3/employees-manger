@@ -34,13 +34,8 @@ import { useRouter } from "next/navigation";
 import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { createEmployee, deleteEmployee } from "@/lib/actions/employee.actions";
-import {
-  createEmployeeApiSchema,
-  createEmployeeFormSchema,
-} from "@/lib/validators";
-import { updateEmployee } from "@/lib/actions/employee.actions";
-import { useEdgeStore } from "@/lib/edgestore";
+import { createEmployee, updateEmployee, deleteEmployee } from "@/lib/actions/employee.actions";
+import { createEmployeeApiSchema, createEmployeeFormSchema } from "@/lib/validators";
 import { SingleImageDropzone } from "./upload/single-image";
 import { UploaderProvider } from "./upload/uploader-provider";
 
@@ -88,8 +83,7 @@ const EmployeeForm = ({
   employeeId?: string;
 }) => {
   const router = useRouter();
-  const { edgestore } = useEdgeStore();
-  const [goToNotes, setGoToNotes] = useState(false); // State للتنقل للملاحظات
+  const [goToNotes, setGoToNotes] = useState(false);
 
   // State for uploaded images
   const [personalPhotoUrl, setPersonalPhotoUrl] = useState<string | undefined>(
@@ -102,7 +96,7 @@ const EmployeeForm = ({
     employee?.idBackImageUrl
   );
 
-  // Upload function for the UploaderProvider
+  // Upload function for local file handling
   const createUploadFn =
     (setImageUrl: (url: string | undefined) => void) =>
     async ({
@@ -114,14 +108,40 @@ const EmployeeForm = ({
       signal: AbortSignal;
       onProgressChange: (progress: number) => void;
     }) => {
-      const res = await edgestore.MyEmployeesManager.upload({
-        file,
-        signal,
-        onProgressChange,
-      });
-
-      setImageUrl(res.url);
-      return { url: res.url };
+      try {
+        console.log('Starting upload for file:', file.name);
+        onProgressChange(0);
+        
+        // Create FormData to send file to API route
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        // Send to your API route for server-side file handling
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+          signal,
+        });
+        
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Upload failed:', errorData);
+          throw new Error(`Upload failed: ${errorData.error || 'Unknown error'}`);
+        }
+        
+        const result = await response.json();
+        console.log('Upload result:', result);
+        onProgressChange(100);
+        
+        setImageUrl(result.url);
+        return { url: result.url };
+      } catch (error) {
+        console.error('Upload error:', error);
+        toast.error(error instanceof Error ? error.message : 'فشل في رفع الملف');
+        throw error;
+      }
     };
 
   // Remove image function
@@ -133,19 +153,22 @@ const EmployeeForm = ({
       const confirmed = window.confirm("هل أنت متأكد من حذف هذه الصورة؟");
       if (!confirmed) return;
 
-      setImageUrl(undefined);
-      toast("تم إزالة الصورة من النموذج");
-
-      edgestore.MyEmployeesManager
-        .delete({
-          url: imageUrl,
-        })
-        .then(() => {
-          console.log("Image deleted from EdgeStore successfully");
-        })
-        .catch((error) => {
-          console.warn("Could not delete from EdgeStore (non-critical):", error);
+      try {
+        // Call API route to delete file
+        await fetch('/api/upload', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ filePath: imageUrl }),
         });
+        
+        setImageUrl(undefined);
+        toast("تم إزالة الصورة بنجاح");
+      } catch (error) {
+        console.warn("Could not delete image file:", error);
+        toast("حدث خطأ أثناء حذف الصورة");
+      }
     }
   };
 
@@ -244,7 +267,6 @@ const EmployeeForm = ({
         toast(
           type === "Update" ? "تم تحديث الموظف بنجاح" : "تم إنشاء الموظف بنجاح"
         );
-        // إذا ضغطت على زرار الملاحظات، ننقل لصفحة الملاحظات
         setTimeout(() => {
           if (goToNotes) {
             window.location.href = `/employees/${result.employee.id}/security-notes`;
@@ -566,7 +588,6 @@ const EmployeeForm = ({
               />
             </div>
 
-            {/* Three upload fields for personal photo and two for ID */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">الصورة الشخصية</label>
@@ -880,7 +901,6 @@ const EmployeeForm = ({
           </CardContent>
         </Card>
 
-        {/* Submit and Navigation Buttons */}
         <div className="flex justify-start space-x-4">
           <Button
             type="button"

@@ -1,30 +1,27 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite" // غير من postgresql لـ sqlite
   url      = env("DATABASE_URL")
 }
 
 model Account {
-  id                String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId            String  @db.Uuid
+  id                String  @id @default(cuid()) // غير dbgenerated لـ cuid()
+  userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -33,15 +30,15 @@ model Account {
 }
 
 model Session {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String   @id @default(cuid())
   sessionToken String   @unique
-  userId       String   @db.Uuid
+  userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id            String    @id @default(cuid())
   name          String?
   email         String?   @unique
   username      String    @unique
@@ -63,29 +60,29 @@ model VerificationToken {
 }
 
 model Employee {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id String @id @default(cuid())
 
   // Basic Information (وثيقة تعارف)
-  name              String // الاسم (رباعي)
-  nickName          String // اسم الشهرة
-  profession        String // المهنة
-  birthDate         DateTime // تاريخ الميلاد
-  nationalId        String   @unique // رقم البطاقة
-  maritalStatus     String // الحالة الاجتماعية (متزوج/أعزب)
-  residenceLocation String // العنوان التفصيلي
-  hiringDate        DateTime // تاريخ التعيين
-  hiringType        String // نوع التعيين (دوام كامل/جزئي)
-  email             String?  @unique // البريد
-  administration    String // الادارة
-  actualWork        String // العمل الفعلي
-  phoneNumber       String // رقم الهاتف
-  personalImageUrl  String?  @map("personal_image_url")
-  idFrontImageUrl   String?  @map("id_front_image_url")
-  idBackImageUrl    String?  @map("id_back_image_url")
-  notes             String // ملاحظات
+  name              String
+  nickName          String
+  profession        String
+  birthDate         DateTime
+  nationalId        String   @unique
+  maritalStatus     String
+  residenceLocation String
+  hiringDate        DateTime
+  hiringType        String
+  email             String?  @unique
+  administration    String
+  actualWork        String
+  phoneNumber       String
+  personalImageUrl  String?
+  idFrontImageUrl   String?
+  idBackImageUrl    String?
+  notes             String
 
   // Relationships
-  relationships Relationship[] // العلاقات
+  relationships Relationship[]
 
   // Metadata
   createdAt DateTime @default(now())
@@ -95,18 +92,18 @@ model Employee {
 }
 
 model Relationship {
-  id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  employeeId String @db.Uuid
+  id         String @id @default(cuid())
+  employeeId String
 
-  relationshipType  String // نوع العلاقة (أب/أم/أخ/أخت)
-  name              String // اسم الزوج/الزوجة
-  nationalId        String?   @unique //  رقم البطاقة
-  birthDate         DateTime? // تاريخ الميلاد
-  birthPlace        String? // مكان الميلاد
-  profession        String? // المهنة
-  spouseName        String? // اسم الزوج/الزوجة
-  residenceLocation String? // محل الاقامة للعمل
-  notes             String? // ملاحظات
+  relationshipType  String
+  name              String
+  nationalId        String?   @unique
+  birthDate         DateTime?
+  birthPlace        String?
+  profession        String?
+  spouseName        String?
+  residenceLocation String?
+  notes             String?
 
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 

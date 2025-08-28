@@ -2,15 +2,9 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Download,
-  Eye,
-  User,
-  CreditCard,
-  IdCard,
-  AlertCircle,
-} from "lucide-react";
-import Image from "next/image";
+import { Download, Eye, User, CreditCard, IdCard, AlertCircle } from "lucide-react";
+import { copyFileSync } from "fs";
+import { join } from "path";
 
 interface EmployeeImagesProps {
   personalImageUrl?: string | null;
@@ -25,22 +19,13 @@ const EmployeeImages: React.FC<EmployeeImagesProps> = ({
   idBackImageUrl,
   employeeName,
 }) => {
-  const [imageErrors, setImageErrors] = useState<{ [key: string]: boolean }>(
-    {}
-  );
-  const [loadingImages, setLoadingImages] = useState<{
-    [key: string]: boolean;
-  }>({});
-
-  console.log(personalImageUrl, idFrontImageUrl, idBackImageUrl);
+  const [imageErrors, setImageErrors] = useState<{ [key: string]: boolean }>({});
+  const [loadingImages, setLoadingImages] = useState<{ [key: string]: boolean }>({});
 
   const handleImageError = (imageUrl: string) => {
     setImageErrors((prev) => ({ ...prev, [imageUrl]: true }));
     setLoadingImages((prev) => ({ ...prev, [imageUrl]: false }));
     console.error("Failed to load image:", imageUrl);
-    // Add more detailed error logging
-    console.error("Image URL:", imageUrl);
-    console.error("Possible CORS or domain issue");
   };
 
   const handleImageLoad = (imageUrl: string) => {
@@ -52,30 +37,28 @@ const EmployeeImages: React.FC<EmployeeImagesProps> = ({
     setLoadingImages((prev) => ({ ...prev, [imageUrl]: true }));
   };
 
-  const handleDownloadImage = async (imageUrl: string, filename: string) => {
+  const handleDownloadImage = (imageUrl: string, filename: string) => {
     try {
-      // Use a proxy approach for CORS issues
-      const response = await fetch(
-        `/api/download-image?url=${encodeURIComponent(imageUrl)}`
-      );
-      if (!response.ok) {
-        // Fallback: open in new tab
-        window.open(imageUrl, "_blank");
-        return;
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const { app } = window.require("electron").remote;
+      const downloadsPath = app.getPath("downloads");
+      const localPath = imageUrl.replace("file://", "");
+      const destPath = join(downloadsPath, filename);
+      copyFileSync(localPath, destPath);
+      console.log(`Image copied to ${destPath}`);
+      alert(`تم نسخ الصورة إلى: ${destPath}`);
     } catch (error) {
       console.error("Error downloading image:", error);
-      // Fallback: open in new tab
-      window.open(imageUrl, "_blank");
+      alert("حدث خطأ أثناء تحميل الصورة");
+    }
+  };
+
+  const handleViewImage = (imageUrl: string) => {
+    try {
+      const { shell } = window.require("electron");
+      shell.openExternal(imageUrl);
+    } catch (error) {
+      console.error("Error opening image:", error);
+      alert("حدث خطأ أثناء فتح الصورة");
     }
   };
 
@@ -139,7 +122,6 @@ const EmployeeImages: React.FC<EmployeeImagesProps> = ({
         const hasError = imageErrors[image.url!];
         const isLoading = loadingImages[image.url!];
 
-        console.log(isLoading);
         return (
           <div key={index} className="space-y-3">
             <div className="flex items-center gap-2 mb-2">
@@ -158,7 +140,7 @@ const EmployeeImages: React.FC<EmployeeImagesProps> = ({
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => window.open(image.url!, "_blank")}
+                      onClick={() => handleViewImage(image.url!)}
                       className="mt-2"
                     >
                       فتح في علامة تبويب جديدة
@@ -171,31 +153,27 @@ const EmployeeImages: React.FC<EmployeeImagesProps> = ({
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
                       </div>
                     )}
-                    <Image
+                    <img
                       src={image.url!}
                       alt={image.description}
-                      width={0}
-                      height={0}
-                      sizes="100vw"
                       className={`w-full h-auto transition-transform group-hover:scale-105 ${
                         isLoading ? "opacity-0" : "opacity-100"
                       }`}
                       onError={() => handleImageError(image.url!)}
                       onLoad={() => handleImageLoad(image.url!)}
                       onLoadStart={() => handleImageLoadStart(image.url!)}
-                      crossOrigin="anonymous"
                     />
                   </>
                 )}
               </div>
 
               {!hasError && !isLoading && (
-                <div className="absolute inset-0  bg-opacity-0 group-hover:bg-opacity-40 transition-opacity flex items-center justify-center">
+                <div className="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-40 transition-opacity flex items-center justify-center">
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                     <Button
                       size="sm"
                       variant="secondary"
-                      onClick={() => window.open(image.url!, "_blank")}
+                      onClick={() => handleViewImage(image.url!)}
                       className="bg-white text-gray-800 hover:bg-gray-100"
                     >
                       <Eye className="w-4 h-4 mr-1" />
