@@ -42,11 +42,9 @@ const fs = __importStar(require("fs"));
 let mainWindow;
 
 function createWindow() {
-    // تحديد مسار قاعدة البيانات
     const dbPath = path.join(app.getPath("userData"), "db.sqlite");
-    process.env.DATABASE_URL = `file:${dbPath}`;
+    process.env.DATABASE_UURL = `file:${dbPath}`;
 
-    // التأكد من وجود ملف db.sqlite
     if (!fs.existsSync(dbPath)) {
         fs.writeFileSync(dbPath, "");
         console.log(`Created SQLite database at: ${dbPath}`);
