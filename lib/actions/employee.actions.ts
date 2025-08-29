@@ -191,7 +191,6 @@ export const getEmployeesBySearch = async (name: string, administration: string)
       where: {
         name: {
           contains: name,
-          mode: "insensitive",
         },
         administration: administration,
       },

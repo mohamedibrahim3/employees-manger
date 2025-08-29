@@ -3,8 +3,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, Eye, User, CreditCard, IdCard, AlertCircle } from "lucide-react";
-import { copyFileSync } from "fs";
-import { join } from "path";
 
 interface EmployeeImagesProps {
   personalImageUrl?: string | null;
@@ -37,28 +35,27 @@ const EmployeeImages: React.FC<EmployeeImagesProps> = ({
     setLoadingImages((prev) => ({ ...prev, [imageUrl]: true }));
   };
 
-  const handleDownloadImage = (imageUrl: string, filename: string) => {
+  const handleDownloadImage = async (imageUrl: string, filename: string) => {
     try {
-      const { app } = window.require("electron").remote;
-      const downloadsPath = app.getPath("downloads");
-      const localPath = imageUrl.replace("file://", "");
-      const destPath = join(downloadsPath, filename);
-      copyFileSync(localPath, destPath);
-      console.log(`Image copied to ${destPath}`);
-      alert(`تم نسخ الصورة إلى: ${destPath}`);
+      const result = await (window as any).electronAPI.downloadImage(imageUrl, filename);
+      if (result.success) {
+        alert(`تم نسخ الصورة إلى: ${result.destPath}`);
+      } else {
+        alert("فشل التحميل: " + result.error);
+      }
     } catch (error) {
-      console.error("Error downloading image:", error);
-      alert("حدث خطأ أثناء تحميل الصورة");
+      alert("Error: " + error);
     }
   };
 
-  const handleViewImage = (imageUrl: string) => {
+  const handleViewImage = async (imageUrl: string) => {
     try {
-      const { shell } = window.require("electron");
-      shell.openExternal(imageUrl);
+      const result = await (window as any).electronAPI.viewImage(imageUrl);
+      if (!result.success) {
+        alert("فشل في فتح الصورة: " + result.error);
+      }
     } catch (error) {
-      console.error("Error opening image:", error);
-      alert("حدث خطأ أثناء فتح الصورة");
+      alert("Error: " + error);
     }
   };
 
@@ -69,7 +66,6 @@ const EmployeeImages: React.FC<EmployeeImagesProps> = ({
       description: "صورة شخصية للموظف",
       icon: User,
       filename: `${employeeName}_personal_image.jpg`,
-      aspectRatio: "square",
     },
     {
       url: idFrontImageUrl,
@@ -77,7 +73,6 @@ const EmployeeImages: React.FC<EmployeeImagesProps> = ({
       description: "صورة الوجه الأمامي لبطاقة الهوية",
       icon: CreditCard,
       filename: `${employeeName}_id_front.jpg`,
-      aspectRatio: "card",
     },
     {
       url: idBackImageUrl,
@@ -85,27 +80,14 @@ const EmployeeImages: React.FC<EmployeeImagesProps> = ({
       description: "صورة الوجه الخلفي لبطاقة الهوية",
       icon: IdCard,
       filename: `${employeeName}_id_back.jpg`,
-      aspectRatio: "card",
     },
-  ].filter((image) => image.url); // Only show images that exist
+  ].filter((image) => image.url);
 
   if (images.length === 0) {
     return (
       <div className="text-center py-8">
         <div className="text-gray-400 mb-2">
-          <svg
-            className="mx-auto h-12 w-12"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1}
-              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-            />
-          </svg>
+          <AlertCircle className="mx-auto h-12 w-12" />
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-1">
           لا توجد صور مرفقة

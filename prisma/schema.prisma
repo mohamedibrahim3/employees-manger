@@ -1,17 +1,14 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
 
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "sqlite" // غير من postgresql لـ sqlite
-  url      = env("DATABASE_URL")
-}
-
 model Account {
-  id                String  @id @default(cuid()) // غير dbgenerated لـ cuid()
+  id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
@@ -62,7 +59,7 @@ model VerificationToken {
 model Employee {
   id String @id @default(cuid())
 
-  // Basic Information (وثيقة تعارف)
+  // Basic Information
   name              String
   nickName          String
   profession        String
@@ -72,14 +69,14 @@ model Employee {
   residenceLocation String
   hiringDate        DateTime
   hiringType        String
-  email             String?  @unique
+  email             String?  // لغيت unique عشان SQLite
   administration    String
   actualWork        String
   phoneNumber       String
   personalImageUrl  String?
   idFrontImageUrl   String?
   idBackImageUrl    String?
-  notes             String
+  notes             String?  // خليتها optional
 
   // Relationships
   relationships Relationship[]
@@ -97,7 +94,7 @@ model Relationship {
 
   relationshipType  String
   name              String
-  nationalId        String?   @unique
+  nationalId        String?   // لغيت unique
   birthDate         DateTime?
   birthPlace        String?
   profession        String?
