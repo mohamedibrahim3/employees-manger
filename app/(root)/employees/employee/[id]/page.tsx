@@ -27,6 +27,20 @@ const RELATIONSHIP_LABELS: Record<string, string> = {
   sister: "بيانات الأخت",
 };
 
+const JOB_POSITION_LABELS: Record<string, string> = {  // الـ function الجديدة للترجمة
+  ENGINEER: "مهندس",
+  ACCOUNTANT: "محاسب",
+  ADMINISTRATIVE: "إداري",
+  EXECUTIVE_SUPERVISOR: "مشرف تنفيذ",
+  WRITER: "كاتب",
+  WORKER: "عامل",
+};
+
+const getJobPositionLabel = (jobPosition: string | null | undefined) => {
+  if (!jobPosition) return "-";
+  return JOB_POSITION_LABELS[jobPosition] ?? jobPosition;
+};
+
 const EmployeeDetailsPage = async (props: {
   params: Promise<{ id: string }>;
 }) => {
@@ -168,6 +182,12 @@ const EmployeeDetailsPage = async (props: {
                     المهنة
                   </td>
                   <td className="p-3">{employee.profession}</td>
+                </tr>
+                <tr className="border-b border-gray-200">
+                  <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
+                    الوظيفة
+                  </td>
+                  <td className="p-3">{getJobPositionLabel(employee.jobPosition)}</td>
                 </tr>
                 <tr className="border-b border-gray-200">
                   <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">

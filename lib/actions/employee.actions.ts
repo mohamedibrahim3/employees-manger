@@ -41,6 +41,7 @@ export async function createEmployee(
       personalImageUrl: validatedData.personalImageUrl || null,
       idFrontImageUrl: validatedData.idFrontImageUrl || null,
       idBackImageUrl: validatedData.idBackImageUrl || null,
+      jobPosition: validatedData.jobPosition || null,  // الحقل الجديد
     };
 
     let relationships: Relationship[] = [];
@@ -111,6 +112,7 @@ export const updateEmployee = async (
       personalImageUrl: validatedData.personalImageUrl || null,
       idFrontImageUrl: validatedData.idFrontImageUrl || null,
       idBackImageUrl: validatedData.idBackImageUrl || null,
+      jobPosition: validatedData.jobPosition || null,  // الحقل الجديد
     };
 
     let relationships: Relationship[] = [];

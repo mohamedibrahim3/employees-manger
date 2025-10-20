@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, User, Users, X } from "lucide-react";
+import { Plus, Trash2, User, Users, X, Phone, Mail, MapPin, Calendar, Briefcase, Building2 } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -74,6 +74,7 @@ interface EmployeeData {
     residenceLocation: string | null;
     notes?: string | null;
   }[];
+  jobPosition?: string; // الحقل الجديد
 }
 
 type FormData = z.infer<typeof createEmployeeFormSchema>;
@@ -187,6 +188,13 @@ const EmployeeForm = ({
           notes: rel.notes || "",
         })) || [],
       status: (employee as any)?.status || "active",
+      jobPosition: (() => {
+        const val = employee?.jobPosition;
+        const allowed = ["ENGINEER", "ACCOUNTANT", "ADMINISTRATIVE", "EXECUTIVE_SUPERVISOR", "WRITER", "WORKER"] as const;
+        return val && (allowed as readonly string[]).includes(val)
+          ? (val as FormData["jobPosition"])
+          : "";
+      })(),
     },
   });
 
@@ -226,6 +234,7 @@ const EmployeeForm = ({
           residenceLocation: rel.residenceLocation || "",
           notes: rel.notes || undefined,
         })),
+        jobPosition: values.jobPosition || undefined, // الحقل الجديد
       };
 
       let result;
@@ -287,414 +296,495 @@ const EmployeeForm = ({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         {/* Basic Employee Information */}
-        <Card>
+        <Card className="overflow-hidden shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-xl font-bold">
+              <User className="h-6 w-6 text-blue-600" />
               المعلومات الأساسية
             </CardTitle>
-            <CardDescription>تفاصيل الموظف الشخصية والمهنية</CardDescription>
+            <CardDescription className="text-gray-600">
+              تفاصيل الموظف الشخصية والمهنية
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الاسم رباعي *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="ادخل الاسم الكامل" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="nickName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>اسم الشهرة</FormLabel>
-                    <FormControl>
-                      <Input placeholder="ادخل اسم الشهرة" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <CardContent className="p-6 space-y-8">
+            {/* قسم المعلومات الشخصية الأساسية */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 mb-4">
+                <User className="h-5 w-5 text-gray-500" />
+                <h3 className="text-lg font-semibold text-gray-800">المعلومات الشخصية</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 font-medium">
+                        الاسم رباعي *
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="ادخل الاسم الكامل" {...field} className="border-gray-300 focus:border-blue-500" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="nickName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 font-medium">اسم الشهرة</FormLabel>
+                      <FormControl>
+                        <Input placeholder="ادخل اسم الشهرة" {...field} className="border-gray-300 focus:border-blue-500" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="birthDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 font-medium">
+                        تاريخ الميلاد *
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} className="border-gray-300 focus:border-blue-500" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="nationalId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 font-medium">رقم البطاقة *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="ادخل رقم البطاقة"
+                          {...field}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9]/g, "");
+                            field.onChange(value);
+                          }}
+                          className="border-gray-300 focus:border-blue-500"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="maritalStatus"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 font-medium">الحالة الاجتماعية *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="border-gray-300 focus:border-blue-500">
+                            <SelectValue placeholder="اختر الحالة الاجتماعية" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="single">أعزب</SelectItem>
+                          <SelectItem value="married">متزوج</SelectItem>
+                          <SelectItem value="divorced">مطلق</SelectItem>
+                          <SelectItem value="widowed">أرمل</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="profession"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>المهنة</FormLabel>
-                    <FormControl>
-                      <Input placeholder="ادخل المهنة" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="birthDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>تاريخ الميلاد *</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <Separator className="my-6" />
+
+            {/* قسم معلومات الاتصال */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 mb-4">
+                <MapPin className="h-5 w-5 text-gray-500" />
+                <h3 className="text-lg font-semibold text-gray-800">معلومات الاتصال</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="phoneNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 font-medium">
+                        رقم الهاتف
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="أدخل رقم الهاتف" {...field} className="border-gray-300 focus:border-blue-500" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 font-medium">
+                        البريد الإلكتروني
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="أدخل عنوان البريد الإلكتروني"
+                          {...field}
+                          className="border-gray-300 focus:border-blue-500"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="residenceLocation"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel className="flex items-center gap-2 font-medium">العنوان التفصيلي</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="ادخل العنوان التفصيلي" {...field} className="border-gray-300 focus:border-blue-500 min-h-[80px]" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="nationalId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>رقم البطاقة *</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="ادخل رقم البطاقة"
-                        {...field}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/[^0-9]/g, "");
-                          field.onChange(value);
+            <Separator className="my-6" />
+
+            {/* قسم المعلومات المهنية */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Briefcase className="h-5 w-5 text-gray-500" />
+                <h3 className="text-lg font-semibold text-gray-800">المعلومات المهنية</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="profession"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 font-medium">المهنة</FormLabel>
+                      <FormControl>
+                        <Input placeholder="ادخل المهنة" {...field} className="border-gray-300 focus:border-blue-500" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="jobPosition"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 font-medium">الوظيفة</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="border-gray-300 focus:border-blue-500">
+                            <SelectValue placeholder="اختر الوظيفة" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="ENGINEER">مهندس</SelectItem>
+                          <SelectItem value="ACCOUNTANT">محاسب</SelectItem>
+                          <SelectItem value="ADMINISTRATIVE">إداري</SelectItem>
+                          <SelectItem value="EXECUTIVE_SUPERVISOR">مشرف تنفيذ</SelectItem>
+                          <SelectItem value="WRITER">كاتب</SelectItem>
+                          <SelectItem value="WORKER">عامل</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="hiringDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 font-medium">
+                        تاريخ التعيين *
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} className="border-gray-300 focus:border-blue-500" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="hiringType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 font-medium">
+                        نوع التعيين *
+                      </FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="border-gray-300 focus:border-blue-500">
+                            <SelectValue placeholder="اختر نوع التعيين" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="full-time">دائم</SelectItem>
+                          <SelectItem value="temporary">مؤقت</SelectItem>
+                          <SelectItem value="secondment">معار</SelectItem>
+                          <SelectItem value="mandate">ندب</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="administration"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 font-medium">
+                        الإدارة والمنطقة التابع لها *
+                      </FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="border-gray-300 focus:border-blue-500">
+                            <SelectValue placeholder="اختر الإدارة و المنطقة" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="الإدارة المركزية للمشروعات">
+                            الإدارة المركزية للمشروعات
+                          </SelectItem>
+                          <SelectItem value="الإدارة العامة للشئون المالية">
+                            الإدارة العامة للشئون المالية
+                          </SelectItem>
+                          <SelectItem value="الإدارة العامة للشئون الإدارية">
+                            الإدارة العامة للشئون الإدارية
+                          </SelectItem>
+                          <SelectItem value="نظم المعلومات والتحول الرقمي">
+                            نظم المعلومات والتحول الرقمي
+                          </SelectItem>
+                          <SelectItem value="المكتب الفني">المكتب الفني</SelectItem>
+                          <SelectItem value="العلاقات العامة">العلاقات العامة</SelectItem>
+                          <SelectItem value="الأمن">الأمن</SelectItem>
+                          <SelectItem value="التعاقدات">التعاقدات</SelectItem>
+                          <SelectItem value="الشئون القانونية">الشئون القانونية</SelectItem>
+                          <SelectItem value="التنمية المتكاملة">التنمية المتكاملة</SelectItem>
+                          <SelectItem value="مكتب رئيس الجهاز">مكتب رئيس الجهاز</SelectItem>
+                          <SelectItem value="مكتب نائب رئيس الجهاز">
+                            مكتب نائب رئيس الجهاز
+                          </SelectItem>
+                          <SelectItem value="التخطيط والمتابعة">التخطيط والمتابعة</SelectItem>
+                          <SelectItem value="منطقة تعمير شمال سيناء">
+                            منطقة تعمير شمال سيناء
+                          </SelectItem>
+                          <SelectItem value="منطقة تعمير جنوب سيناء">
+                            منطقة تعمير جنوب سيناء
+                          </SelectItem>
+                          <SelectItem value="منطقة تعمير بورسعيد">
+                            منطقة تعمير بورسعيد
+                          </SelectItem>
+                          <SelectItem value="منطقة تعمير الإسماعيلية">
+                            منطقة تعمير الإسماعيلية
+                          </SelectItem>
+                          <SelectItem value="منطقة تعمير القنطرة شرق">
+                            منطقة تعمير القنطرة شرق
+                          </SelectItem>
+                          <SelectItem value="منطقة تعمير السويس">
+                            منطقة تعمير السويس
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="actualWork"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 font-medium">العمل الفعلي</FormLabel>
+                      <FormControl>
+                        <Input placeholder="أدخل العمل الفعلي" {...field} className="border-gray-300 focus:border-blue-500" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            <Separator className="my-6" />
+
+            {/* قسم الصور والوثائق */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Building2 className="h-5 w-5 text-gray-500" />
+                <h3 className="text-lg font-semibold text-gray-800">الصور والوثائق</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <User className="h-4 w-4 text-gray-500" />
+                    الصورة الشخصية
+                  </label>
+                  {personalPhotoUrl ? (
+                    <div className="relative">
+                      <img
+                        src={personalPhotoUrl}
+                        alt="Personal Photo"
+                        className="w-full h-[200px] object-cover rounded-lg border-2 border-gray-200 shadow-md"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600"
+                        onClick={() => removeImage(personalPhotoUrl, setPersonalPhotoUrl)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <UploaderProvider
+                      uploadFn={createUploadFn(setPersonalPhotoUrl)}
+                      autoUpload={true}
+                    >
+                      <SingleImageDropzone
+                        height={200}
+                        width={200}
+                        dropzoneOptions={{
+                          maxSize: 1024 * 1024 * 1, // 1 MB
                         }}
+                        className="rounded-lg border-2 border-dashed border-gray-300 hover:border-blue-500"
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="maritalStatus"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الحالة الاجتماعية *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر الحالة الاجتماعية" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="single">أعزب</SelectItem>
-                        <SelectItem value="married">متزوج</SelectItem>
-                        <SelectItem value="divorced">مطلق</SelectItem>
-                        <SelectItem value="widowed">أرمل</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                    </UploaderProvider>
+                  )}
+                </div>
 
-            <FormField
-              control={form.control}
-              name="residenceLocation"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>العنوان التفصيلي</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="ادخل العنوان التفصيلي" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Separator />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="hiringDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>تاريخ التعيين *</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="hiringType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>نوع التعيين *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر نوع التعيين" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="full-time">دائم</SelectItem>
-                        <SelectItem value="temporary">مؤقت</SelectItem>
-                        <SelectItem value="secondment">معار</SelectItem>
-                        <SelectItem value="mandate">ندب</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="administration"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الإدارة والمنطقة التابع لها *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر الإدارة و المنطقة" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="الإدارة المركزية للمشروعات">
-                          الإدارة المركزية للمشروعات
-                        </SelectItem>
-                        <SelectItem value="الإدارة العامة للشئون المالية">
-                          الإدارة العامة للشئون المالية
-                        </SelectItem>
-                        <SelectItem value="الإدارة العامة للشئون الإدارية">
-                          الإدارة العامة للشئون الإدارية
-                        </SelectItem>
-                        <SelectItem value="نظم المعلومات والتحول الرقمي">
-                          نظم المعلومات والتحول الرقمي
-                        </SelectItem>
-                        <SelectItem value="المكتب الفني">المكتب الفني</SelectItem>
-                        <SelectItem value="العلاقات العامة">العلاقات العامة</SelectItem>
-                        <SelectItem value="الأمن">الأمن</SelectItem>
-                        <SelectItem value="التعاقدات">التعاقدات</SelectItem>
-                        <SelectItem value="الشئون القانونية">الشئون القانونية</SelectItem>
-                        <SelectItem value="التنمية المتكاملة">التنمية المتكاملة</SelectItem>
-                        <SelectItem value="مكتب رئيس الجهاز">مكتب رئيس الجهاز</SelectItem>
-                        <SelectItem value="مكتب نائب رئيس الجهاز">
-                          مكتب نائب رئيس الجهاز
-                        </SelectItem>
-                        <SelectItem value="التخطيط والمتابعة">التخطيط والمتابعة</SelectItem>
-                        <SelectItem value="منطقة تعمير شمال سيناء">
-                          منطقة تعمير شمال سيناء
-                        </SelectItem>
-                        <SelectItem value="منطقة تعمير جنوب سيناء">
-                          منطقة تعمير جنوب سيناء
-                        </SelectItem>
-                        <SelectItem value="منطقة تعمير بورسعيد">
-                          منطقة تعمير بورسعيد
-                        </SelectItem>
-                        <SelectItem value="منطقة تعمير الإسماعيلية">
-                          منطقة تعمير الإسماعيلية
-                        </SelectItem>
-                        <SelectItem value="منطقة تعمير القنطرة شرق">
-                          منطقة تعمير القنطرة شرق
-                        </SelectItem>
-                        <SelectItem value="منطقة تعمير السويس">
-                          منطقة تعمير السويس
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="actualWork"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>العمل الفعلي</FormLabel>
-                    <FormControl>
-                      <Input placeholder="أدخل العمل الفعلي" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>البريد الإلكتروني</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="أدخل عنوان البريد الإلكتروني"
-                        {...field}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-gray-500" />
+                    صورة البطاقة (أمامي)
+                  </label>
+                  {idFrontUrl ? (
+                    <div className="relative">
+                      <img
+                        src={idFrontUrl}
+                        alt="ID Front"
+                        className="w-full h-[200px] object-cover rounded-lg border-2 border-gray-200 shadow-md"
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="phoneNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>رقم الهاتف</FormLabel>
-                    <FormControl>
-                      <Input placeholder="أدخل رقم الهاتف" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Three upload fields for personal photo and two for ID */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">الصورة الشخصية</label>
-                {personalPhotoUrl ? (
-                  <div className="relative">
-                    <img
-                      src={personalPhotoUrl}
-                      alt="Personal Photo"
-                      className="w-[200px] h-[200px] object-cover rounded-md border"
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      className="absolute top-2 right-2"
-                      onClick={() => removeImage(personalPhotoUrl, setPersonalPhotoUrl)}
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600"
+                        onClick={() => removeImage(idFrontUrl, setIdFrontUrl)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <UploaderProvider
+                      uploadFn={createUploadFn(setIdFrontUrl)}
+                      autoUpload={true}
                     >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <UploaderProvider
-                    uploadFn={createUploadFn(setPersonalPhotoUrl)}
-                    autoUpload={true}
-                  >
-                    <SingleImageDropzone
-                      height={200}
-                      width={200}
-                      dropzoneOptions={{
-                        maxSize: 1024 * 1024 * 1, // 1 MB
-                      }}
-                    />
-                  </UploaderProvider>
-                )}
-              </div>
+                      <SingleImageDropzone
+                        height={200}
+                        width={200}
+                        dropzoneOptions={{
+                          maxSize: 1024 * 1024 * 1, // 1 MB
+                        }}
+                        className="rounded-lg border-2 border-dashed border-gray-300 hover:border-blue-500"
+                      />
+                    </UploaderProvider>
+                  )}
+                </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">صورة البطاقة (أمامي)</label>
-                {idFrontUrl ? (
-                  <div className="relative">
-                    <img
-                      src={idFrontUrl}
-                      alt="ID Front"
-                      className="w-[200px] h-[200px] object-cover rounded-md border"
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      className="absolute top-2 right-2"
-                      onClick={() => removeImage(idFrontUrl, setIdFrontUrl)}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-gray-500" />
+                    صورة البطاقة (خلفي)
+                  </label>
+                  {idBackUrl ? (
+                    <div className="relative">
+                      <img
+                        src={idBackUrl}
+                        alt="ID Back"
+                        className="w-full h-[200px] object-cover rounded-lg border-2 border-gray-200 shadow-md"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600"
+                        onClick={() => removeImage(idBackUrl, setIdBackUrl)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <UploaderProvider
+                      uploadFn={createUploadFn(setIdBackUrl)}
+                      autoUpload={true}
                     >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <UploaderProvider
-                    uploadFn={createUploadFn(setIdFrontUrl)}
-                    autoUpload={true}
-                  >
-                    <SingleImageDropzone
-                      height={200}
-                      width={200}
-                      dropzoneOptions={{
-                        maxSize: 1024 * 1024 * 1, // 1 MB
-                      }}
-                    />
-                  </UploaderProvider>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">صورة البطاقة (خلفي)</label>
-                {idBackUrl ? (
-                  <div className="relative">
-                    <img
-                      src={idBackUrl}
-                      alt="ID Back"
-                      className="w-[200px] h-[200px] object-cover rounded-md border"
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      className="absolute top-2 right-2"
-                      onClick={() => removeImage(idBackUrl, setIdBackUrl)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <UploaderProvider
-                    uploadFn={createUploadFn(setIdBackUrl)}
-                    autoUpload={true}
-                  >
-                    <SingleImageDropzone
-                      height={200}
-                      width={200}
-                      dropzoneOptions={{
-                        maxSize: 1024 * 1024 * 1, // 1 MB
-                      }}
-                    />
-                  </UploaderProvider>
-                )}
+                      <SingleImageDropzone
+                        height={200}
+                        width={200}
+                        dropzoneOptions={{
+                          maxSize: 1024 * 1024 * 1, // 1 MB
+                        }}
+                        className="rounded-lg border-2 border-dashed border-gray-300 hover:border-blue-500"
+                      />
+                    </UploaderProvider>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Relationships Section */}
-        <Card>
+        <Card className="overflow-hidden shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-xl font-bold">
+              <Users className="h-6 w-6 text-green-600" />
               العلاقات العائلية
             </CardTitle>
-            <CardDescription>إضافة أفراد الأسرة ومعلوماتهم</CardDescription>
+            <CardDescription className="text-gray-600">
+              إضافة أفراد الأسرة ومعلوماتهم
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="p-6 space-y-6">
             {fields.map((field, index) => (
-              <div key={field.id} className="border rounded-lg p-4 space-y-4">
+              <div key={field.id} className="border border-gray-200 rounded-xl p-6 space-y-4 bg-gray-50">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-semibold">البيانات العائلية رقم {index + 1}</h4>
+                  <h4 className="font-semibold text-gray-800 flex items-center gap-2">
+                    <Users className="h-5 w-5 text-gray-500" />
+                    البيانات العائلية رقم {index + 1}
+                  </h4>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={() => remove(index)}
-                    className="text-red-600 hover:text-red-700"
+                    className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -706,13 +796,13 @@ const EmployeeForm = ({
                     name={`relationships.${index}.relationshipType`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>نوع العلاقة *</FormLabel>
+                        <FormLabel className="font-medium">نوع العلاقة *</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           value={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="border-gray-300 focus:border-green-500">
                               <SelectValue placeholder="اختر نوع العلاقة" />
                             </SelectTrigger>
                           </FormControl>
@@ -754,9 +844,9 @@ const EmployeeForm = ({
                     name={`relationships.${index}.name`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>الاسم *</FormLabel>
+                        <FormLabel className="font-medium">الاسم *</FormLabel>
                         <FormControl>
-                          <Input placeholder="أدخل الاسم" {...field} />
+                          <Input placeholder="أدخل الاسم" {...field} className="border-gray-300 focus:border-green-500" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -770,9 +860,9 @@ const EmployeeForm = ({
                     name={`relationships.${index}.nationalId`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>رقم البطاقة</FormLabel>
+                        <FormLabel className="font-medium">رقم البطاقة</FormLabel>
                         <FormControl>
-                          <Input placeholder="أدخل رقم البطاقة" {...field} />
+                          <Input placeholder="أدخل رقم البطاقة" {...field} className="border-gray-300 focus:border-green-500" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -783,9 +873,9 @@ const EmployeeForm = ({
                     name={`relationships.${index}.birthDate`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>تاريخ الميلاد</FormLabel>
+                        <FormLabel className="font-medium">تاريخ الميلاد</FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} />
+                          <Input type="date" {...field} className="border-gray-300 focus:border-green-500" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -799,9 +889,9 @@ const EmployeeForm = ({
                     name={`relationships.${index}.birthPlace`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>مكان الميلاد</FormLabel>
+                        <FormLabel className="font-medium">مكان الميلاد</FormLabel>
                         <FormControl>
-                          <Input placeholder="أدخل مكان الميلاد" {...field} />
+                          <Input placeholder="أدخل مكان الميلاد" {...field} className="border-gray-300 focus:border-green-500" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -812,9 +902,9 @@ const EmployeeForm = ({
                     name={`relationships.${index}.profession`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>المهنة</FormLabel>
+                        <FormLabel className="font-medium">المهنة</FormLabel>
                         <FormControl>
-                          <Input placeholder="أدخل المهنة" {...field} />
+                          <Input placeholder="أدخل المهنة" {...field} className="border-gray-300 focus:border-green-500" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -828,9 +918,9 @@ const EmployeeForm = ({
                     name={`relationships.${index}.spouseName`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>اسم الزوج/الزوجة</FormLabel>
+                        <FormLabel className="font-medium">اسم الزوج/الزوجة</FormLabel>
                         <FormControl>
-                          <Input placeholder="أدخل اسم الزوج/الزوجة" {...field} />
+                          <Input placeholder="أدخل اسم الزوج/الزوجة" {...field} className="border-gray-300 focus:border-green-500" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -841,9 +931,9 @@ const EmployeeForm = ({
                     name={`relationships.${index}.residenceLocation`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>محل الإقامة</FormLabel>
+                        <FormLabel className="font-medium">محل الإقامة</FormLabel>
                         <FormControl>
-                          <Input placeholder="أدخل محل الإقامة" {...field} />
+                          <Input placeholder="أدخل محل الإقامة" {...field} className="border-gray-300 focus:border-green-500" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -855,10 +945,10 @@ const EmployeeForm = ({
                   control={form.control}
                   name={`relationships.${index}.notes`}
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>ملاحظات</FormLabel>
+                    <FormItem className="md:col-span-2">
+                      <FormLabel className="font-medium">ملاحظات</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="أدخل أي ملاحظات" {...field} />
+                        <Textarea placeholder="أدخل أي ملاحظات" {...field} className="border-gray-300 focus:border-green-500 min-h-[60px]" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -871,7 +961,7 @@ const EmployeeForm = ({
               type="button"
               variant="outline"
               onClick={addRelationship}
-              className="w-full bg-transparent"
+              className="w-full border-2 border-dashed border-gray-300 hover:border-green-500 text-green-600 hover:bg-green-50"
             >
               <Plus className="h-4 w-4 mr-2" />
               إضافة علاقة
@@ -880,22 +970,27 @@ const EmployeeForm = ({
         </Card>
 
         {/* Submit and Navigation Buttons */}
-        <div className="flex justify-start space-x-4">
+        <div className="flex flex-col sm:flex-row justify-start sm:justify-end gap-4 pt-6 border-t border-gray-200">
           <Button
             type="button"
             variant="outline"
             onClick={() => router.push("/employees")}
+            className="w-full sm:w-auto border-gray-300 hover:border-gray-400"
           >
             رجوع
           </Button>
-          <Button type="submit" onClick={() => setGoToNotes(false)}>
+          <Button 
+            type="submit" 
+            onClick={() => setGoToNotes(false)}
+            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
+          >
             {type === "Update" ? "تحديث الموظف" : "تسجيل موظف جديد"}
           </Button>
           <Button
             type="submit"
             variant="secondary"
             onClick={() => setGoToNotes(true)}
-            className="bg-green-600 hover:bg-green-700 text-white"
+            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
           >
             {type === "Update" ? "تحديث وإضافة ملاحظات أمنية" : "تسجيل وإضافة ملاحظات أمنية"}
           </Button>
@@ -910,6 +1005,7 @@ const EmployeeForm = ({
                   router.push("/employees");
                 }
               }}
+              className="w-full sm:w-auto bg-red-600 hover:bg-red-700"
             >
               حذف الموظف
             </Button>

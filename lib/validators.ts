@@ -28,6 +28,7 @@ export const createEmployeeFormSchema = z.object({
   personalPhoto: z.any().optional(),
   frontIdCard: z.any().optional(),
   backIdCard: z.any().optional(),
+  jobPosition: z.union([z.enum(["ENGINEER", "ACCOUNTANT", "ADMINISTRATIVE", "EXECUTIVE_SUPERVISOR", "WRITER", "WORKER"]), z.literal("")]).default(""),
   
   // ✅ العلاقات - إجباري نوع + اسم فقط
   relationships: z.array(
@@ -63,7 +64,7 @@ export const createEmployeeApiSchema = z.object({
   actualWork: z.string().nullable().default(null).transform(val => val || ""),
   phoneNumber: z.string().nullable().default(null).transform(val => val || ""),
   email: z.string().email("البريد الإلكتروني غير صحيح").nullable().default(null).or(z.literal("")),
-  
+
   notes: z.string().default(""),
   status: z.enum(["active", "inactive", "suspended", "retired"]).default("active"),
   personalImageUrl: z.string().nullable().default(null),
@@ -84,6 +85,9 @@ export const createEmployeeApiSchema = z.object({
       notes: z.string().nullable().default(null).transform(val => val || ""),
     })
   ).default([]),
+
+  // الحقل الجديد
+  jobPosition: z.enum(["ENGINEER", "ACCOUNTANT", "ADMINISTRATIVE", "EXECUTIVE_SUPERVISOR", "WRITER", "WORKER"]).nullable().default(null),
 });
 
 export const employeeSchema = z.object({
@@ -122,6 +126,7 @@ export const employeeSchema = z.object({
       notes: z.string().optional(),
     })
   ).optional().default([]),
+  jobPosition: z.enum(["ENGINEER", "ACCOUNTANT", "ADMINISTRATIVE", "EXECUTIVE_SUPERVISOR", "WRITER", "WORKER"]).optional(),
 });
 
 export type Employee = z.infer<typeof employeeSchema>;
@@ -154,6 +159,9 @@ export function transformEmployeeFormToApi(
       residenceLocation: r.residenceLocation || "",
       notes: r.notes || "",
     })) ?? [],
+
+    // الحقل الجديد
+    jobPosition: data.jobPosition || null,
   };
 }
 

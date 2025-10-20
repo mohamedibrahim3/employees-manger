@@ -91,6 +91,8 @@ model Employee {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  jobPosition JobPosition? // الحقل الجديد لالوظيفة
+
   @@map("employees")
 }
 
@@ -111,4 +113,13 @@ model Relationship {
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@map("relationships")
+}
+
+enum JobPosition {
+  ENGINEER     // مهندس
+  ACCOUNTANT   // محاسب
+  ADMINISTRATIVE // إداري
+  EXECUTIVE_SUPERVISOR // مشرف تنفيذ
+  WRITER       // كاتب
+  WORKER       // عامل
 }
