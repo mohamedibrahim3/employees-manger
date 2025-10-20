@@ -89,9 +89,6 @@ export default function RootLayout({
             <div className="text-center text-sm text-slate-500 dark:text-slate-400">
               © {new Date().getFullYear()} {APP_NAME_FULL}. جميع الحقوق محفوظة.
               <br />
-              <span className="text-xs">
-                تم التصميم والتطوير بحب ✨
-              </span>
             </div>
           </div>
         </footer>

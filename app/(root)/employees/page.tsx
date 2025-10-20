@@ -93,7 +93,7 @@ const EmployeesPage = () => {
   if (initialLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center text-blue-600 font-bold text-xl animate-pulse">
+        <div className="text-center text-gray-600 font-medium text-xl animate-pulse">
           جاري تحميل البيانات...
         </div>
       </div>
@@ -101,45 +101,50 @@ const EmployeesPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
-      {/* ... Rest of your JSX remains the same ... */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-white relative overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gray-200/30 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gray-200/30 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gray-100/20 rounded-full blur-3xl"></div>
+      </div>
+
       <div className="relative z-10 w-full max-w-none px-6 lg:px-12 xl:px-16 py-12 space-y-8">
         {/* Header Section */}
         <div className="text-center space-y-6 mb-12">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-2xl mb-6">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-700 rounded-2xl shadow-xl mb-6">
             <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
           </div>
-          <h1 className="text-5xl md:text-6xl font-black bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent leading-tight">
+          <h1 className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent leading-tight tracking-tight">
             إدارة الموظفين
           </h1>
-          <p className="text-xl text-gray-600 font-semibold max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 font-medium max-w-2xl mx-auto">
             نظام شامل لإدارة وعرض بيانات الموظفين في جهاز تعمير سيناء
           </p>
-          <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mx-auto"></div>
+          <div className="w-24 h-1 bg-gray-700 rounded-full mx-auto"></div>
         </div>
 
         {/* Stats and Actions Bar */}
-        <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden border border-white/20 p-8">
+        <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-xl overflow-hidden border border-gray-200 p-8">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
             <div className="flex items-center justify-center">
               <div className="text-center">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl mb-4">
-                  <svg className="w-10 h-10 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-2xl mb-4">
+                  <svg className="w-10 h-10 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
                   </svg>
                 </div>
-                <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                <div className="text-4xl font-medium bg-gradient-to-r from-gray-700 to-gray-600 bg-clip-text text-transparent mb-2">
                   {toArabicDigits(employees.length)}
                 </div>
-                <p className="text-xl text-gray-600 font-semibold">إجمالي الموظفين المسجلين</p>
+                <p className="text-xl text-gray-600 font-medium">إجمالي الموظفين المسجلين</p>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-6">
               <Link href="/employees/create">
-                <Button className="group relative px-10 py-5 text-xl font-bold text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <Button className="group relative px-10 py-5 text-xl font-medium text-white bg-gradient-to-r from-gray-700 to-gray-600 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-600 to-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <span className="relative flex items-center">
                     <svg className="w-6 h-6 ml-3" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd"></path>
@@ -151,10 +156,10 @@ const EmployeesPage = () => {
               <Link href="/">
                 <Button
                   variant="outline"
-                  className="group px-10 py-5 text-xl font-semibold text-gray-700 bg-white border-2 border-gray-300 rounded-2xl hover:border-blue-400 hover:text-blue-600 hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300"
+                  className="group px-10 py-5 text-xl font-medium text-gray-700 bg-white border-2 border-gray-300 rounded-2xl hover:border-gray-500 hover:text-gray-700 hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300"
                 >
                   <span className="flex items-center">
-                    <svg className="w-6 h-6 ml-3 group-hover:text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-6 h-6 ml-3 group-hover:text-gray-700" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd"></path>
                     </svg>
                     العودة للرئيسية
@@ -166,13 +171,11 @@ const EmployeesPage = () => {
         </div>
 
         {/* Main Employees Table */}
-        <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden border border-white/20">
-          <div className="bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 px-12 py-8">
+        <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-xl overflow-hidden border border-gray-200">
+          <div className="bg-gradient-to-r from-gray-800 to-gray-600 px-12 py-8">
             <div className="flex items-center justify-center">
               <div className="flex items-center space-x-4 space-x-reverse">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <h2 className="text-3xl font-bold text-white mr-4">
+                <h2 className="text-3xl font-medium text-white mr-4">
                   قائمة الموظفين التفصيلية
                 </h2>
               </div>
@@ -186,7 +189,7 @@ const EmployeesPage = () => {
         {/* Footer Info */}
         <div className="text-center space-y-4 pt-8">
           <div className="inline-flex items-center justify-center space-x-2 space-x-reverse text-gray-600">
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            <div className="w-2 h-2 bg-gray-700 rounded-full animate-pulse"></div>
             <span className="text-lg">النظام يعمل بحالة ممتازة</span>
           </div>
           <p className="text-gray-500">
