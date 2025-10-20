@@ -53,11 +53,7 @@ const Page = async () => {
         {/* Stats Card */}
         <div className="flex justify-center">
           <div className="group relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-gray-700 to-gray-600 rounded-3xl blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
             <div className="relative bg-white rounded-3xl p-12 text-center shadow-xl transform group-hover:scale-105 transition-all duration-300 max-w-lg w-full">
-              <div className="absolute top-6 right-6 w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
-              <div className="absolute top-6 right-6 w-3 h-3 bg-green-500 rounded-full"></div>
-
               <div className="mb-6">
                 <h2 className="text-2xl font-medium text-gray-800 mb-2">قوة الجهاز الإجمالية</h2>
                 <div className="text-6xl font-medium bg-gradient-to-r from-gray-700 to-gray-600 bg-clip-text text-transparent mb-2 tracking-wide">

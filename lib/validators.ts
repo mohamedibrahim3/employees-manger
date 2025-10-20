@@ -6,62 +6,76 @@ export const signInSchema = z.object({
 });
 
 export const createEmployeeFormSchema = z.object({
+  // ✅ إجباري فقط
   name: z.string().min(2, "الاسم مطلوب"),
-  nickName: z.string().min(1, "اسم الشهرة مطلوب"),
-  profession: z.string().min(1, "المهنة مطلوبة"),
   birthDate: z.string().min(1, "تاريخ الميلاد مطلوب"),
-  nationalId: z.string().min(1, "رقم البطاقة مطلوبة"),
+  nationalId: z.string().min(1, "رقم البطاقة مطلوب"),
   maritalStatus: z.string().min(1, "الحالة الاجتماعية مطلوبة"),
-  residenceLocation: z.string().min(1, "العنوان التفصيلي مطلوب"),
   hiringDate: z.string().min(1, "تاريخ التعيين مطلوب"),
   hiringType: z.string().min(1, "نوع التوظيف مطلوب"),
-  email: z.string().email("البريد الإلكتروني غير صحيح").optional().or(z.literal("")),
   administration: z.string().min(1, "الإدارة مطلوبة"),
-  actualWork: z.string().min(1, "العمل الفعلي مطلوب"),
-  phoneNumber: z.string().min(1, "رقم الهاتف مطلوب"),
+  
+  // ✅ اختياري كامل
+  nickName: z.string().optional().or(z.literal("")),
+  profession: z.string().optional().or(z.literal("")),
+  residenceLocation: z.string().optional().or(z.literal("")),
+  actualWork: z.string().optional().or(z.literal("")),
+  phoneNumber: z.string().optional().or(z.literal("")),
+  email: z.string().email("البريد الإلكتروني غير صحيح").optional().or(z.literal("")),
+  
   notes: z.string().optional(),
   status: z.enum(["active", "inactive", "suspended", "retired"]).default("active"),
   personalPhoto: z.any().optional(),
   frontIdCard: z.any().optional(),
   backIdCard: z.any().optional(),
+  
+  // ✅ العلاقات - إجباري نوع + اسم فقط
   relationships: z.array(
     z.object({
       relationshipType: z.string().min(1, "نوع العلاقة مطلوب"),
       name: z.string().min(1, "الاسم مطلوب"),
-      nationalId: z.string().optional(),
-      birthDate: z.string().optional(),
-      birthPlace: z.string().optional(),
-      profession: z.string().optional(),
-      spouseName: z.string().optional(),
-      residenceLocation: z.string().optional(),
-      notes: z.string().optional(),
+      // ✅ باقي الحقول اختيارية
+      nationalId: z.string().optional().or(z.literal("")),
+      birthDate: z.string().optional().or(z.literal("")),
+      birthPlace: z.string().optional().or(z.literal("")),
+      profession: z.string().optional().or(z.literal("")),
+      spouseName: z.string().optional().or(z.literal("")),
+      residenceLocation: z.string().optional().or(z.literal("")),
+      notes: z.string().optional().or(z.literal("")),
     })
-  ),
+  ).optional().default([]),
 });
 
 export const createEmployeeApiSchema = z.object({
+  // ✅ إجباري فقط
   name: z.string().min(2, "الاسم مطلوب"),
-  nickName: z.string().min(1, "اسم الشهرة مطلوب"),
-  profession: z.string().min(1, "المهنة مطلوبة"),
   birthDate: z.date(),
-  nationalId: z.string().min(1, "رقم البطاقة مطلوبة"),
+  nationalId: z.string().min(1, "رقم البطاقة مطلوب"),
   maritalStatus: z.string().min(1, "الحالة الاجتماعية مطلوبة"),
-  residenceLocation: z.string().min(1, "العنوان التفصيلي مطلوب"),
   hiringDate: z.date(),
   hiringType: z.string().min(1, "نوع التوظيف مطلوب"),
-  email: z.string().email("البريد الإلكتروني غير صحيح").optional(),
   administration: z.string().min(1, "الإدارة مطلوبة"),
-  actualWork: z.string().min(1, "العمل الفعلي مطلوب"),
-  phoneNumber: z.string().min(1, "رقم الهاتف مطلوب"),
-  notes: z.string().optional(), // ✅ التعديل: خليناها اختيارية
+  
+  // ✅ اختياري كامل
+  nickName: z.string().optional(),
+  profession: z.string().optional(),
+  residenceLocation: z.string().optional(),
+  actualWork: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  email: z.string().email("البريد الإلكتروني غير صحيح").optional(),
+  
+  notes: z.string().optional(),
   status: z.enum(["active", "inactive", "suspended", "retired"]).default("active"),
   personalImageUrl: z.string().optional(),
   idFrontImageUrl: z.string().optional(),
   idBackImageUrl: z.string().optional(),
+  
+  // ✅ العلاقات - إجباري نوع + اسم فقط
   relationships: z.array(
     z.object({
       relationshipType: z.string().min(1, "نوع العلاقة مطلوب"),
       name: z.string().min(1, "الاسم مطلوب"),
+      // ✅ باقي الحقول اختيارية
       nationalId: z.string().optional(),
       birthDate: z.date().optional().nullable(),
       birthPlace: z.string().optional(),
@@ -76,18 +90,18 @@ export const createEmployeeApiSchema = z.object({
 export const employeeSchema = z.object({
   id: z.string(),
   name: z.string(),
-  nickName: z.string(),
-  profession: z.string(),
+  nickName: z.string().optional(),
+  profession: z.string().optional(),
   birthDate: z.string(), // ISO string format
   nationalId: z.string(),
   maritalStatus: z.string(),
-  residenceLocation: z.string(),
+  residenceLocation: z.string().optional(),
   hiringDate: z.string(), // ISO string format
   hiringType: z.string(),
   email: z.string().optional(),
   administration: z.string(),
-  actualWork: z.string(),
-  phoneNumber: z.string(),
+  actualWork: z.string().optional(),
+  phoneNumber: z.string().optional(),
   notes: z.string().optional(),
   status: z.enum(["active", "inactive", "suspended", "retired"]).default("active"),
   personalImageUrl: z.string().optional(),
@@ -123,10 +137,10 @@ export function transformEmployeeFormToApi(
     birthDate: new Date(data.birthDate),
     hiringDate: new Date(data.hiringDate),
     email: data.email && data.email !== "" ? data.email : undefined,
-    personalImageUrl: data.personalPhoto ? URL.createObjectURL(data.personalPhoto) : undefined,
-    idFrontImageUrl: data.frontIdCard ? URL.createObjectURL(data.frontIdCard) : undefined,
-    idBackImageUrl: data.backIdCard ? URL.createObjectURL(data.backIdCard) : undefined,
-    notes: data.notes,
+    // ✅ الصور من EdgeStore مش من Form
+    personalImageUrl: undefined, // سيتم تعيينها من EdgeStore state
+    idFrontImageUrl: undefined, // سيتم تعيينها من EdgeStore state
+    idBackImageUrl: undefined, // سيتم تعيينها من EdgeStore state
     relationships: data.relationships?.map((r) => ({
       ...r,
       birthDate: r.birthDate ? new Date(r.birthDate) : null,

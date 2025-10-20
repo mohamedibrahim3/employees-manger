@@ -89,7 +89,7 @@ const EmployeeForm = ({
 }) => {
   const router = useRouter();
   const { edgestore } = useEdgeStore();
-  const [goToNotes, setGoToNotes] = useState(false); // State للتنقل للملاحظات
+  const [goToNotes, setGoToNotes] = useState(false);
 
   // State for uploaded images
   const [personalPhotoUrl, setPersonalPhotoUrl] = useState<string | undefined>(
@@ -199,18 +199,18 @@ const EmployeeForm = ({
     try {
       const transformedData: EmployeeData = {
         name: values.name,
-        nickName: values.nickName,
-        profession: values.profession,
+        nickName: values.nickName  || "",
+        profession: values.profession || "",
         birthDate: new Date(values.birthDate),
         nationalId: values.nationalId,
         maritalStatus: values.maritalStatus as string,
-        residenceLocation: values.residenceLocation,
+        residenceLocation: values.residenceLocation   || "",
         hiringDate: new Date(values.hiringDate),
         hiringType: values.hiringType,
         email: values.email || undefined,
         administration: values.administration,
-        actualWork: values.actualWork,
-        phoneNumber: values.phoneNumber,
+        actualWork: values.actualWork || "",
+        phoneNumber: values.phoneNumber || "",
         notes: "",
         personalImageUrl: personalPhotoUrl,
         idFrontImageUrl: idFrontUrl,
@@ -244,7 +244,6 @@ const EmployeeForm = ({
         toast(
           type === "Update" ? "تم تحديث الموظف بنجاح" : "تم إنشاء الموظف بنجاح"
         );
-        // إذا ضغطت على زرار الملاحظات، ننقل لصفحة الملاحظات
         setTimeout(() => {
           if (goToNotes) {
             window.location.href = `/employees/${result.employee.id}/security-notes`;
@@ -316,7 +315,7 @@ const EmployeeForm = ({
                 name="nickName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>اسم الشهرة *</FormLabel>
+                    <FormLabel>اسم الشهرة</FormLabel>
                     <FormControl>
                       <Input placeholder="ادخل اسم الشهرة" {...field} />
                     </FormControl>
@@ -332,7 +331,7 @@ const EmployeeForm = ({
                 name="profession"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>المهنة *</FormLabel>
+                    <FormLabel>المهنة</FormLabel>
                     <FormControl>
                       <Input placeholder="ادخل المهنة" {...field} />
                     </FormControl>
@@ -407,7 +406,7 @@ const EmployeeForm = ({
               name="residenceLocation"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>العنوان التفصيلي *</FormLabel>
+                  <FormLabel>العنوان التفصيلي</FormLabel>
                   <FormControl>
                     <Textarea placeholder="ادخل العنوان التفصيلي" {...field} />
                   </FormControl>
@@ -523,7 +522,7 @@ const EmployeeForm = ({
                 name="actualWork"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>العمل الفعلي *</FormLabel>
+                    <FormLabel>العمل الفعلي</FormLabel>
                     <FormControl>
                       <Input placeholder="أدخل العمل الفعلي" {...field} />
                     </FormControl>
@@ -556,7 +555,7 @@ const EmployeeForm = ({
                 name="phoneNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>رقم الهاتف *</FormLabel>
+                    <FormLabel>رقم الهاتف</FormLabel>
                     <FormControl>
                       <Input placeholder="أدخل رقم الهاتف" {...field} />
                     </FormControl>
@@ -771,7 +770,7 @@ const EmployeeForm = ({
                     name={`relationships.${index}.nationalId`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>رقم البطاقة *</FormLabel>
+                        <FormLabel>رقم البطاقة</FormLabel>
                         <FormControl>
                           <Input placeholder="أدخل رقم البطاقة" {...field} />
                         </FormControl>
@@ -784,7 +783,7 @@ const EmployeeForm = ({
                     name={`relationships.${index}.birthDate`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>تاريخ الميلاد *</FormLabel>
+                        <FormLabel>تاريخ الميلاد</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} />
                         </FormControl>
@@ -842,7 +841,7 @@ const EmployeeForm = ({
                     name={`relationships.${index}.residenceLocation`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>محل الإقامة *</FormLabel>
+                        <FormLabel>محل الإقامة</FormLabel>
                         <FormControl>
                           <Input placeholder="أدخل محل الإقامة" {...field} />
                         </FormControl>
