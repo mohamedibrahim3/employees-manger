@@ -25,17 +25,17 @@ export async function createEmployee(
 
     const empData = {
       name: validatedData.name,
-      nickName: validatedData.nickName,
-      profession: validatedData.profession,
+      nickName: validatedData.nickName || "",
+      profession: validatedData.profession || "",
       birthDate: new Date(validatedData.birthDate),
       nationalId: validatedData.nationalId,
       maritalStatus: validatedData.maritalStatus,
-      residenceLocation: validatedData.residenceLocation,
+      residenceLocation: validatedData.residenceLocation || "",
       hiringDate: new Date(validatedData.hiringDate),
       hiringType: validatedData.hiringType,
       administration: validatedData.administration,
-      actualWork: validatedData.actualWork,
-      phoneNumber: validatedData.phoneNumber,
+      actualWork: validatedData.actualWork || "",
+      phoneNumber: validatedData.phoneNumber || "",
       email: validatedData.email || null,
       notes: validatedData.notes || "",
       personalImageUrl: validatedData.personalImageUrl || null,
@@ -92,21 +92,22 @@ export const updateEmployee = async (
   try {
     const validatedData = createEmployeeApiSchema.parse(data);
 
+    // ✅ حذف حقل notes من البيانات لتجنب الكتابة فوقه
     const empData = {
       name: validatedData.name,
-      nickName: validatedData.nickName,
-      profession: validatedData.profession,
+      nickName: validatedData.nickName || "",
+      profession: validatedData.profession || "",
       birthDate: new Date(validatedData.birthDate),
       nationalId: validatedData.nationalId,
       maritalStatus: validatedData.maritalStatus,
-      residenceLocation: validatedData.residenceLocation,
+      residenceLocation: validatedData.residenceLocation || "",
       hiringDate: new Date(validatedData.hiringDate),
       hiringType: validatedData.hiringType,
       email: validatedData.email || null,
       administration: validatedData.administration,
-      actualWork: validatedData.actualWork,
-      phoneNumber: validatedData.phoneNumber,
-      notes: validatedData.notes || "",
+      actualWork: validatedData.actualWork || "",
+      phoneNumber: validatedData.phoneNumber || "",
+      // ❌ تم حذف سطر notes من هنا لحماية الملاحظات من المسح
       personalImageUrl: validatedData.personalImageUrl || null,
       idFrontImageUrl: validatedData.idFrontImageUrl || null,
       idBackImageUrl: validatedData.idBackImageUrl || null,
@@ -268,8 +269,8 @@ export const getEmployeesBySearch = async (name: string, administration: string)
         distinct: ['administration']
       });
       console.log("📋 Available administrations:", 
-        allAdmins.map(a => `"${a.administration}" (${a.administration.length})`
-      ));
+        allAdmins.map(a => `"${a.administration}" (${a.administration.length})`)
+      );
     }
 
     return { success: true, employees };
@@ -323,6 +324,7 @@ export const updateEmployeeNotes = async (id: string, notes: string) => {
     });
     revalidatePath(`/employees/${id}`);
     revalidatePath(`/employees/${id}/security-notes`);
+    revalidatePath("/employees");
     return { success: true, employee };
   } catch (error) {
     console.error("Error updating notes:", error);

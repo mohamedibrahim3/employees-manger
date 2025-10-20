@@ -15,15 +15,15 @@ export const createEmployeeFormSchema = z.object({
   hiringType: z.string().min(1, "نوع التوظيف مطلوب"),
   administration: z.string().min(1, "الإدارة مطلوبة"),
   
-  // ✅ اختياري كامل
-  nickName: z.string().optional().or(z.literal("")),
-  profession: z.string().optional().or(z.literal("")),
-  residenceLocation: z.string().optional().or(z.literal("")),
-  actualWork: z.string().optional().or(z.literal("")),
-  phoneNumber: z.string().optional().or(z.literal("")),
-  email: z.string().email("البريد الإلكتروني غير صحيح").optional().or(z.literal("")),
+  // ✅ اختياري - يقبل empty string
+  nickName: z.string().default(""),
+  profession: z.string().default(""),
+  residenceLocation: z.string().default(""),
+  actualWork: z.string().default(""),
+  phoneNumber: z.string().default(""),
+  email: z.string().email("البريد الإلكتروني غير صحيح").or(z.literal("")).default(""),
   
-  notes: z.string().optional(),
+  notes: z.string().default(""),
   status: z.enum(["active", "inactive", "suspended", "retired"]).default("active"),
   personalPhoto: z.any().optional(),
   frontIdCard: z.any().optional(),
@@ -35,15 +35,15 @@ export const createEmployeeFormSchema = z.object({
       relationshipType: z.string().min(1, "نوع العلاقة مطلوب"),
       name: z.string().min(1, "الاسم مطلوب"),
       // ✅ باقي الحقول اختيارية
-      nationalId: z.string().optional().or(z.literal("")),
-      birthDate: z.string().optional().or(z.literal("")),
-      birthPlace: z.string().optional().or(z.literal("")),
-      profession: z.string().optional().or(z.literal("")),
-      spouseName: z.string().optional().or(z.literal("")),
-      residenceLocation: z.string().optional().or(z.literal("")),
-      notes: z.string().optional().or(z.literal("")),
+      nationalId: z.string().default(""),
+      birthDate: z.string().default(""),
+      birthPlace: z.string().default(""),
+      profession: z.string().default(""),
+      spouseName: z.string().default(""),
+      residenceLocation: z.string().default(""),
+      notes: z.string().default(""),
     })
-  ).optional().default([]),
+  ).default([]),
 });
 
 export const createEmployeeApiSchema = z.object({
@@ -56,35 +56,34 @@ export const createEmployeeApiSchema = z.object({
   hiringType: z.string().min(1, "نوع التوظيف مطلوب"),
   administration: z.string().min(1, "الإدارة مطلوبة"),
   
-  // ✅ اختياري كامل
-  nickName: z.string().optional(),
-  profession: z.string().optional(),
-  residenceLocation: z.string().optional(),
-  actualWork: z.string().optional(),
-  phoneNumber: z.string().optional(),
-  email: z.string().email("البريد الإلكتروني غير صحيح").optional(),
+  // ✅ اختياري - Prisma يحتاج null بدلاً من undefined
+  nickName: z.string().nullable().default(null).transform(val => val || ""),
+  profession: z.string().nullable().default(null).transform(val => val || ""),
+  residenceLocation: z.string().nullable().default(null).transform(val => val || ""),
+  actualWork: z.string().nullable().default(null).transform(val => val || ""),
+  phoneNumber: z.string().nullable().default(null).transform(val => val || ""),
+  email: z.string().email("البريد الإلكتروني غير صحيح").nullable().default(null).or(z.literal("")),
   
-  notes: z.string().optional(),
+  notes: z.string().default(""),
   status: z.enum(["active", "inactive", "suspended", "retired"]).default("active"),
-  personalImageUrl: z.string().optional(),
-  idFrontImageUrl: z.string().optional(),
-  idBackImageUrl: z.string().optional(),
+  personalImageUrl: z.string().nullable().default(null),
+  idFrontImageUrl: z.string().nullable().default(null),
+  idBackImageUrl: z.string().nullable().default(null),
   
-  // ✅ العلاقات - إجباري نوع + اسم فقط
+  // ✅ العلاقات
   relationships: z.array(
     z.object({
       relationshipType: z.string().min(1, "نوع العلاقة مطلوب"),
       name: z.string().min(1, "الاسم مطلوب"),
-      // ✅ باقي الحقول اختيارية
-      nationalId: z.string().optional(),
-      birthDate: z.date().optional().nullable(),
-      birthPlace: z.string().optional(),
-      profession: z.string().optional(),
-      spouseName: z.string().optional(),
-      residenceLocation: z.string().optional(),
-      notes: z.string().optional(),
+      nationalId: z.string().nullable().default(null).transform(val => val || ""),
+      birthDate: z.date().nullable().default(null),
+      birthPlace: z.string().nullable().default(null).transform(val => val || ""),
+      profession: z.string().nullable().default(null).transform(val => val || ""),
+      spouseName: z.string().nullable().default(null).transform(val => val || ""),
+      residenceLocation: z.string().nullable().default(null).transform(val => val || ""),
+      notes: z.string().nullable().default(null).transform(val => val || ""),
     })
-  ).optional().default([]),
+  ).default([]),
 });
 
 export const employeeSchema = z.object({
@@ -92,11 +91,11 @@ export const employeeSchema = z.object({
   name: z.string(),
   nickName: z.string().optional(),
   profession: z.string().optional(),
-  birthDate: z.string(), // ISO string format
+  birthDate: z.string(),
   nationalId: z.string(),
   maritalStatus: z.string(),
   residenceLocation: z.string().optional(),
-  hiringDate: z.string(), // ISO string format
+  hiringDate: z.string(),
   hiringType: z.string(),
   email: z.string().optional(),
   administration: z.string(),
@@ -136,14 +135,24 @@ export function transformEmployeeFormToApi(
     ...data,
     birthDate: new Date(data.birthDate),
     hiringDate: new Date(data.hiringDate),
-    email: data.email && data.email !== "" ? data.email : undefined,
-    // ✅ الصور من EdgeStore مش من Form
-    personalImageUrl: undefined, // سيتم تعيينها من EdgeStore state
-    idFrontImageUrl: undefined, // سيتم تعيينها من EdgeStore state
-    idBackImageUrl: undefined, // سيتم تعيينها من EdgeStore state
+    nickName: data.nickName || "",
+    profession: data.profession || "",
+    residenceLocation: data.residenceLocation || "",
+    actualWork: data.actualWork || "",
+    phoneNumber: data.phoneNumber || "",
+    email: data.email && data.email !== "" ? data.email : null,
+    personalImageUrl: null,
+    idFrontImageUrl: null,
+    idBackImageUrl: null,
     relationships: data.relationships?.map((r) => ({
       ...r,
+      nationalId: r.nationalId || "",
       birthDate: r.birthDate ? new Date(r.birthDate) : null,
+      birthPlace: r.birthPlace || "",
+      profession: r.profession || "",
+      spouseName: r.spouseName || "",
+      residenceLocation: r.residenceLocation || "",
+      notes: r.notes || "",
     })) ?? [],
   };
 }
