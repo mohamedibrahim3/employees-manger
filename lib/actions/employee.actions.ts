@@ -27,8 +27,6 @@ export async function createEmployee(
       name: validatedData.name,
       nickName: validatedData.nickName,
       profession: validatedData.profession,
-      // validatedData.birthDate should already be a Date (from the schema),
-      // but we wrap with new Date(...) as a safe normalization if a string slipped through.
       birthDate: new Date(validatedData.birthDate),
       nationalId: validatedData.nationalId,
       maritalStatus: validatedData.maritalStatus,
@@ -39,7 +37,7 @@ export async function createEmployee(
       actualWork: validatedData.actualWork,
       phoneNumber: validatedData.phoneNumber,
       email: validatedData.email || null,
-      notes: validatedData.notes || "", // خليها فارغة
+      notes: validatedData.notes || "",
       personalImageUrl: validatedData.personalImageUrl || null,
       idFrontImageUrl: validatedData.idFrontImageUrl || null,
       idBackImageUrl: validatedData.idBackImageUrl || null,
@@ -65,7 +63,6 @@ export async function createEmployee(
     });
 
     if (relationships.length > 0) {
-      // createMany is fine if fields match DB nullable types
       await prisma.relationship.createMany({
         data: relationships.map((rel: Relationship) => ({
           employeeId: employee.id,
@@ -74,10 +71,8 @@ export async function createEmployee(
       });
     }
 
-    // Revalidate the relevant pages (call takes only the path)
     revalidatePath("/employees");
     revalidatePath("/");
-    // optional: revalidate specific employee page if you want it to appear immediately
     revalidatePath(`/employees/${employee.id}`);
 
     return { success: true, employee };
@@ -111,7 +106,7 @@ export const updateEmployee = async (
       administration: validatedData.administration,
       actualWork: validatedData.actualWork,
       phoneNumber: validatedData.phoneNumber,
-      notes: validatedData.notes || "", // خليها فارغة
+      notes: validatedData.notes || "",
       personalImageUrl: validatedData.personalImageUrl || null,
       idFrontImageUrl: validatedData.idFrontImageUrl || null,
       idBackImageUrl: validatedData.idBackImageUrl || null,
@@ -150,7 +145,6 @@ export const updateEmployee = async (
       });
     }
 
-    // Revalidate affected paths
     revalidatePath("/employees");
     revalidatePath("/");
     revalidatePath(`/employees/${id}`);
@@ -184,17 +178,42 @@ export const getEmployees = async () => {
   }
 };
 
+// ✅ الدالة المعدلة - مع تنظيف أقوى
 export const getEmployeesBySearch = async (name: string, administration: string) => {
   noStore();
   try {
-    const employees = await prisma.employee.findMany({
-      where: {
-        name: {
-          contains: name,
-          mode: "insensitive",
-        },
-        administration: administration,
-      },
+    // تنظيف قوي للمدخلات - إزالة كل المسافات الزائدة والحروف الخفية
+    const cleanName = name?.replace(/\s+/g, ' ').trim() || "";
+    const cleanAdmin = administration?.replace(/\s+/g, ' ').trim() || "";
+
+    console.log("🔍 Search Input:", { 
+      rawName: name, 
+      rawAdmin: administration,
+      cleanName, 
+      cleanAdmin,
+      nameLength: cleanName.length,
+      adminLength: cleanAdmin.length
+    });
+
+    // بناء شرط البحث
+    const whereClause: any = {};
+
+    if (cleanName) {
+      whereClause.name = {
+        contains: cleanName,
+        mode: "insensitive",
+      };
+    }
+
+    if (cleanAdmin) {
+      // نجرب الاتنين: exact match و contains
+      whereClause.administration = cleanAdmin;
+    }
+
+    console.log("🔍 Where Clause:", JSON.stringify(whereClause, null, 2));
+
+    let employees = await prisma.employee.findMany({
+      where: whereClause,
       orderBy: {
         createdAt: "desc",
       },
@@ -203,10 +222,60 @@ export const getEmployeesBySearch = async (name: string, administration: string)
       },
     });
 
+    console.log(`✅ Found ${employees.length} employees with exact match`);
+
+    // لو مش لاقي نتائج بـ exact match، جرب contains
+    if (employees.length === 0 && cleanAdmin) {
+      console.log("🔄 Trying with contains instead...");
+      
+      const containsWhere: any = {};
+      if (cleanName) {
+        containsWhere.name = {
+          contains: cleanName,
+          mode: "insensitive",
+        };
+      }
+      containsWhere.administration = {
+        contains: cleanAdmin,
+        mode: "insensitive",
+      };
+
+      employees = await prisma.employee.findMany({
+        where: containsWhere,
+        orderBy: {
+          createdAt: "desc",
+        },
+        include: {
+          relationships: true,
+        },
+      });
+
+      console.log(`✅ Found ${employees.length} employees with contains`);
+    }
+    
+    // اطبع عينة من النتائج
+    if (employees.length > 0) {
+      console.log("📋 Sample Results:");
+      employees.slice(0, 3).forEach((emp, i) => {
+        console.log(`  ${i + 1}. "${emp.name}" - "${emp.administration}" (length: ${emp.administration.length})`);
+      });
+    } else {
+      console.log("❌ No results found");
+      
+      // اطبع كل الإدارات المتاحة للمساعدة في التشخيص
+      const allAdmins = await prisma.employee.findMany({
+        select: { administration: true },
+        distinct: ['administration']
+      });
+      console.log("📋 Available administrations:", 
+        allAdmins.map(a => `"${a.administration}" (${a.administration.length})`
+      ));
+    }
+
     return { success: true, employees };
   } catch (error) {
-    console.error("Error searching employees:", error);
-    return { success: false, error: "حدث خطأ أثناء البحث" };
+    console.error("❌ Error searching employees:", error);
+    return { success: false, error: "حدث خطأ أثناء البحث", employees: [] };
   }
 };
 
@@ -216,7 +285,6 @@ export const deleteEmployee = async (id: string) => {
       where: { id },
     });
 
-    // Revalidate relevant paths (single param each)
     revalidatePath("/employees");
     revalidatePath("/");
     return { success: true };
@@ -247,7 +315,6 @@ export const getEmployeeById = async (id: string) => {
   }
 };
 
-// إضافة الـ functions الجديدة
 export const updateEmployeeNotes = async (id: string, notes: string) => {
   try {
     const employee = await prisma.employee.update({
