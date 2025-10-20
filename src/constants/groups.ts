@@ -19,3 +19,4 @@ export const ADMINISTRATIONS_AND_REGIONS = [
   "منطقة تعمير القنطرة شرق",
   "منطقة تعمير السويس",
 ];
+
