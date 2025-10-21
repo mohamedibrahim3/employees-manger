@@ -74,7 +74,9 @@ interface EmployeeData {
     residenceLocation: string | null;
     notes?: string | null;
   }[];
-  jobPosition?: string; // الحقل الجديد
+  jobPosition?: string;
+  educationalDegree?: string; // الحقل الجديد
+  functionalDegree?: string; // الحقل الجديد
 }
 
 type FormData = z.infer<typeof createEmployeeFormSchema>;
@@ -195,6 +197,20 @@ const EmployeeForm = ({
           ? (val as FormData["jobPosition"])
           : "";
       })(),
+      educationalDegree: (() => {
+        const val = employee?.educationalDegree;
+        const allowed = ["DOCTORATE", "MASTERS", "BACHELORS", "GENERAL_SECONDARY", "AZHARI_SECONDARY", "ABOVE_AVERAGE", "AVERAGE", "PREPARATORY", "PRIMARY", "LITERACY", "NONE"] as const;
+        return val && (allowed as readonly string[]).includes(val)
+          ? (val as FormData["educationalDegree"])
+          : "";
+      })(),
+      functionalDegree: (() => {
+        const val = employee?.functionalDegree;
+        const allowed = ["FIRST_DEPUTY_MINISTER", "DEPUTY_MINISTER", "GENERAL_MANAGER", "DEPARTMENT_MANAGER", "DEPARTMENT_HEAD", "FIRST_A", "FIRST_B", "SECOND_A", "SECOND_B", "THIRD_A", "THIRD_B", "THIRD_C", "FOURTH_A", "FOURTH_B", "FOURTH_C", "FIFTH_A", "FIFTH_B", "FIFTH_C", "SIXTH_A", "SIXTH_B", "SIXTH_C"] as const;
+        return val && (allowed as readonly string[]).includes(val)
+          ? (val as FormData["functionalDegree"])
+          : "";
+      })(),
     },
   });
 
@@ -234,7 +250,9 @@ const EmployeeForm = ({
           residenceLocation: rel.residenceLocation || "",
           notes: rel.notes || undefined,
         })),
-        jobPosition: values.jobPosition || undefined, // الحقل الجديد
+        jobPosition: values.jobPosition || undefined,
+        educationalDegree: values.educationalDegree || undefined, 
+        functionalDegree: values.functionalDegree || undefined,
       };
 
       let result;
@@ -307,7 +325,6 @@ const EmployeeForm = ({
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6 space-y-8">
-            {/* قسم المعلومات الشخصية الأساسية */}
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-4">
                 <User className="h-5 w-5 text-gray-500" />
@@ -506,6 +523,76 @@ const EmployeeForm = ({
                           <SelectItem value="EXECUTIVE_SUPERVISOR">مشرف تنفيذ</SelectItem>
                           <SelectItem value="WRITER">كاتب</SelectItem>
                           <SelectItem value="WORKER">عامل</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="educationalDegree"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 font-medium">الدرجة العلمية</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="border-gray-300 focus:border-blue-500">
+                            <SelectValue placeholder="اختر الدرجة العلمية" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="DOCTORATE">دكتوراة</SelectItem>
+                          <SelectItem value="MASTERS">ماجستير</SelectItem>
+                          <SelectItem value="BACHELORS">بكالوريوس</SelectItem>
+                          <SelectItem value="GENERAL_SECONDARY">ثانوية عامة</SelectItem>
+                          <SelectItem value="AZHARI_SECONDARY">ثانوية أزهرية</SelectItem>
+                          <SelectItem value="ABOVE_AVERAGE">مؤهل فوق متوسط</SelectItem>
+                          <SelectItem value="AVERAGE">مؤهل متوسط</SelectItem>
+                          <SelectItem value="PREPARATORY">اعدادية</SelectItem>
+                          <SelectItem value="PRIMARY">ابتدائية</SelectItem>
+                          <SelectItem value="LITERACY">محو أمية</SelectItem>
+                          <SelectItem value="NONE">بدون</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="functionalDegree"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 font-medium">الدرجة الوظيفية</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="border-gray-300 focus:border-blue-500">
+                            <SelectValue placeholder="اختر الدرجة الوظيفية" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="FIRST_DEPUTY_MINISTER">وكيل أول وزارة</SelectItem>
+                          <SelectItem value="DEPUTY_MINISTER">وكيل وزارة</SelectItem>
+                          <SelectItem value="GENERAL_MANAGER">مدير عام</SelectItem>
+                          <SelectItem value="DEPARTMENT_MANAGER">مدير إدارة</SelectItem>
+                          <SelectItem value="DEPARTMENT_HEAD">رئيس قسم</SelectItem>
+                          <SelectItem value="FIRST_A">أولى أ</SelectItem>
+                          <SelectItem value="FIRST_B">أولى ب</SelectItem>
+                          <SelectItem value="SECOND_A">ثانية أ</SelectItem>
+                          <SelectItem value="SECOND_B">ثانية ب</SelectItem>
+                          <SelectItem value="THIRD_A">ثالثة أ</SelectItem>
+                          <SelectItem value="THIRD_B">ثالثة ب</SelectItem>
+                          <SelectItem value="THIRD_C">ثالثة ج</SelectItem>
+                          <SelectItem value="FOURTH_A">رابعة أ</SelectItem>
+                          <SelectItem value="FOURTH_B">رابعة ب</SelectItem>
+                          <SelectItem value="FOURTH_C">رابعة ج</SelectItem>
+                          <SelectItem value="FIFTH_A">خامسة أ</SelectItem>
+                          <SelectItem value="FIFTH_B">خامسة ب</SelectItem>
+                          <SelectItem value="FIFTH_C">خامسة ج</SelectItem>
+                          <SelectItem value="SIXTH_A">سادسة أ</SelectItem>
+                          <SelectItem value="SIXTH_B">سادسة ب</SelectItem>
+                          <SelectItem value="SIXTH_C">سادسة ج</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

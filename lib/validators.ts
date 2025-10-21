@@ -6,7 +6,6 @@ export const signInSchema = z.object({
 });
 
 export const createEmployeeFormSchema = z.object({
-  // ✅ إجباري فقط
   name: z.string().min(2, "الاسم مطلوب"),
   birthDate: z.string().min(1, "تاريخ الميلاد مطلوب"),
   nationalId: z.string().min(1, "رقم البطاقة مطلوب"),
@@ -14,8 +13,6 @@ export const createEmployeeFormSchema = z.object({
   hiringDate: z.string().min(1, "تاريخ التعيين مطلوب"),
   hiringType: z.string().min(1, "نوع التوظيف مطلوب"),
   administration: z.string().min(1, "الإدارة مطلوبة"),
-  
-  // ✅ اختياري - يقبل empty string
   nickName: z.string().default(""),
   profession: z.string().default(""),
   residenceLocation: z.string().default(""),
@@ -29,13 +26,13 @@ export const createEmployeeFormSchema = z.object({
   frontIdCard: z.any().optional(),
   backIdCard: z.any().optional(),
   jobPosition: z.union([z.enum(["ENGINEER", "ACCOUNTANT", "ADMINISTRATIVE", "EXECUTIVE_SUPERVISOR", "WRITER", "WORKER"]), z.literal("")]).default(""),
-  
-  // ✅ العلاقات - إجباري نوع + اسم فقط
+  educationalDegree: z.union([z.enum(["DOCTORATE", "MASTERS", "BACHELORS", "GENERAL_SECONDARY", "AZHARI_SECONDARY", "ABOVE_AVERAGE", "AVERAGE", "PREPARATORY", "PRIMARY", "LITERACY", "NONE"]), z.literal("")]).default(""),
+  functionalDegree: z.union([z.enum(["FIRST_DEPUTY_MINISTER", "DEPUTY_MINISTER", "GENERAL_MANAGER", "DEPARTMENT_MANAGER", "DEPARTMENT_HEAD", "FIRST_A", "FIRST_B", "SECOND_A", "SECOND_B", "THIRD_A", "THIRD_B", "THIRD_C", "FOURTH_A", "FOURTH_B", "FOURTH_C", "FIFTH_A", "FIFTH_B", "FIFTH_C", "SIXTH_A", "SIXTH_B", "SIXTH_C"]), z.literal("")]).default(""),
+
   relationships: z.array(
     z.object({
       relationshipType: z.string().min(1, "نوع العلاقة مطلوب"),
       name: z.string().min(1, "الاسم مطلوب"),
-      // ✅ باقي الحقول اختيارية
       nationalId: z.string().default(""),
       birthDate: z.string().default(""),
       birthPlace: z.string().default(""),
@@ -48,7 +45,6 @@ export const createEmployeeFormSchema = z.object({
 });
 
 export const createEmployeeApiSchema = z.object({
-  // ✅ إجباري فقط
   name: z.string().min(2, "الاسم مطلوب"),
   birthDate: z.date(),
   nationalId: z.string().min(1, "رقم البطاقة مطلوب"),
@@ -56,8 +52,6 @@ export const createEmployeeApiSchema = z.object({
   hiringDate: z.date(),
   hiringType: z.string().min(1, "نوع التوظيف مطلوب"),
   administration: z.string().min(1, "الإدارة مطلوبة"),
-  
-  // ✅ اختياري - Prisma يحتاج null بدلاً من undefined
   nickName: z.string().nullable().default(null).transform(val => val || ""),
   profession: z.string().nullable().default(null).transform(val => val || ""),
   residenceLocation: z.string().nullable().default(null).transform(val => val || ""),
@@ -70,8 +64,6 @@ export const createEmployeeApiSchema = z.object({
   personalImageUrl: z.string().nullable().default(null),
   idFrontImageUrl: z.string().nullable().default(null),
   idBackImageUrl: z.string().nullable().default(null),
-  
-  // ✅ العلاقات
   relationships: z.array(
     z.object({
       relationshipType: z.string().min(1, "نوع العلاقة مطلوب"),
@@ -85,9 +77,9 @@ export const createEmployeeApiSchema = z.object({
       notes: z.string().nullable().default(null).transform(val => val || ""),
     })
   ).default([]),
-
-  // الحقل الجديد
   jobPosition: z.enum(["ENGINEER", "ACCOUNTANT", "ADMINISTRATIVE", "EXECUTIVE_SUPERVISOR", "WRITER", "WORKER"]).nullable().default(null),
+  educationalDegree: z.enum(["DOCTORATE", "MASTERS", "BACHELORS", "GENERAL_SECONDARY", "AZHARI_SECONDARY", "ABOVE_AVERAGE", "AVERAGE", "PREPARATORY", "PRIMARY", "LITERACY", "NONE"]).nullable().default(null),
+  functionalDegree: z.enum(["FIRST_DEPUTY_MINISTER", "DEPUTY_MINISTER", "GENERAL_MANAGER", "DEPARTMENT_MANAGER", "DEPARTMENT_HEAD", "FIRST_A", "FIRST_B", "SECOND_A", "SECOND_B", "THIRD_A", "THIRD_B", "THIRD_C", "FOURTH_A", "FOURTH_B", "FOURTH_C", "FIFTH_A", "FIFTH_B", "FIFTH_C", "SIXTH_A", "SIXTH_B", "SIXTH_C"]).nullable().default(null),
 });
 
 export const employeeSchema = z.object({
@@ -127,6 +119,8 @@ export const employeeSchema = z.object({
     })
   ).optional().default([]),
   jobPosition: z.enum(["ENGINEER", "ACCOUNTANT", "ADMINISTRATIVE", "EXECUTIVE_SUPERVISOR", "WRITER", "WORKER"]).optional(),
+  educationalDegree: z.enum(["DOCTORATE", "MASTERS", "BACHELORS", "GENERAL_SECONDARY", "AZHARI_SECONDARY", "ABOVE_AVERAGE", "AVERAGE", "PREPARATORY", "PRIMARY", "LITERACY", "NONE"]).optional(),
+  functionalDegree: z.enum(["FIRST_DEPUTY_MINISTER", "DEPUTY_MINISTER", "GENERAL_MANAGER", "DEPARTMENT_MANAGER", "DEPARTMENT_HEAD", "FIRST_A", "FIRST_B", "SECOND_A", "SECOND_B", "THIRD_A", "THIRD_B", "THIRD_C", "FOURTH_A", "FOURTH_B", "FOURTH_C", "FIFTH_A", "FIFTH_B", "FIFTH_C", "SIXTH_A", "SIXTH_B", "SIXTH_C"]).optional(),
 });
 
 export type Employee = z.infer<typeof employeeSchema>;
@@ -159,9 +153,9 @@ export function transformEmployeeFormToApi(
       residenceLocation: r.residenceLocation || "",
       notes: r.notes || "",
     })) ?? [],
-
-    // الحقل الجديد
     jobPosition: data.jobPosition || null,
+    educationalDegree: data.educationalDegree || null,
+    functionalDegree: data.functionalDegree || null,
   };
 }
 

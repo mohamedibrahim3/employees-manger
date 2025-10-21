@@ -41,23 +41,25 @@ export async function createEmployee(
       personalImageUrl: validatedData.personalImageUrl || null,
       idFrontImageUrl: validatedData.idFrontImageUrl || null,
       idBackImageUrl: validatedData.idBackImageUrl || null,
-      jobPosition: validatedData.jobPosition || null,  // الحقل الجديد
+      jobPosition: validatedData.jobPosition || null,
+      educationalDegree: validatedData.educationalDegree || null, // الحقل الجديد
+      functionalDegree: validatedData.functionalDegree || null, // الحقل الجديد
     };
 
-    let relationships: Relationship[] = [];
-    if (validatedData.relationships && validatedData.relationships.length > 0) {
-      relationships = validatedData.relationships.map((rel) => ({
-        relationshipType: rel.relationshipType,
-        name: rel.name,
-        nationalId: rel.nationalId || null,
-        birthDate: rel.birthDate ? new Date(rel.birthDate) : null,
-        birthPlace: rel.birthPlace || undefined,
-        profession: rel.profession || undefined,
-        spouseName: rel.spouseName || undefined,
-        residenceLocation: rel.residenceLocation || "",
-        notes: rel.notes || undefined,
-      }));
-    }
+let relationships: Relationship[] = [];
+if (validatedData.relationships && validatedData.relationships.length > 0) {
+  relationships = validatedData.relationships.map((rel) => ({
+    relationshipType: rel.relationshipType,
+    name: rel.name,
+    nationalId: rel.nationalId || null,
+    birthDate: rel.birthDate ? new Date(rel.birthDate) : null,
+    birthPlace: rel.birthPlace || undefined,
+    profession: rel.profession || undefined,
+    spouseName: rel.spouseName || undefined,
+    residenceLocation: rel.residenceLocation || "",
+    notes: rel.notes || undefined,
+  }));
+}
 
     const employee = await prisma.employee.create({
       data: empData,
@@ -91,10 +93,8 @@ export const updateEmployee = async (
   data: z.infer<typeof createEmployeeApiSchema>
 ) => {
   try {
-    const validatedData = createEmployeeApiSchema.parse(data);
-
-    // ✅ حذف حقل notes من البيانات لتجنب الكتابة فوقه
-    const empData = {
+    const validatedData = createEmployeeApiSchema.parse(data);                                
+    const empData = {                                                                     
       name: validatedData.name,
       nickName: validatedData.nickName || "",
       profession: validatedData.profession || "",
@@ -108,11 +108,12 @@ export const updateEmployee = async (
       administration: validatedData.administration,
       actualWork: validatedData.actualWork || "",
       phoneNumber: validatedData.phoneNumber || "",
-      // ❌ تم حذف سطر notes من هنا لحماية الملاحظات من المسح
       personalImageUrl: validatedData.personalImageUrl || null,
       idFrontImageUrl: validatedData.idFrontImageUrl || null,
       idBackImageUrl: validatedData.idBackImageUrl || null,
-      jobPosition: validatedData.jobPosition || null,  // الحقل الجديد
+      jobPosition: validatedData.jobPosition || null,
+      educationalDegree: validatedData.educationalDegree || null,
+      functionalDegree: validatedData.functionalDegree || null,
     };
 
     let relationships: Relationship[] = [];

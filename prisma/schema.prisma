@@ -91,7 +91,9 @@ model Employee {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  jobPosition JobPosition? // الحقل الجديد لالوظيفة
+  jobPosition JobPosition? // الحقل للوظيفة
+  educationalDegree EducationalDegree? // الحقل الجديد للدرجة العلمية
+  functionalDegree FunctionalDegree? // الحقل الجديد للدرجة الوظيفية
 
   @@map("employees")
 }
@@ -122,4 +124,42 @@ enum JobPosition {
   EXECUTIVE_SUPERVISOR // مشرف تنفيذ
   WRITER       // كاتب
   WORKER       // عامل
+}
+
+enum EducationalDegree {
+  DOCTORATE // دكتوراة
+  MASTERS // ماجستير
+  BACHELORS // بكالوريوس
+  GENERAL_SECONDARY // ثانوية عامة
+  AZHARI_SECONDARY // ثانوية أزهرية
+  ABOVE_AVERAGE // مؤهل فوق متوسط
+  AVERAGE // مؤهل متوسط
+  PREPARATORY // اعدادية
+  PRIMARY // ابتدائية
+  LITERACY // محو أمية
+  NONE // بدون
+}
+
+enum FunctionalDegree {
+  FIRST_DEPUTY_MINISTER // وكيل أول وزارة
+  DEPUTY_MINISTER // وكيل وزارة
+  GENERAL_MANAGER // مدير عام
+  DEPARTMENT_MANAGER // مدير إدارة
+  DEPARTMENT_HEAD // رئيس قسم
+  FIRST_A // أولى أ
+  FIRST_B // أولى ب
+  SECOND_A // ثانية أ
+  SECOND_B // ثانية ب
+  THIRD_A // ثالثة أ
+  THIRD_B // ثالثة ب
+  THIRD_C // ثالثة ج
+  FOURTH_A // رابعة أ
+  FOURTH_B // رابعة ب
+  FOURTH_C // رابعة ج
+  FIFTH_A // خامسة أ
+  FIFTH_B // خامسة ب
+  FIFTH_C // خامسة ج
+  SIXTH_A // سادسة أ
+  SIXTH_B // سادسة ب
+  SIXTH_C // سادسة ج
 }

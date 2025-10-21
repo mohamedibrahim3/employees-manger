@@ -27,7 +27,7 @@ const RELATIONSHIP_LABELS: Record<string, string> = {
   sister: "بيانات الأخت",
 };
 
-const JOB_POSITION_LABELS: Record<string, string> = {  // الـ function الجديدة للترجمة
+const JOB_POSITION_LABELS: Record<string, string> = {
   ENGINEER: "مهندس",
   ACCOUNTANT: "محاسب",
   ADMINISTRATIVE: "إداري",
@@ -36,9 +36,57 @@ const JOB_POSITION_LABELS: Record<string, string> = {  // الـ function الج
   WORKER: "عامل",
 };
 
+const EDUCATIONAL_DEGREE_LABELS: Record<string, string> = {
+  DOCTORATE: "دكتوراة",
+  MASTERS: "ماجستير",
+  BACHELORS: "بكالوريوس",
+  GENERAL_SECONDARY: "ثانوية عامة",
+  AZHARI_SECONDARY: "ثانوية أزهرية",
+  ABOVE_AVERAGE: "مؤهل فوق متوسط",
+  AVERAGE: "مؤهل متوسط",
+  PREPARATORY: "اعدادية",
+  PRIMARY: "ابتدائية",
+  LITERACY: "محو أمية",
+  NONE: "بدون",
+};
+
+const FUNCTIONAL_DEGREE_LABELS: Record<string, string> = {
+  FIRST_DEPUTY_MINISTER: "وكيل أول وزارة",
+  DEPUTY_MINISTER: "وكيل وزارة",
+  GENERAL_MANAGER: "مدير عام",
+  DEPARTMENT_MANAGER: "مدير إدارة",
+  DEPARTMENT_HEAD: "رئيس قسم",
+  FIRST_A: "أولى أ",
+  FIRST_B: "أولى ب",
+  SECOND_A: "ثانية أ",
+  SECOND_B: "ثانية ب",
+  THIRD_A: "ثالثة أ",
+  THIRD_B: "ثالثة ب",
+  THIRD_C: "ثالثة ج",
+  FOURTH_A: "رابعة أ",
+  FOURTH_B: "رابعة ب",
+  FOURTH_C: "رابعة ج",
+  FIFTH_A: "خامسة أ",
+  FIFTH_B: "خامسة ب",
+  FIFTH_C: "خامسة ج",
+  SIXTH_A: "سادسة أ",
+  SIXTH_B: "سادسة ب",
+  SIXTH_C: "سادسة ج",
+};
+
 const getJobPositionLabel = (jobPosition: string | null | undefined) => {
   if (!jobPosition) return "-";
   return JOB_POSITION_LABELS[jobPosition] ?? jobPosition;
+};
+
+const getEducationalDegreeLabel = (educationalDegree: string | null | undefined) => {
+  if (!educationalDegree) return "-";
+  return EDUCATIONAL_DEGREE_LABELS[educationalDegree] ?? educationalDegree;
+};
+
+const getFunctionalDegreeLabel = (functionalDegree: string | null | undefined) => {
+  if (!functionalDegree) return "-";
+  return FUNCTIONAL_DEGREE_LABELS[functionalDegree] ?? functionalDegree;
 };
 
 const EmployeeDetailsPage = async (props: {
@@ -188,6 +236,18 @@ const EmployeeDetailsPage = async (props: {
                     الوظيفة
                   </td>
                   <td className="p-3">{getJobPositionLabel(employee.jobPosition)}</td>
+                </tr>
+                <tr className="border-b border-gray-200">
+                  <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
+                    الدرجة العلمية
+                  </td>
+                  <td className="p-3">{getEducationalDegreeLabel(employee.educationalDegree)}</td>
+                </tr>
+                <tr className="border-b border-gray-200">
+                  <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
+                    الدرجة الوظيفية
+                  </td>
+                  <td className="p-3">{getFunctionalDegreeLabel(employee.functionalDegree)}</td>
                 </tr>
                 <tr className="border-b border-gray-200">
                   <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
