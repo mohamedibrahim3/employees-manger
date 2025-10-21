@@ -86,6 +86,7 @@ model Employee {
 
   // Relationships
   relationships Relationship[] // العلاقات
+  penalties     Penalty[]     // الجزاءات (New)
 
   // Metadata
   createdAt DateTime @default(now())
@@ -115,6 +116,22 @@ model Relationship {
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@map("relationships")
+}
+
+model Penalty {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId  String   @db.Uuid
+  date        DateTime
+  type        String   // نوع الجزاء (e.g., "إنذار", "خصم يوم")
+  description String   @db.Text
+  attachments String?  // Optional JSON string of attachment URLs
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("penalties")
 }
 
 enum JobPosition {

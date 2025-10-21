@@ -1,9 +1,5 @@
 import { getEmployeeById } from "@/lib/actions/employee.actions";
 import { unstable_noStore as noStore } from "next/cache";
-
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 import React from "react";
 import {
   Card,
@@ -16,6 +12,8 @@ import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { formateHiringType, formateMaritalStatus } from "@/lib/utils";
 import EmployeeImages from "@/components/EmployeeImages";
+import PenaltiesModal from "@/components/PenaltiesModal";
+import PenaltyDeleteButton from "@/components/PenaltyDeleteButton";
 
 const RELATIONSHIP_LABELS: Record<string, string> = {
   father: "بيانات الأب",
@@ -74,6 +72,14 @@ const FUNCTIONAL_DEGREE_LABELS: Record<string, string> = {
   SIXTH_C: "سادسة ج",
 };
 
+const PENALTY_TYPE_LABELS: Record<string, string> = {
+  WARNING: "إنذار",
+  DEDUCTION: "خصم يوم",
+  SUSPENSION: "إيقاف",
+  NOTE: "لفت نظر",
+  TERMINATION: "فصل",
+};
+
 const getJobPositionLabel = (jobPosition: string | null | undefined) => {
   if (!jobPosition) return "-";
   return JOB_POSITION_LABELS[jobPosition] ?? jobPosition;
@@ -87,6 +93,11 @@ const getEducationalDegreeLabel = (educationalDegree: string | null | undefined)
 const getFunctionalDegreeLabel = (functionalDegree: string | null | undefined) => {
   if (!functionalDegree) return "-";
   return FUNCTIONAL_DEGREE_LABELS[functionalDegree] ?? functionalDegree;
+};
+
+const getPenaltyTypeLabel = (penaltyType: string | null | undefined) => {
+  if (!penaltyType) return "-";
+  return PENALTY_TYPE_LABELS[penaltyType] ?? penaltyType;
 };
 
 const EmployeeDetailsPage = async (props: {
@@ -434,6 +445,107 @@ const EmployeeDetailsPage = async (props: {
             </div>
           </div>
         )}
+
+        {/* Penalties Section */}
+        <div className="mt-8">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-xl font-medium text-gray-800 bg-gray-100 p-3 rounded-t-xl">
+              الجزاءات
+            </h2>
+            <PenaltiesModal
+              employeeId={employee.id}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-4 py-2 rounded-xl transition-all font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1 duration-300"
+            />
+          </div>
+          {employee.penalties && employee.penalties.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-gray-200 text-base">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-200 p-3 text-center font-medium">
+                      التاريخ
+                    </th>
+                    <th className="border border-gray-200 p-3 text-center font-medium">
+                      نوع الجزاء
+                    </th>
+                    <th className="border border-gray-200 p-3 text-center font-medium">
+                      الوصف
+                    </th>
+                    <th className="border border-gray-200 p-3 text-center font-medium">
+                      المرفقات
+                    </th>
+                    <th className="border border-gray-200 p-3 text-center font-medium">
+                      الإجراءات
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {employee.penalties
+                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                    .map((penalty, index: number) => (
+                      <tr
+                        key={penalty.id}
+                        className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                      >
+                        <td className="border border-gray-200 p-3 text-center">
+                          {new Date(penalty.date).toLocaleDateString("ar-EG-u-nu-arab", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                          })}
+                        </td>
+                        <td className="border border-gray-200 p-3 text-center">
+                          {getPenaltyTypeLabel(penalty.type)}
+                        </td>
+                        <td className="border border-gray-200 p-3">
+                          {penalty.description}
+                        </td>
+                        <td className="border border-gray-200 p-3 text-center">
+                          {penalty.attachments ? (
+                            <a
+                              href={penalty.attachments}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              عرض المرفق
+                            </a>
+                          ) : (
+                            "-"
+                          )}
+                        </td>
+                        <td className="border border-gray-200 p-3 text-center">
+                          <div className="flex gap-2 justify-center">
+                            <PenaltiesModal
+                              employeeId={employee.id}
+                              penalty={{
+                                id: penalty.id,
+                                date: new Date(penalty.date).toISOString().split("T")[0],
+                                type: penalty.type,
+                                description: penalty.description,
+                                attachments: penalty.attachments || undefined,
+                              }}
+                              className="text-blue-600 hover:underline"
+                            />
+                            <PenaltyDeleteButton 
+                              penaltyId={penalty.id!} 
+                              employeeId={employee.id} 
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="border border-gray-200 p-8 text-center bg-gray-50">
+              <p className="text-gray-600 text-base">
+                لا توجد جزاءات مسجلة
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

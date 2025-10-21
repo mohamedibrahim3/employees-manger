@@ -17,6 +17,13 @@ interface Relationship {
   notes?: string;
 }
 
+interface Penalty {
+  date: Date;
+  type: string;
+  description: string;
+  attachments?: string | null;
+}
+
 export async function createEmployee(
   data: z.infer<typeof createEmployeeApiSchema>
 ) {
@@ -42,24 +49,34 @@ export async function createEmployee(
       idFrontImageUrl: validatedData.idFrontImageUrl || null,
       idBackImageUrl: validatedData.idBackImageUrl || null,
       jobPosition: validatedData.jobPosition || null,
-      educationalDegree: validatedData.educationalDegree || null, // الحقل الجديد
-      functionalDegree: validatedData.functionalDegree || null, // الحقل الجديد
+      educationalDegree: validatedData.educationalDegree || null,
+      functionalDegree: validatedData.functionalDegree || null,
     };
 
-let relationships: Relationship[] = [];
-if (validatedData.relationships && validatedData.relationships.length > 0) {
-  relationships = validatedData.relationships.map((rel) => ({
-    relationshipType: rel.relationshipType,
-    name: rel.name,
-    nationalId: rel.nationalId || null,
-    birthDate: rel.birthDate ? new Date(rel.birthDate) : null,
-    birthPlace: rel.birthPlace || undefined,
-    profession: rel.profession || undefined,
-    spouseName: rel.spouseName || undefined,
-    residenceLocation: rel.residenceLocation || "",
-    notes: rel.notes || undefined,
-  }));
-}
+    let relationships: Relationship[] = [];
+    if (validatedData.relationships && validatedData.relationships.length > 0) {
+      relationships = validatedData.relationships.map((rel) => ({
+        relationshipType: rel.relationshipType,
+        name: rel.name,
+        nationalId: rel.nationalId || null,
+        birthDate: rel.birthDate ? new Date(rel.birthDate) : null,
+        birthPlace: rel.birthPlace || undefined,
+        profession: rel.profession || undefined,
+        spouseName: rel.spouseName || undefined,
+        residenceLocation: rel.residenceLocation || "",
+        notes: rel.notes || undefined,
+      }));
+    }
+
+    let penalties: Penalty[] = [];
+    if (validatedData.penalties && validatedData.penalties.length > 0) {
+      penalties = validatedData.penalties.map((pen) => ({
+        date: pen.date,
+        type: pen.type,
+        description: pen.description,
+        attachments: pen.attachments || null,
+      }));
+    }
 
     const employee = await prisma.employee.create({
       data: empData,
@@ -70,6 +87,15 @@ if (validatedData.relationships && validatedData.relationships.length > 0) {
         data: relationships.map((rel: Relationship) => ({
           employeeId: employee.id,
           ...rel,
+        })),
+      });
+    }
+
+    if (penalties.length > 0) {
+      await prisma.penalty.createMany({
+        data: penalties.map((pen: Penalty) => ({
+          employeeId: employee.id,
+          ...pen,
         })),
       });
     }
@@ -93,8 +119,8 @@ export const updateEmployee = async (
   data: z.infer<typeof createEmployeeApiSchema>
 ) => {
   try {
-    const validatedData = createEmployeeApiSchema.parse(data);                                
-    const empData = {                                                                     
+    const validatedData = createEmployeeApiSchema.parse(data);
+    const empData = {
       name: validatedData.name,
       nickName: validatedData.nickName || "",
       profession: validatedData.profession || "",
@@ -131,6 +157,16 @@ export const updateEmployee = async (
       }));
     }
 
+    let penalties: Penalty[] = [];
+    if (validatedData.penalties && validatedData.penalties.length > 0) {
+      penalties = validatedData.penalties.map((pen) => ({
+        date: pen.date,
+        type: pen.type,
+        description: pen.description,
+        attachments: pen.attachments || null,
+      }));
+    }
+
     const employee = await prisma.employee.update({
       where: { id },
       data: empData,
@@ -145,6 +181,19 @@ export const updateEmployee = async (
         data: relationships.map((rel) => ({
           employeeId: employee.id,
           ...rel,
+        })),
+      });
+    }
+
+    if (penalties.length > 0) {
+      await prisma.penalty.deleteMany({
+        where: { employeeId: id },
+      });
+
+      await prisma.penalty.createMany({
+        data: penalties.map((pen) => ({
+          employeeId: employee.id,
+          ...pen,
         })),
       });
     }
@@ -172,6 +221,7 @@ export const getEmployees = async () => {
       },
       include: {
         relationships: true,
+        penalties: true,
       },
     });
 
@@ -182,24 +232,21 @@ export const getEmployees = async () => {
   }
 };
 
-// ✅ الدالة المعدلة - مع تنظيف أقوى
 export const getEmployeesBySearch = async (name: string, administration: string) => {
   noStore();
   try {
-    // تنظيف قوي للمدخلات - إزالة كل المسافات الزائدة والحروف الخفية
     const cleanName = name?.replace(/\s+/g, ' ').trim() || "";
     const cleanAdmin = administration?.replace(/\s+/g, ' ').trim() || "";
 
-    console.log("🔍 Search Input:", { 
-      rawName: name, 
+    console.log("🔍 Search Input:", {
+      rawName: name,
       rawAdmin: administration,
-      cleanName, 
+      cleanName,
       cleanAdmin,
       nameLength: cleanName.length,
       adminLength: cleanAdmin.length
     });
 
-    // بناء شرط البحث
     const whereClause: any = {};
 
     if (cleanName) {
@@ -210,7 +257,6 @@ export const getEmployeesBySearch = async (name: string, administration: string)
     }
 
     if (cleanAdmin) {
-      // نجرب الاتنين: exact match و contains
       whereClause.administration = cleanAdmin;
     }
 
@@ -223,12 +269,12 @@ export const getEmployeesBySearch = async (name: string, administration: string)
       },
       include: {
         relationships: true,
+        penalties: true,
       },
     });
 
     console.log(`✅ Found ${employees.length} employees with exact match`);
 
-    // لو مش لاقي نتائج بـ exact match، جرب contains
     if (employees.length === 0 && cleanAdmin) {
       console.log("🔄 Trying with contains instead...");
       
@@ -251,13 +297,13 @@ export const getEmployeesBySearch = async (name: string, administration: string)
         },
         include: {
           relationships: true,
+          penalties: true,
         },
       });
 
       console.log(`✅ Found ${employees.length} employees with contains`);
     }
-    
-    // اطبع عينة من النتائج
+
     if (employees.length > 0) {
       console.log("📋 Sample Results:");
       employees.slice(0, 3).forEach((emp, i) => {
@@ -266,12 +312,11 @@ export const getEmployeesBySearch = async (name: string, administration: string)
     } else {
       console.log("❌ No results found");
       
-      // اطبع كل الإدارات المتاحة للمساعدة في التشخيص
       const allAdmins = await prisma.employee.findMany({
         select: { administration: true },
         distinct: ['administration']
       });
-      console.log("📋 Available administrations:", 
+      console.log("📋 Available administrations:",
         allAdmins.map(a => `"${a.administration}" (${a.administration.length})`)
       );
     }
@@ -305,6 +350,7 @@ export const getEmployeeById = async (id: string) => {
       where: { id },
       include: {
         relationships: true,
+        penalties: true,
       },
     });
 
@@ -347,3 +393,78 @@ export const getEmployeeNotes = async (id: string) => {
     return { success: false, error: "خطأ في جلب الملاحظات" };
   }
 };
+
+// New: Penalty-specific actions
+export async function createPenalty(employeeId: string, data: { date: string; type: string; description: string; attachments?: string }) {
+  try {
+    const validatedData = z.object({
+      date: z.string().min(1, "التاريخ مطلوب"),
+      type: z.string().min(1, "نوع الجزاء مطلوب"),
+      description: z.string().min(1, "الوصف مطلوب"),
+      attachments: z.string().optional(),
+    }).parse(data);
+
+    const penalty = await prisma.penalty.create({
+      data: {
+        employeeId,
+        date: new Date(validatedData.date),
+        type: validatedData.type,
+        description: validatedData.description,
+        attachments: validatedData.attachments || null,
+      },
+    });
+
+    revalidatePath(`/employees/${employeeId}`);
+    return { success: true, penalty };
+  } catch (error) {
+    console.error("Error creating penalty:", error);
+    if (error instanceof z.ZodError) {
+      return { success: false, error: "بيانات غير صحيحة" };
+    }
+    return { success: false, error: "حدث خطأ أثناء إنشاء الجزاء" };
+  }
+}
+
+export async function updatePenalty(penaltyId: string, employeeId: string, data: { date: string; type: string; description: string; attachments?: string }) {
+  try {
+    const validatedData = z.object({
+      date: z.string().min(1, "التاريخ مطلوب"),
+      type: z.string().min(1, "نوع الجزاء مطلوب"),
+      description: z.string().min(1, "الوصف مطلوب"),
+      attachments: z.string().optional(),
+    }).parse(data);
+
+    const penalty = await prisma.penalty.update({
+      where: { id: penaltyId },
+      data: {
+        date: new Date(validatedData.date),
+        type: validatedData.type,
+        description: validatedData.description,
+        attachments: validatedData.attachments || null,
+      },
+    });
+
+    revalidatePath(`/employees/${employeeId}`);
+    return { success: true, penalty };
+  } catch (error) {
+    console.error("Error updating penalty:", error);
+    if (error instanceof z.ZodError) {
+      return { success: false, error: "بيانات غير صحيحة" };
+    }
+    return { success: false, error: "حدث خطأ أثناء تحديث الجزاء" };
+  }
+}
+
+export async function deletePenalty(penaltyId: string, employeeId: string) {
+  try {
+    await prisma.penalty.delete({
+      where: { id: penaltyId },
+    });
+
+    revalidatePath(`/employees/${employeeId}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting penalty:", error);
+    return { success: false, error: "حدث خطأ أثناء حذف الجزاء" };
+  }
+}
