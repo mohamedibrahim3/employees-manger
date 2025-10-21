@@ -29,7 +29,7 @@ interface PenaltiesModalProps {
 
 const PENALTY_TYPES = [
   { value: "WARNING", label: "إنذار" },
-  { value: "DEDUCTION", label: "خصم يوم" },
+  { value: "DEDUCTION", label: "خصم" },
   { value: "SUSPENSION", label: "إيقاف" },
   { value: "NOTE", label: "لفت نظر" },
   { value: "TERMINATION", label: "فصل" },

@@ -74,7 +74,7 @@ const FUNCTIONAL_DEGREE_LABELS: Record<string, string> = {
 
 const PENALTY_TYPE_LABELS: Record<string, string> = {
   WARNING: "إنذار",
-  DEDUCTION: "خصم يوم",
+  DEDUCTION: "خصم",
   SUSPENSION: "إيقاف",
   NOTE: "لفت نظر",
   TERMINATION: "فصل",

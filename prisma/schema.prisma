@@ -122,7 +122,7 @@ model Penalty {
   id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   employeeId  String   @db.Uuid
   date        DateTime
-  type        String   // نوع الجزاء (e.g., "إنذار", "خصم يوم")
+  type        String   // نوع الجزاء (e.g., "إنذار", "خصم")
   description String   @db.Text
   attachments String?  // Optional JSON string of attachment URLs
 
