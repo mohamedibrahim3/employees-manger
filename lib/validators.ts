@@ -43,11 +43,20 @@ export const createEmployeeFormSchema = z.object({
     })
   ).default([]),
 
-  penalties: z.array(  // New: Penalties array for form
+  penalties: z.array(
     z.object({
       date: z.string().min(1, "التاريخ مطلوب"),
       type: z.string().min(1, "نوع الجزاء مطلوب"),
       description: z.string().min(1, "الوصف مطلوب"),
+      attachments: z.string().optional(),
+    })
+  ).default([]),
+
+  bonuses: z.array(
+    z.object({
+      date: z.string().min(1, "التاريخ مطلوب"),
+      reason: z.string().min(1, "الموقف مطلوب"),
+      amount: z.string().optional(),
       attachments: z.string().optional(),
     })
   ).default([]),
@@ -73,6 +82,7 @@ export const createEmployeeApiSchema = z.object({
   personalImageUrl: z.string().nullable().default(null),
   idFrontImageUrl: z.string().nullable().default(null),
   idBackImageUrl: z.string().nullable().default(null),
+  
   relationships: z.array(
     z.object({
       relationshipType: z.string().min(1, "نوع العلاقة مطلوب"),
@@ -86,7 +96,8 @@ export const createEmployeeApiSchema = z.object({
       notes: z.string().nullable().default(null).transform(val => val || ""),
     })
   ).default([]),
-  penalties: z.array(  // New: Penalties array for API
+  
+  penalties: z.array(
     z.object({
       date: z.date(),
       type: z.string().min(1, "نوع الجزاء مطلوب"),
@@ -94,6 +105,16 @@ export const createEmployeeApiSchema = z.object({
       attachments: z.string().nullable().default(null),
     })
   ).default([]),
+  
+  bonuses: z.array(
+    z.object({
+      date: z.date(),
+      reason: z.string().min(1, "الموقف مطلوب"),
+      amount: z.string().nullable().default(null),
+      attachments: z.string().nullable().default(null),
+    })
+  ).default([]),
+  
   jobPosition: z.enum(["ENGINEER", "ACCOUNTANT", "ADMINISTRATIVE", "EXECUTIVE_SUPERVISOR", "WRITER", "WORKER"]).nullable().default(null),
   educationalDegree: z.enum(["DOCTORATE", "MASTERS", "BACHELORS", "GENERAL_SECONDARY", "AZHARI_SECONDARY", "ABOVE_AVERAGE", "AVERAGE", "PREPARATORY", "PRIMARY", "LITERACY", "NONE"]).nullable().default(null),
   functionalDegree: z.enum(["FIRST_DEPUTY_MINISTER", "DEPUTY_MINISTER", "GENERAL_MANAGER", "DEPARTMENT_MANAGER", "DEPARTMENT_HEAD", "FIRST_A", "FIRST_B", "SECOND_A", "SECOND_B", "THIRD_A", "THIRD_B", "THIRD_C", "FOURTH_A", "FOURTH_B", "FOURTH_C", "FIFTH_A", "FIFTH_B", "FIFTH_C", "SIXTH_A", "SIXTH_B", "SIXTH_C"]).nullable().default(null),
@@ -121,6 +142,7 @@ export const employeeSchema = z.object({
   idBackImageUrl: z.string().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  
   relationships: z.array(
     z.object({
       id: z.string().optional(),
@@ -135,7 +157,8 @@ export const employeeSchema = z.object({
       notes: z.string().optional(),
     })
   ).optional().default([]),
-  penalties: z.array(  // New: Penalties in employee schema
+  
+  penalties: z.array(
     z.object({
       id: z.string().optional(),
       date: z.string(),
@@ -144,6 +167,17 @@ export const employeeSchema = z.object({
       attachments: z.string().optional(),
     })
   ).optional().default([]),
+  
+  bonuses: z.array(
+    z.object({
+      id: z.string().optional(),
+      date: z.string(),
+      reason: z.string(),
+      amount: z.string().optional(),
+      attachments: z.string().optional(),
+    })
+  ).optional().default([]),
+  
   jobPosition: z.enum(["ENGINEER", "ACCOUNTANT", "ADMINISTRATIVE", "EXECUTIVE_SUPERVISOR", "WRITER", "WORKER"]).optional(),
   educationalDegree: z.enum(["DOCTORATE", "MASTERS", "BACHELORS", "GENERAL_SECONDARY", "AZHARI_SECONDARY", "ABOVE_AVERAGE", "AVERAGE", "PREPARATORY", "PRIMARY", "LITERACY", "NONE"]).optional(),
   functionalDegree: z.enum(["FIRST_DEPUTY_MINISTER", "DEPUTY_MINISTER", "GENERAL_MANAGER", "DEPARTMENT_MANAGER", "DEPARTMENT_HEAD", "FIRST_A", "FIRST_B", "SECOND_A", "SECOND_B", "THIRD_A", "THIRD_B", "THIRD_C", "FOURTH_A", "FOURTH_B", "FOURTH_C", "FIFTH_A", "FIFTH_B", "FIFTH_C", "SIXTH_A", "SIXTH_B", "SIXTH_C"]).optional(),
@@ -179,10 +213,16 @@ export function transformEmployeeFormToApi(
       residenceLocation: r.residenceLocation || "",
       notes: r.notes || "",
     })) ?? [],
-    penalties: data.penalties?.map((p) => ({  // New: Transform penalties
+    penalties: data.penalties?.map((p) => ({
       ...p,
       date: new Date(p.date),
       attachments: p.attachments || null,
+    })) ?? [],
+    bonuses: data.bonuses?.map((b) => ({
+      ...b,
+      date: new Date(b.date),
+      amount: b.amount || null,
+      attachments: b.attachments || null,
     })) ?? [],
     jobPosition: data.jobPosition || null,
     educationalDegree: data.educationalDegree || null,

@@ -14,6 +14,8 @@ import { formateHiringType, formateMaritalStatus } from "@/lib/utils";
 import EmployeeImages from "@/components/EmployeeImages";
 import PenaltiesModal from "@/components/PenaltiesModal";
 import PenaltyDeleteButton from "@/components/PenaltyDeleteButton";
+import BonusesModal from "@/components/BonusesModal";
+import BonusDeleteButton from "@/components/BonusDeleteButton";
 
 const RELATIONSHIP_LABELS: Record<string, string> = {
   father: "بيانات الأب",
@@ -85,12 +87,16 @@ const getJobPositionLabel = (jobPosition: string | null | undefined) => {
   return JOB_POSITION_LABELS[jobPosition] ?? jobPosition;
 };
 
-const getEducationalDegreeLabel = (educationalDegree: string | null | undefined) => {
+const getEducationalDegreeLabel = (
+  educationalDegree: string | null | undefined
+) => {
   if (!educationalDegree) return "-";
   return EDUCATIONAL_DEGREE_LABELS[educationalDegree] ?? educationalDegree;
 };
 
-const getFunctionalDegreeLabel = (functionalDegree: string | null | undefined) => {
+const getFunctionalDegreeLabel = (
+  functionalDegree: string | null | undefined
+) => {
   if (!functionalDegree) return "-";
   return FUNCTIONAL_DEGREE_LABELS[functionalDegree] ?? functionalDegree;
 };
@@ -112,7 +118,9 @@ const EmployeeDetailsPage = async (props: {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-white py-4">
         <div className="container mx-auto px-4">
-          <h1 className="text-2xl font-medium text-gray-800">الموظف غير موجود</h1>
+          <h1 className="text-2xl font-medium text-gray-800">
+            الموظف غير موجود
+          </h1>
           <p className="text-gray-600 mt-2">
             لا يمكن العثور على الموظف المطلوب.
           </p>
@@ -129,7 +137,9 @@ const EmployeeDetailsPage = async (props: {
         {/* Header */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between bg-white/95 p-6 rounded-2xl shadow-md border border-gray-200 print:hidden">
           <div className="mb-4 md:mb-0">
-            <h1 className="text-3xl font-extrabold text-gray-900">تفاصيل الموظف</h1>
+            <h1 className="text-3xl font-extrabold text-gray-900">
+              تفاصيل الموظف
+            </h1>
             <p className="text-gray-600 mt-1">عرض بيانات الموظف في المؤسسة</p>
           </div>
           <div className="print:hidden flex flex-wrap gap-4">
@@ -246,30 +256,39 @@ const EmployeeDetailsPage = async (props: {
                   <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
                     الوظيفة
                   </td>
-                  <td className="p-3">{getJobPositionLabel(employee.jobPosition)}</td>
+                  <td className="p-3">
+                    {getJobPositionLabel(employee.jobPosition)}
+                  </td>
                 </tr>
                 <tr className="border-b border-gray-200">
                   <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
                     الدرجة العلمية
                   </td>
-                  <td className="p-3">{getEducationalDegreeLabel(employee.educationalDegree)}</td>
+                  <td className="p-3">
+                    {getEducationalDegreeLabel(employee.educationalDegree)}
+                  </td>
                 </tr>
                 <tr className="border-b border-gray-200">
                   <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
                     الدرجة الوظيفية
                   </td>
-                  <td className="p-3">{getFunctionalDegreeLabel(employee.functionalDegree)}</td>
+                  <td className="p-3">
+                    {getFunctionalDegreeLabel(employee.functionalDegree)}
+                  </td>
                 </tr>
                 <tr className="border-b border-gray-200">
                   <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
                     تاريخ الميلاد
                   </td>
                   <td className="p-3">
-                    {new Date(employee.birthDate).toLocaleDateString("ar-EG-u-nu-arab", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                    })}
+                    {new Date(employee.birthDate).toLocaleDateString(
+                      "ar-EG-u-nu-arab",
+                      {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      }
+                    )}
                   </td>
                 </tr>
                 <tr className="border-b border-gray-200">
@@ -328,11 +347,14 @@ const EmployeeDetailsPage = async (props: {
                     تاريخ التعيين
                   </td>
                   <td className="p-3">
-                    {new Date(employee.hiringDate).toLocaleDateString("ar-EG-u-nu-arab", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                    })}
+                    {new Date(employee.hiringDate).toLocaleDateString(
+                      "ar-EG-u-nu-arab",
+                      {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      }
+                    )}
                   </td>
                 </tr>
                 <tr>
@@ -481,18 +503,24 @@ const EmployeeDetailsPage = async (props: {
                 </thead>
                 <tbody>
                   {employee.penalties
-                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                    .sort(
+                      (a, b) =>
+                        new Date(b.date).getTime() - new Date(a.date).getTime()
+                    )
                     .map((penalty, index: number) => (
                       <tr
                         key={penalty.id}
                         className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
                       >
                         <td className="border border-gray-200 p-3 text-center">
-                          {new Date(penalty.date).toLocaleDateString("ar-EG-u-nu-arab", {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                          })}
+                          {new Date(penalty.date).toLocaleDateString(
+                            "ar-EG-u-nu-arab",
+                            {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                            }
+                          )}
                         </td>
                         <td className="border border-gray-200 p-3 text-center">
                           {getPenaltyTypeLabel(penalty.type)}
@@ -520,16 +548,18 @@ const EmployeeDetailsPage = async (props: {
                               employeeId={employee.id}
                               penalty={{
                                 id: penalty.id,
-                                date: new Date(penalty.date).toISOString().split("T")[0],
+                                date: new Date(penalty.date)
+                                  .toISOString()
+                                  .split("T")[0],
                                 type: penalty.type,
                                 description: penalty.description,
                                 attachments: penalty.attachments || undefined,
                               }}
                               className="text-blue-600 hover:underline"
                             />
-                            <PenaltyDeleteButton 
-                              penaltyId={penalty.id!} 
-                              employeeId={employee.id} 
+                            <PenaltyDeleteButton
+                              penaltyId={penalty.id!}
+                              employeeId={employee.id}
                             />
                           </div>
                         </td>
@@ -540,9 +570,114 @@ const EmployeeDetailsPage = async (props: {
             </div>
           ) : (
             <div className="border border-gray-200 p-8 text-center bg-gray-50">
-              <p className="text-gray-600 text-base">
-                لا توجد جزاءات مسجلة
-              </p>
+              <p className="text-gray-600 text-base">لا توجد جزاءات مسجلة</p>
+            </div>
+          )}
+        </div>
+
+        {/* Bonuses Section */}
+        <div className="mt-8">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-xl font-medium text-gray-800 bg-gray-100 p-3 rounded-t-xl">
+              العلاوات التشجيعية
+            </h2>
+            <BonusesModal
+              employeeId={employee.id}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white px-4 py-2 rounded-xl transition-all font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1 duration-300"
+            />
+          </div>
+          {employee.bonuses && employee.bonuses.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-gray-200 text-base">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-200 p-3 text-center font-medium">
+                      التاريخ
+                    </th>
+                    <th className="border border-gray-200 p-3 text-center font-medium">
+                      الموقف/السبب
+                    </th>
+                    <th className="border border-gray-200 p-3 text-center font-medium">
+                      قيمة العلاوة
+                    </th>
+                    <th className="border border-gray-200 p-3 text-center font-medium">
+                      المرفقات
+                    </th>
+                    <th className="border border-gray-200 p-3 text-center font-medium">
+                      الإجراءات
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {employee.bonuses
+                    .sort(
+                      (a, b) =>
+                        new Date(b.date).getTime() - new Date(a.date).getTime()
+                    )
+                    .map((bonus, index: number) => (
+                      <tr
+                        key={bonus.id}
+                        className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                      >
+                        <td className="border border-gray-200 p-3 text-center">
+                          {new Date(bonus.date).toLocaleDateString(
+                            "ar-EG-u-nu-arab",
+                            {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                            }
+                          )}
+                        </td>
+                        <td className="border border-gray-200 p-3">
+                          {bonus.reason}
+                        </td>
+                        <td className="border border-gray-200 p-3 text-center">
+                          {bonus.amount || "-"}
+                        </td>
+                        <td className="border border-gray-200 p-3 text-center">
+                          {bonus.attachments ? (
+                            <a
+                              href={bonus.attachments}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              عرض المرفق
+                            </a>
+                          ) : (
+                            "-"
+                          )}
+                        </td>
+                        <td className="border border-gray-200 p-3 text-center">
+                          <div className="flex gap-2 justify-center">
+                            <BonusesModal
+                              employeeId={employee.id}
+                              bonus={{
+                                id: bonus.id,
+                                date: new Date(bonus.date)
+                                  .toISOString()
+                                  .split("T")[0],
+                                reason: bonus.reason,
+                                amount: bonus.amount || undefined,
+                                attachments: bonus.attachments || undefined,
+                              }}
+                              className="text-blue-600 hover:underline"
+                            />
+                            <BonusDeleteButton
+                              bonusId={bonus.id!}
+                              employeeId={employee.id}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="border border-gray-200 p-8 text-center bg-gray-50">
+              <p className="text-gray-600 text-base">لا توجد علاوات مسجلة</p>
             </div>
           )}
         </div>

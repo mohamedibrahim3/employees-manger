@@ -24,6 +24,13 @@ interface Penalty {
   attachments?: string | null;
 }
 
+interface Bonus {
+  date: Date;
+  reason: string;
+  amount?: string | null;
+  attachments?: string | null;
+}
+
 export async function createEmployee(
   data: z.infer<typeof createEmployeeApiSchema>
 ) {
@@ -71,10 +78,20 @@ export async function createEmployee(
     let penalties: Penalty[] = [];
     if (validatedData.penalties && validatedData.penalties.length > 0) {
       penalties = validatedData.penalties.map((pen) => ({
-        date: pen.date,
+        date: new Date(pen.date),
         type: pen.type,
         description: pen.description,
         attachments: pen.attachments || null,
+      }));
+    }
+
+    let bonuses: Bonus[] = [];
+    if (validatedData.bonuses && validatedData.bonuses.length > 0) {
+      bonuses = validatedData.bonuses.map((bon) => ({
+        date: new Date(bon.date),
+        reason: bon.reason,
+        amount: bon.amount || null,
+        attachments: bon.attachments || null,
       }));
     }
 
@@ -96,6 +113,15 @@ export async function createEmployee(
         data: penalties.map((pen: Penalty) => ({
           employeeId: employee.id,
           ...pen,
+        })),
+      });
+    }
+
+    if (bonuses.length > 0) {
+      await prisma.bonus.createMany({
+        data: bonuses.map((bon: Bonus) => ({
+          employeeId: employee.id,
+          ...bon,
         })),
       });
     }
@@ -160,10 +186,20 @@ export const updateEmployee = async (
     let penalties: Penalty[] = [];
     if (validatedData.penalties && validatedData.penalties.length > 0) {
       penalties = validatedData.penalties.map((pen) => ({
-        date: pen.date,
+        date: new Date(pen.date),
         type: pen.type,
         description: pen.description,
         attachments: pen.attachments || null,
+      }));
+    }
+
+    let bonuses: Bonus[] = [];
+    if (validatedData.bonuses && validatedData.bonuses.length > 0) {
+      bonuses = validatedData.bonuses.map((bon) => ({
+        date: new Date(bon.date),
+        reason: bon.reason,
+        amount: bon.amount || null,
+        attachments: bon.attachments || null,
       }));
     }
 
@@ -198,6 +234,19 @@ export const updateEmployee = async (
       });
     }
 
+    if (bonuses.length > 0) {
+      await prisma.bonus.deleteMany({
+        where: { employeeId: id },
+      });
+
+      await prisma.bonus.createMany({
+        data: bonuses.map((bon) => ({
+          employeeId: employee.id,
+          ...bon,
+        })),
+      });
+    }
+
     revalidatePath("/employees");
     revalidatePath("/");
     revalidatePath(`/employees/${id}`);
@@ -222,6 +271,7 @@ export const getEmployees = async () => {
       include: {
         relationships: true,
         penalties: true,
+        bonuses: true,
       },
     });
 
@@ -270,6 +320,7 @@ export const getEmployeesBySearch = async (name: string, administration: string)
       include: {
         relationships: true,
         penalties: true,
+        bonuses: true,
       },
     });
 
@@ -298,6 +349,7 @@ export const getEmployeesBySearch = async (name: string, administration: string)
         include: {
           relationships: true,
           penalties: true,
+          bonuses: true,
         },
       });
 
@@ -351,6 +403,7 @@ export const getEmployeeById = async (id: string) => {
       include: {
         relationships: true,
         penalties: true,
+        bonuses: true,
       },
     });
 
@@ -394,7 +447,7 @@ export const getEmployeeNotes = async (id: string) => {
   }
 };
 
-// New: Penalty-specific actions
+// Penalty-specific actions
 export async function createPenalty(employeeId: string, data: { date: string; type: string; description: string; attachments?: string }) {
   try {
     const validatedData = z.object({
@@ -466,5 +519,80 @@ export async function deletePenalty(penaltyId: string, employeeId: string) {
   } catch (error) {
     console.error("Error deleting penalty:", error);
     return { success: false, error: "حدث خطأ أثناء حذف الجزاء" };
+  }
+}
+
+// Bonus-specific actions
+export async function createBonus(employeeId: string, data: { date: string; reason: string; amount?: string; attachments?: string }) {
+  try {
+    const validatedData = z.object({
+      date: z.string().min(1, "التاريخ مطلوب"),
+      reason: z.string().min(1, "الموقف مطلوب"),
+      amount: z.string().optional(),
+      attachments: z.string().optional(),
+    }).parse(data);
+
+    const bonus = await prisma.bonus.create({
+      data: {
+        employeeId,
+        date: new Date(validatedData.date),
+        reason: validatedData.reason,
+        amount: validatedData.amount || null,
+        attachments: validatedData.attachments || null,
+      },
+    });
+
+    revalidatePath(`/employees/${employeeId}`);
+    return { success: true, bonus };
+  } catch (error) {
+    console.error("Error creating bonus:", error);
+    if (error instanceof z.ZodError) {
+      return { success: false, error: "بيانات غير صحيحة" };
+    }
+    return { success: false, error: "حدث خطأ أثناء إنشاء العلاوة" };
+  }
+}
+
+export async function updateBonus(bonusId: string, employeeId: string, data: { date: string; reason: string; amount?: string; attachments?: string }) {
+  try {
+    const validatedData = z.object({
+      date: z.string().min(1, "التاريخ مطلوب"),
+      reason: z.string().min(1, "الموقف مطلوب"),
+      amount: z.string().optional(),
+      attachments: z.string().optional(),
+    }).parse(data);
+
+    const bonus = await prisma.bonus.update({
+      where: { id: bonusId },
+      data: {
+        date: new Date(validatedData.date),
+        reason: validatedData.reason,
+        amount: validatedData.amount || null,
+        attachments: validatedData.attachments || null,
+      },
+    });
+
+    revalidatePath(`/employees/${employeeId}`);
+    return { success: true, bonus };
+  } catch (error) {
+    console.error("Error updating bonus:", error);
+    if (error instanceof z.ZodError) {
+      return { success: false, error: "بيانات غير صحيحة" };
+    }
+    return { success: false, error: "حدث خطأ أثناء تحديث العلاوة" };
+  }
+}
+
+export async function deleteBonus(bonusId: string, employeeId: string) {
+  try {
+    await prisma.bonus.delete({
+      where: { id: bonusId },
+    });
+
+    revalidatePath(`/employees/${employeeId}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting bonus:", error);
+    return { success: false, error: "حدث خطأ أثناء حذف العلاوة" };
   }
 }

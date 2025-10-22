@@ -86,7 +86,8 @@ model Employee {
 
   // Relationships
   relationships Relationship[] // العلاقات
-  penalties     Penalty[]     // الجزاءات (New)
+  penalties     Penalty[]      // الجزاءات
+  bonuses       Bonus[]        // العلاوات التشجيعية
 
   // Metadata
   createdAt DateTime @default(now())
@@ -132,6 +133,22 @@ model Penalty {
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@map("penalties")
+}
+
+model Bonus {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId  String   @db.Uuid
+  date        DateTime // تاريخ العلاوة
+  reason      String   @db.Text // الموقف/السبب
+  amount      String?  // قيمة العلاوة (اختياري)
+  attachments String?  // Optional JSON string of attachment URLs
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("bonuses")
 }
 
 enum JobPosition {
