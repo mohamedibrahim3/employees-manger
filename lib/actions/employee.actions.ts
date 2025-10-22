@@ -327,34 +327,61 @@ export const getEmployees = async () => {
   }
 };
 
+/**
+ * @name getEmployeesBySearch
+ * @description Retrieves employees filtered by name, administration, and educational degree using 'contains' for flexibility.
+ * @param {string} name - Employee name for search (contains/insensitive).
+ * @param {string} administration - Employee administration for search (contains/insensitive).
+ * @param {string} educationalDegree - Employee educational degree for search (contains/insensitive).
+ * @returns {Promise<{ success: boolean; employees?: any[]; error?: string }>}
+ */
 export const getEmployeesBySearch = async (
   name: string,
-  administration: string
+  administration: string,
+  educationalDegree: string
 ) => {
   noStore();
   try {
+    // 💡 تنظيف المدخلات
     const cleanName = name?.replace(/\s+/g, " ").trim() || "";
     const cleanAdmin = administration?.replace(/\s+/g, " ").trim() || "";
+    const cleanDegree = educationalDegree?.replace(/\s+/g, " ").trim() || "";
 
     console.log("🔍 Search Input:", {
-      rawName: name,
-      rawAdmin: administration,
       cleanName,
       cleanAdmin,
-      nameLength: cleanName.length,
-      adminLength: cleanAdmin.length,
+      cleanDegree,
     });
 
     const whereClause: any = {};
+
+    // 💡 استخدام 'contains' للبحث بالاسم (مرونة أكبر)
     if (cleanName) {
       whereClause.name = { contains: cleanName, mode: "insensitive" };
     }
+
+    // 💡 استخدام 'contains' للبحث بالإدارة (مرونة أكبر)
     if (cleanAdmin) {
-      whereClause.administration = cleanAdmin;
+      whereClause.administration = {
+        contains: cleanAdmin,
+        mode: "insensitive",
+      };
     }
 
-    console.log("🔍 Where Clause:", JSON.stringify(whereClause, null, 2));
+    // 💡 استخدام 'contains' للبحث بالدرجة العلمية (مرونة أكبر)
+    if (cleanDegree) {
+      whereClause.educationalDegree = {
+        contains: cleanDegree,
+        mode: "insensitive",
+      };
+    }
 
+    console.log(
+      "🔍 Where Clause (Optimized):",
+      JSON.stringify(whereClause, null, 2)
+    );
+
+    // 💡 تنفيذ البحث بشروط الـ 'contains' المرنة
     let employees = await prisma.employee.findMany({
       where: whereClause,
       orderBy: { createdAt: "desc" },
@@ -366,63 +393,45 @@ export const getEmployeesBySearch = async (
       },
     });
 
-    console.log(`✅ Found ${employees.length} employees with exact match`);
-
-    if (employees.length === 0 && cleanAdmin) {
-      console.log("🔄 Trying with contains instead...");
-      const containsWhere: any = {};
-      if (cleanName) {
-        containsWhere.name = { contains: cleanName, mode: "insensitive" };
-      }
-      containsWhere.administration = {
-        contains: cleanAdmin,
-        mode: "insensitive",
-      };
-      employees = await prisma.employee.findMany({
-        where: containsWhere,
-        orderBy: { createdAt: "desc" },
-        include: {
-          relationships: true,
-          penalties: true,
-          bonuses: true,
-          efficiencyReports: true,
-        },
-      });
-      console.log(`✅ Found ${employees.length} employees with contains`);
-    }
+    console.log(`✅ Found ${employees.length} employees with flexible match`);
 
     if (employees.length > 0) {
-      console.log("📋 Sample Results:");
       interface EmployeeSearchResult {
         name: string;
-        administration: string;
+        admin: string;
+        degree: string | null;
       }
 
-      employees
-        .slice(0, 3)
-        .forEach((emp: EmployeeSearchResult, i: number): void => {
-          console.log(
-            ` ${i + 1}. "${emp.name}" - "${emp.administration}" (length: ${
-              emp.administration.length
-            })`
-          );
-        });
-    } else {
-      console.log("❌ No results found");
-      const allAdmins = await prisma.employee.findMany({
-        select: { administration: true },
-        distinct: ["administration"],
-      });
-      interface AdminResult {
-        administration: string;
+      interface EmployeeSearchResult {
+        name: string;
+        admin: string;
+        degree: string | null;
       }
+
+      interface EmployeeSearchResultDisplay {
+        name: string;
+        admin: string;
+        degree: string | null;
+      }
+
+      interface EmployeeBase {
+        name: string;
+        administration: string;
+        educationalDegree: string | null;
+      }
+
       console.log(
-        "📋 Available administrations:",
-        allAdmins.map(
-          (a: AdminResult) =>
-            `"${a.administration}" (${a.administration.length})`
+        "📋 Sample Results:",
+        employees.slice(0, 3).map(
+          (emp: EmployeeBase): EmployeeSearchResultDisplay => ({
+            name: emp.name,
+            admin: emp.administration,
+            degree: emp.educationalDegree,
+          })
         )
       );
+    } else {
+      console.log("❌ No results found");
     }
 
     return { success: true, employees };
@@ -444,6 +453,8 @@ export const deleteEmployee = async (id: string) => {
   }
 };
 
+// ... (باقي الدوال كما هي)
+// ...
 export const getEmployeeById = async (id: string) => {
   noStore();
   try {

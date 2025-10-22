@@ -7,7 +7,12 @@ export async function GET(request: Request) {
     const name = searchParams.get("name") || "";
     const administration = searchParams.get("administration") || "";
 
-    const result = await getEmployeesBySearch(name, administration);
+    const educationalDegree = searchParams.get("educationalDegree") || "";
+    const result = await getEmployeesBySearch(
+      name,
+      administration,
+      educationalDegree
+    );
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {

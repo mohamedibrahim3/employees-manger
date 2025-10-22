@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+// 💡 استيراد الدرجات العلمية الثابتة (عدّل المسار حسب موقع الملف في مشروعك)
+import { EDUCATIONAL_DEGREES } from "@/src/constants/degrees";
 
 interface SearchSectionProps {
   administrations: string[];
@@ -10,6 +12,8 @@ interface SearchSectionProps {
 export default function SearchSection({ administrations }: SearchSectionProps) {
   const [name, setName] = useState("");
   const [administration, setAdministration] = useState("");
+  const [educationalDegree, setEducationalDegree] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +29,8 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
       const params = new URLSearchParams();
       if (name) params.append("name", name);
       if (administration) params.append("administration", administration);
+      if (educationalDegree)
+        params.append("educationalDegree", educationalDegree);
 
       const res = await fetch(`/api/employees/search?${params.toString()}`, {
         method: "GET",
@@ -48,6 +54,9 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
     }
   };
 
+  const isSearchDisabled =
+    loading || (!name && !administration && !educationalDegree);
+
   return (
     <div className="space-y-10">
       {/* Search Form */}
@@ -55,7 +64,8 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
         onSubmit={handleSearch}
         className="flex flex-col md:flex-row gap-4 items-end justify-center bg-white/90 p-6 rounded-2xl shadow-md border border-gray-200"
       >
-        <div className="w-full md:w-1/3">
+        {/* حقل اسم الموظف */}
+        <div className="w-full md:w-1/4">
           <label className="block text-right text-gray-700 font-medium mb-2">
             اسم الموظف
           </label>
@@ -69,7 +79,8 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
           />
         </div>
 
-        <div className="w-full md:w-1/3">
+        {/* حقل الإدارة */}
+        <div className="w-full md:w-1/4">
           <label className="block text-right text-gray-700 font-medium mb-2">
             الإدارة
           </label>
@@ -88,12 +99,34 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
           </select>
         </div>
 
+        {/* 💡 قائمة الدرجة العلمية الجديدة (Select) */}
+        <div className="w-full md:w-1/4">
+          <label className="block text-right text-gray-700 font-medium mb-2">
+            الدرجة العلمية
+          </label>
+          <select
+            value={educationalDegree}
+            onChange={(e) => setEducationalDegree(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-gray-500 focus:outline-none text-right bg-white/80 backdrop-blur-sm"
+            disabled={loading}
+          >
+            <option value="">اختر الدرجة العلمية</option>
+            {/* 💡 استخدام المصفوفة الثابتة لتوليد الخيارات */}
+            {EDUCATIONAL_DEGREES.map((degree) => (
+              <option key={degree} value={degree}>
+                {degree}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* زر البحث */}
         <button
           type="submit"
           className={`w-full md:w-auto px-8 py-3 bg-gradient-to-r from-gray-700 to-gray-600 text-white rounded-xl font-medium text-base shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 hover:from-gray-600 hover:to-gray-700 ${
             loading ? "opacity-50 cursor-not-allowed" : ""
           }`}
-          disabled={loading || (!name && !administration)}
+          disabled={isSearchDisabled}
         >
           {loading ? "جاري البحث..." : "بحث"}
         </button>
@@ -106,7 +139,7 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
         </div>
       )}
 
-      {/* Search Results */}
+      {/* Search Results (باقي الكود كما هو) */}
       {hasSearched && (
         <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-xl overflow-hidden border border-gray-200 p-8 space-y-6">
           <div className="bg-gradient-to-r from-gray-800 to-gray-600 px-8 py-6 rounded-2xl mb-6">
@@ -129,9 +162,15 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
                   <h4 className="text-lg font-medium text-gray-800 mb-2 group-hover:text-gray-700 transition-colors">
                     {emp.name}
                   </h4>
-                  <p className="text-gray-600 font-medium mb-4 text-sm">
+                  <p className="text-gray-600 font-medium mb-1 text-sm">
                     الإدارة:{" "}
                     <span className="text-gray-800">{emp.administration}</span>
+                  </p>
+                  <p className="text-gray-600 font-medium mb-4 text-sm">
+                    الدرجة العلمية:{" "}
+                    <span className="text-gray-800">
+                      {emp.educationalDegree || "-"}
+                    </span>
                   </p>
                   <Link
                     href={`/employees/employee/${emp.id}`}
