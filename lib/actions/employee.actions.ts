@@ -1,9 +1,12 @@
 "use server";
-
 import { prisma } from "@/db/prisma";
 import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 import { z } from "zod";
-import { createEmployeeApiSchema } from "../validators";
+import {
+  createEmployeeApiSchema,
+  efficiencyGradeEnum,
+  EfficiencyGrade,
+} from "../validators";
 
 interface Relationship {
   relationshipType: string;
@@ -28,6 +31,13 @@ interface Bonus {
   date: Date;
   reason: string;
   amount?: string | null;
+  attachments?: string | null;
+}
+
+interface EfficiencyReport {
+  year: number;
+  grade: EfficiencyGrade;
+  description: string;
   attachments?: string | null;
 }
 
@@ -95,6 +105,19 @@ export async function createEmployee(
       }));
     }
 
+    let efficiencyReports: EfficiencyReport[] = [];
+    if (
+      validatedData.efficiencyReports &&
+      validatedData.efficiencyReports.length > 0
+    ) {
+      efficiencyReports = validatedData.efficiencyReports.map((rep) => ({
+        year: rep.year,
+        grade: rep.grade as EfficiencyGrade,
+        description: rep.description,
+        attachments: rep.attachments || null,
+      }));
+    }
+
     const employee = await prisma.employee.create({
       data: empData,
     });
@@ -126,6 +149,15 @@ export async function createEmployee(
       });
     }
 
+    if (efficiencyReports.length > 0) {
+      await prisma.efficiencyReport.createMany({
+        data: efficiencyReports.map((rep: EfficiencyReport) => ({
+          employeeId: employee.id,
+          ...rep,
+        })),
+      });
+    }
+
     revalidatePath("/employees");
     revalidatePath("/");
     revalidatePath(`/employees/${employee.id}`);
@@ -146,6 +178,7 @@ export const updateEmployee = async (
 ) => {
   try {
     const validatedData = createEmployeeApiSchema.parse(data);
+
     const empData = {
       name: validatedData.name,
       nickName: validatedData.nickName || "",
@@ -203,16 +236,26 @@ export const updateEmployee = async (
       }));
     }
 
+    let efficiencyReports: EfficiencyReport[] = [];
+    if (
+      validatedData.efficiencyReports &&
+      validatedData.efficiencyReports.length > 0
+    ) {
+      efficiencyReports = validatedData.efficiencyReports.map((rep) => ({
+        year: rep.year,
+        grade: rep.grade as EfficiencyGrade,
+        description: rep.description,
+        attachments: rep.attachments || null,
+      }));
+    }
+
     const employee = await prisma.employee.update({
       where: { id },
       data: empData,
     });
 
     if (relationships.length > 0) {
-      await prisma.relationship.deleteMany({
-        where: { employeeId: id },
-      });
-
+      await prisma.relationship.deleteMany({ where: { employeeId: id } });
       await prisma.relationship.createMany({
         data: relationships.map((rel) => ({
           employeeId: employee.id,
@@ -222,10 +265,7 @@ export const updateEmployee = async (
     }
 
     if (penalties.length > 0) {
-      await prisma.penalty.deleteMany({
-        where: { employeeId: id },
-      });
-
+      await prisma.penalty.deleteMany({ where: { employeeId: id } });
       await prisma.penalty.createMany({
         data: penalties.map((pen) => ({
           employeeId: employee.id,
@@ -235,14 +275,21 @@ export const updateEmployee = async (
     }
 
     if (bonuses.length > 0) {
-      await prisma.bonus.deleteMany({
-        where: { employeeId: id },
-      });
-
+      await prisma.bonus.deleteMany({ where: { employeeId: id } });
       await prisma.bonus.createMany({
         data: bonuses.map((bon) => ({
           employeeId: employee.id,
           ...bon,
+        })),
+      });
+    }
+
+    if (efficiencyReports.length > 0) {
+      await prisma.efficiencyReport.deleteMany({ where: { employeeId: id } });
+      await prisma.efficiencyReport.createMany({
+        data: efficiencyReports.map((rep) => ({
+          employeeId: employee.id,
+          ...rep,
         })),
       });
     }
@@ -265,16 +312,14 @@ export const getEmployees = async () => {
   noStore();
   try {
     const employees = await prisma.employee.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: { createdAt: "desc" },
       include: {
         relationships: true,
         penalties: true,
         bonuses: true,
+        efficiencyReports: true,
       },
     });
-
     return { success: true, employees };
   } catch (error) {
     console.error("Error fetching employees:", error);
@@ -282,11 +327,14 @@ export const getEmployees = async () => {
   }
 };
 
-export const getEmployeesBySearch = async (name: string, administration: string) => {
+export const getEmployeesBySearch = async (
+  name: string,
+  administration: string
+) => {
   noStore();
   try {
-    const cleanName = name?.replace(/\s+/g, ' ').trim() || "";
-    const cleanAdmin = administration?.replace(/\s+/g, ' ').trim() || "";
+    const cleanName = name?.replace(/\s+/g, " ").trim() || "";
+    const cleanAdmin = administration?.replace(/\s+/g, " ").trim() || "";
 
     console.log("🔍 Search Input:", {
       rawName: name,
@@ -294,18 +342,13 @@ export const getEmployeesBySearch = async (name: string, administration: string)
       cleanName,
       cleanAdmin,
       nameLength: cleanName.length,
-      adminLength: cleanAdmin.length
+      adminLength: cleanAdmin.length,
     });
 
     const whereClause: any = {};
-
     if (cleanName) {
-      whereClause.name = {
-        contains: cleanName,
-        mode: "insensitive",
-      };
+      whereClause.name = { contains: cleanName, mode: "insensitive" };
     }
-
     if (cleanAdmin) {
       whereClause.administration = cleanAdmin;
     }
@@ -314,13 +357,12 @@ export const getEmployeesBySearch = async (name: string, administration: string)
 
     let employees = await prisma.employee.findMany({
       where: whereClause,
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: { createdAt: "desc" },
       include: {
         relationships: true,
         penalties: true,
         bonuses: true,
+        efficiencyReports: true,
       },
     });
 
@@ -328,48 +370,58 @@ export const getEmployeesBySearch = async (name: string, administration: string)
 
     if (employees.length === 0 && cleanAdmin) {
       console.log("🔄 Trying with contains instead...");
-      
       const containsWhere: any = {};
       if (cleanName) {
-        containsWhere.name = {
-          contains: cleanName,
-          mode: "insensitive",
-        };
+        containsWhere.name = { contains: cleanName, mode: "insensitive" };
       }
       containsWhere.administration = {
         contains: cleanAdmin,
         mode: "insensitive",
       };
-
       employees = await prisma.employee.findMany({
         where: containsWhere,
-        orderBy: {
-          createdAt: "desc",
-        },
+        orderBy: { createdAt: "desc" },
         include: {
           relationships: true,
           penalties: true,
           bonuses: true,
+          efficiencyReports: true,
         },
       });
-
       console.log(`✅ Found ${employees.length} employees with contains`);
     }
 
     if (employees.length > 0) {
       console.log("📋 Sample Results:");
-      employees.slice(0, 3).forEach((emp, i) => {
-        console.log(`  ${i + 1}. "${emp.name}" - "${emp.administration}" (length: ${emp.administration.length})`);
-      });
+      interface EmployeeSearchResult {
+        name: string;
+        administration: string;
+      }
+
+      employees
+        .slice(0, 3)
+        .forEach((emp: EmployeeSearchResult, i: number): void => {
+          console.log(
+            ` ${i + 1}. "${emp.name}" - "${emp.administration}" (length: ${
+              emp.administration.length
+            })`
+          );
+        });
     } else {
       console.log("❌ No results found");
-      
       const allAdmins = await prisma.employee.findMany({
         select: { administration: true },
-        distinct: ['administration']
+        distinct: ["administration"],
       });
-      console.log("📋 Available administrations:",
-        allAdmins.map(a => `"${a.administration}" (${a.administration.length})`)
+      interface AdminResult {
+        administration: string;
+      }
+      console.log(
+        "📋 Available administrations:",
+        allAdmins.map(
+          (a: AdminResult) =>
+            `"${a.administration}" (${a.administration.length})`
+        )
       );
     }
 
@@ -382,10 +434,7 @@ export const getEmployeesBySearch = async (name: string, administration: string)
 
 export const deleteEmployee = async (id: string) => {
   try {
-    await prisma.employee.delete({
-      where: { id },
-    });
-
+    await prisma.employee.delete({ where: { id } });
     revalidatePath("/employees");
     revalidatePath("/");
     return { success: true };
@@ -404,6 +453,7 @@ export const getEmployeeById = async (id: string) => {
         relationships: true,
         penalties: true,
         bonuses: true,
+        efficiencyReports: true,
       },
     });
 
@@ -424,9 +474,11 @@ export const updateEmployeeNotes = async (id: string, notes: string) => {
       where: { id },
       data: { notes },
     });
+
     revalidatePath(`/employees/${id}`);
     revalidatePath(`/employees/${id}/security-notes`);
     revalidatePath("/employees");
+
     return { success: true, employee };
   } catch (error) {
     console.error("Error updating notes:", error);
@@ -447,15 +499,24 @@ export const getEmployeeNotes = async (id: string) => {
   }
 };
 
-// Penalty-specific actions
-export async function createPenalty(employeeId: string, data: { date: string; type: string; description: string; attachments?: string }) {
+export async function createPenalty(
+  employeeId: string,
+  data: {
+    date: string;
+    type: string;
+    description: string;
+    attachments?: string;
+  }
+) {
   try {
-    const validatedData = z.object({
-      date: z.string().min(1, "التاريخ مطلوب"),
-      type: z.string().min(1, "نوع الجزاء مطلوب"),
-      description: z.string().min(1, "الوصف مطلوب"),
-      attachments: z.string().optional(),
-    }).parse(data);
+    const validatedData = z
+      .object({
+        date: z.string().min(1, "التاريخ مطلوب"),
+        type: z.string().min(1, "نوع الجزاء مطلوب"),
+        description: z.string().min(1, "الوصف مطلوب"),
+        attachments: z.string().optional(),
+      })
+      .parse(data);
 
     const penalty = await prisma.penalty.create({
       data: {
@@ -478,14 +539,25 @@ export async function createPenalty(employeeId: string, data: { date: string; ty
   }
 }
 
-export async function updatePenalty(penaltyId: string, employeeId: string, data: { date: string; type: string; description: string; attachments?: string }) {
+export async function updatePenalty(
+  penaltyId: string,
+  employeeId: string,
+  data: {
+    date: string;
+    type: string;
+    description: string;
+    attachments?: string;
+  }
+) {
   try {
-    const validatedData = z.object({
-      date: z.string().min(1, "التاريخ مطلوب"),
-      type: z.string().min(1, "نوع الجزاء مطلوب"),
-      description: z.string().min(1, "الوصف مطلوب"),
-      attachments: z.string().optional(),
-    }).parse(data);
+    const validatedData = z
+      .object({
+        date: z.string().min(1, "التاريخ مطلوب"),
+        type: z.string().min(1, "نوع الجزاء مطلوب"),
+        description: z.string().min(1, "الوصف مطلوب"),
+        attachments: z.string().optional(),
+      })
+      .parse(data);
 
     const penalty = await prisma.penalty.update({
       where: { id: penaltyId },
@@ -510,10 +582,7 @@ export async function updatePenalty(penaltyId: string, employeeId: string, data:
 
 export async function deletePenalty(penaltyId: string, employeeId: string) {
   try {
-    await prisma.penalty.delete({
-      where: { id: penaltyId },
-    });
-
+    await prisma.penalty.delete({ where: { id: penaltyId } });
     revalidatePath(`/employees/${employeeId}`);
     return { success: true };
   } catch (error) {
@@ -521,16 +590,19 @@ export async function deletePenalty(penaltyId: string, employeeId: string) {
     return { success: false, error: "حدث خطأ أثناء حذف الجزاء" };
   }
 }
-
-// Bonus-specific actions
-export async function createBonus(employeeId: string, data: { date: string; reason: string; amount?: string; attachments?: string }) {
+export async function createBonus(
+  employeeId: string,
+  data: { date: string; reason: string; amount?: string; attachments?: string }
+) {
   try {
-    const validatedData = z.object({
-      date: z.string().min(1, "التاريخ مطلوب"),
-      reason: z.string().min(1, "الموقف مطلوب"),
-      amount: z.string().optional(),
-      attachments: z.string().optional(),
-    }).parse(data);
+    const validatedData = z
+      .object({
+        date: z.string().min(1, "التاريخ مطلوب"),
+        reason: z.string().min(1, "الموقف مطلوب"),
+        amount: z.string().optional(),
+        attachments: z.string().optional(),
+      })
+      .parse(data);
 
     const bonus = await prisma.bonus.create({
       data: {
@@ -553,14 +625,20 @@ export async function createBonus(employeeId: string, data: { date: string; reas
   }
 }
 
-export async function updateBonus(bonusId: string, employeeId: string, data: { date: string; reason: string; amount?: string; attachments?: string }) {
+export async function updateBonus(
+  bonusId: string,
+  employeeId: string,
+  data: { date: string; reason: string; amount?: string; attachments?: string }
+) {
   try {
-    const validatedData = z.object({
-      date: z.string().min(1, "التاريخ مطلوب"),
-      reason: z.string().min(1, "الموقف مطلوب"),
-      amount: z.string().optional(),
-      attachments: z.string().optional(),
-    }).parse(data);
+    const validatedData = z
+      .object({
+        date: z.string().min(1, "التاريخ مطلوب"),
+        reason: z.string().min(1, "الموقف مطلوب"),
+        amount: z.string().optional(),
+        attachments: z.string().optional(),
+      })
+      .parse(data);
 
     const bonus = await prisma.bonus.update({
       where: { id: bonusId },
@@ -585,14 +663,112 @@ export async function updateBonus(bonusId: string, employeeId: string, data: { d
 
 export async function deleteBonus(bonusId: string, employeeId: string) {
   try {
-    await prisma.bonus.delete({
-      where: { id: bonusId },
-    });
-
+    await prisma.bonus.delete({ where: { id: bonusId } });
     revalidatePath(`/employees/${employeeId}`);
     return { success: true };
   } catch (error) {
     console.error("Error deleting bonus:", error);
     return { success: false, error: "حدث خطأ أثناء حذف العلاوة" };
+  }
+}
+
+export async function createEfficiencyReport(
+  employeeId: string,
+  data: {
+    year: string;
+    grade: string;
+    description: string;
+    attachments?: string;
+  }
+) {
+  try {
+    const validatedData = z
+      .object({
+        year: z
+          .string()
+          .min(1, "سنة التقرير مطلوبة")
+          .regex(/^\d{4}$/, "السنة يجب أن تكون أربعة أرقام"),
+        grade: efficiencyGradeEnum,
+        description: z.string().min(1, "الوصف مطلوب"),
+        attachments: z.string().optional(),
+      })
+      .parse(data);
+
+    const report = await prisma.efficiencyReport.create({
+      data: {
+        employeeId,
+        year: parseInt(validatedData.year),
+        grade: validatedData.grade,
+        description: validatedData.description,
+        attachments: validatedData.attachments || null,
+      },
+    });
+
+    revalidatePath(`/employees/${employeeId}`);
+    return { success: true, report };
+  } catch (error) {
+    console.error("Error creating efficiency report:", error);
+    if (error instanceof z.ZodError) {
+      return { success: false, error: "بيانات غير صحيحة" };
+    }
+    return { success: false, error: "حدث خطأ أثناء إنشاء التقرير" };
+  }
+}
+
+export async function updateEfficiencyReport(
+  reportId: string,
+  employeeId: string,
+  data: {
+    year: string;
+    grade: string;
+    description: string;
+    attachments?: string;
+  }
+) {
+  try {
+    const validatedData = z
+      .object({
+        year: z
+          .string()
+          .min(1, "سنة التقرير مطلوبة")
+          .regex(/^\d{4}$/, "السنة يجب أن تكون أربعة أرقام"),
+        grade: efficiencyGradeEnum,
+        description: z.string().min(1, "الوصف مطلوب"),
+        attachments: z.string().optional(),
+      })
+      .parse(data);
+
+    const report = await prisma.efficiencyReport.update({
+      where: { id: reportId },
+      data: {
+        year: parseInt(validatedData.year),
+        grade: validatedData.grade,
+        description: validatedData.description,
+        attachments: validatedData.attachments || null,
+      },
+    });
+
+    revalidatePath(`/employees/${employeeId}`);
+    return { success: true, report };
+  } catch (error) {
+    console.error("Error updating efficiency report:", error);
+    if (error instanceof z.ZodError) {
+      return { success: false, error: "بيانات غير صحيحة" };
+    }
+    return { success: false, error: "حدث خطأ أثناء تحديث التقرير" };
+  }
+}
+
+export async function deleteEfficiencyReport(
+  reportId: string,
+  employeeId: string
+) {
+  try {
+    await prisma.efficiencyReport.delete({ where: { id: reportId } });
+    revalidatePath(`/employees/${employeeId}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting efficiency report:", error);
+    return { success: false, error: "حدث خطأ أثناء حذف التقرير" };
   }
 }

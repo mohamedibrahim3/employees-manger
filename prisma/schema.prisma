@@ -85,28 +85,28 @@ model Employee {
   notes             String // ملاحظات
 
   // Relationships
-  relationships Relationship[] // العلاقات
-  penalties     Penalty[]      // الجزاءات
-  bonuses       Bonus[]        // العلاوات التشجيعية
+  relationships       Relationship[] // العلاقات
+  penalties           Penalty[] // الجزاءات
+  bonuses             Bonus[] // العلاوات التشجيعية
+  efficiencyReports   EfficiencyReport[] // تقارير الكفاءة
 
   // Metadata
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  jobPosition JobPosition? // الحقل للوظيفة
-  educationalDegree EducationalDegree? // الحقل الجديد للدرجة العلمية
-  functionalDegree FunctionalDegree? // الحقل الجديد للدرجة الوظيفية
+  jobPosition         JobPosition? // الحقل للوظيفة
+  educationalDegree   EducationalDegree? // الحقل الجديد للدرجة العلمية
+  functionalDegree    FunctionalDegree? // الحقل الجديد للدرجة الوظيفية
 
   @@map("employees")
 }
 
 model Relationship {
-  id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  employeeId String @db.Uuid
-
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId        String   @db.Uuid
   relationshipType  String // نوع العلاقة (أب/أم/أخ/أخت)
   name              String // اسم الزوج/الزوجة
-  nationalId        String?   @unique //  رقم البطاقة
+  nationalId        String?  @unique // رقم البطاقة
   birthDate         DateTime? // تاريخ الميلاد
   birthPlace        String? // مكان الميلاد
   profession        String? // المهنة
@@ -114,7 +114,7 @@ model Relationship {
   residenceLocation String? // محل الاقامة للعمل
   notes             String? // ملاحظات
 
-  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employee          Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@map("relationships")
 }
@@ -123,14 +123,13 @@ model Penalty {
   id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   employeeId  String   @db.Uuid
   date        DateTime
-  type        String   // نوع الجزاء (e.g., "إنذار", "خصم")
+  type        String // نوع الجزاء (e.g., "إنذار", "خصم")
   description String   @db.Text
   attachments String?  // Optional JSON string of attachment URLs
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@map("penalties")
 }
@@ -142,22 +141,36 @@ model Bonus {
   reason      String   @db.Text // الموقف/السبب
   amount      String?  // قيمة العلاوة (اختياري)
   attachments String?  // Optional JSON string of attachment URLs
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@map("bonuses")
 }
 
+model EfficiencyReport {
+  id          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId  String          @db.Uuid
+  year        Int             // سنة التقرير
+  grade       EfficiencyGrade // درجة التقرير
+  description String          @db.Text
+  attachments String?         // Optional JSON string of attachment URLs
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  employee    Employee        @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("efficiency_reports")
+}
+
 enum JobPosition {
-  ENGINEER     // مهندس
-  ACCOUNTANT   // محاسب
+  ENGINEER // مهندس
+  ACCOUNTANT // محاسب
   ADMINISTRATIVE // إداري
   EXECUTIVE_SUPERVISOR // مشرف تنفيذ
-  WRITER       // كاتب
-  WORKER       // عامل
+  WRITER // كاتب
+  WORKER // عامل
 }
 
 enum EducationalDegree {
@@ -196,4 +209,11 @@ enum FunctionalDegree {
   SIXTH_A // سادسة أ
   SIXTH_B // سادسة ب
   SIXTH_C // سادسة ج
+}
+
+enum EfficiencyGrade {
+  EXCELLENT // ممتاز
+  COMPETENT // كفء
+  AVERAGE // متوسط
+  BELOW // دون
 }

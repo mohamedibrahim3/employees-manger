@@ -16,6 +16,77 @@ import PenaltiesModal from "@/components/PenaltiesModal";
 import PenaltyDeleteButton from "@/components/PenaltyDeleteButton";
 import BonusesModal from "@/components/BonusesModal";
 import BonusDeleteButton from "@/components/BonusDeleteButton";
+import EfficiencyReportsModal from "@/components/EfficiencyReportsModal";
+import EfficiencyReportDeleteButton from "@/components/EfficiencyReportDeleteButton";
+
+type EfficiencyGradeType = "EXCELLENT" | "COMPETENT" | "AVERAGE" | "BELOW";
+
+interface Relationship {
+  id: string;
+  relationshipType: string;
+  name: string;
+  nationalId: string | null;
+  birthDate: Date | null;
+  birthPlace: string | null;
+  profession: string | null;
+  spouseName: string | null;
+  residenceLocation: string | null;
+  notes: string | null;
+  employeeId: string;
+}
+
+interface Penalty {
+  id: string;
+  date: Date;
+  type: string;
+  description: string;
+  attachments: string | null;
+}
+
+interface Bonus {
+  id: string;
+  date: Date;
+  reason: string;
+  amount: string | null;
+  attachments: string | null;
+}
+
+interface EfficiencyReport {
+  id: string;
+  year: number;
+  grade: EfficiencyGradeType;
+  description: string;
+  attachments: string | null;
+}
+
+interface Employee {
+  id: string;
+  name: string;
+  nickName: string;
+  profession: string;
+  birthDate: Date;
+  nationalId: string;
+  maritalStatus: string;
+  residenceLocation: string;
+  hiringDate: Date;
+  hiringType: string;
+  administration: string;
+  actualWork: string;
+  phoneNumber: string;
+  email: string | null;
+  personalImageUrl: string | null;
+  idFrontImageUrl: string | null;
+  idBackImageUrl: string | null;
+  jobPosition: string | null;
+  educationalDegree: string | null;
+  functionalDegree: string | null;
+  relationships: Relationship[];
+  penalties: Penalty[];
+  bonuses: Bonus[];
+  efficiencyReports: EfficiencyReport[];
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 const RELATIONSHIP_LABELS: Record<string, string> = {
   father: "بيانات الأب",
@@ -82,6 +153,13 @@ const PENALTY_TYPE_LABELS: Record<string, string> = {
   TERMINATION: "فصل",
 };
 
+const EFFICIENCY_GRADE_LABELS: Record<string, string> = {
+  EXCELLENT: "ممتاز",
+  COMPETENT: "كفء",
+  AVERAGE: "متوسط",
+  BELOW: "دون",
+};
+
 const getJobPositionLabel = (jobPosition: string | null | undefined) => {
   if (!jobPosition) return "-";
   return JOB_POSITION_LABELS[jobPosition] ?? jobPosition;
@@ -106,12 +184,16 @@ const getPenaltyTypeLabel = (penaltyType: string | null | undefined) => {
   return PENALTY_TYPE_LABELS[penaltyType] ?? penaltyType;
 };
 
+const getEfficiencyGradeLabel = (grade: string | null | undefined) => {
+  if (!grade) return "-";
+  return EFFICIENCY_GRADE_LABELS[grade] ?? grade;
+};
+
 const EmployeeDetailsPage = async (props: {
   params: Promise<{ id: string }>;
 }) => {
   noStore();
   const { id } = await props.params;
-
   const result = await getEmployeeById(id);
 
   if (!result.success || !result.employee) {
@@ -129,7 +211,7 @@ const EmployeeDetailsPage = async (props: {
     );
   }
 
-  const { employee } = result;
+  const employee: Employee = result.employee as Employee;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-white py-8">
@@ -407,47 +489,48 @@ const EmployeeDetailsPage = async (props: {
                   </tr>
                 </thead>
                 <tbody>
-                  {employee.relationships.map((relationship, index: number) => (
-                    <tr
-                      key={relationship.id}
-                      className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                    >
-                      <td className="border border-gray-200 p-3 text-center font-medium">
-                        {RELATIONSHIP_LABELS[relationship.relationshipType] ||
-                          relationship.relationshipType}
-                      </td>
-                      <td className="border border-gray-200 p-3">
-                        {relationship.name}
-                      </td>
-                      <td className="border border-gray-200 p-3 text-center">
-                        {relationship.nationalId}
-                      </td>
-                      <td className="border border-gray-200 p-3 text-center">
-                        {relationship.birthDate
-                          ? new Date(relationship.birthDate).toLocaleDateString(
-                              "ar-EG-u-nu-arab",
-                              {
+                  {employee.relationships.map(
+                    (relationship: Relationship, index: number) => (
+                      <tr
+                        key={relationship.id}
+                        className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                      >
+                        <td className="border border-gray-200 p-3 text-center font-medium">
+                          {RELATIONSHIP_LABELS[relationship.relationshipType] ||
+                            relationship.relationshipType}
+                        </td>
+                        <td className="border border-gray-200 p-3">
+                          {relationship.name}
+                        </td>
+                        <td className="border border-gray-200 p-3 text-center">
+                          {relationship.nationalId || "-"}
+                        </td>
+                        <td className="border border-gray-200 p-3 text-center">
+                          {relationship.birthDate
+                            ? new Date(
+                                relationship.birthDate
+                              ).toLocaleDateString("ar-EG-u-nu-arab", {
                                 year: "numeric",
                                 month: "2-digit",
                                 day: "2-digit",
-                              }
-                            )
-                          : "-"}
-                      </td>
-                      <td className="border border-gray-200 p-3">
-                        {relationship.birthPlace || "-"}
-                      </td>
-                      <td className="border border-gray-200 p-3">
-                        {relationship.profession || "-"}
-                      </td>
-                      <td className="border border-gray-200 p-3">
-                        {relationship.residenceLocation}
-                      </td>
-                      <td className="border border-gray-200 p-3">
-                        {relationship.notes || "-"}
-                      </td>
-                    </tr>
-                  ))}
+                              })
+                            : "-"}
+                        </td>
+                        <td className="border border-gray-200 p-3">
+                          {relationship.birthPlace || "-"}
+                        </td>
+                        <td className="border border-gray-200 p-3">
+                          {relationship.profession || "-"}
+                        </td>
+                        <td className="border border-gray-200 p-3">
+                          {relationship.residenceLocation || "-"}
+                        </td>
+                        <td className="border border-gray-200 p-3">
+                          {relationship.notes || "-"}
+                        </td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             </div>
@@ -504,10 +587,10 @@ const EmployeeDetailsPage = async (props: {
                 <tbody>
                   {employee.penalties
                     .sort(
-                      (a, b) =>
+                      (a: Penalty, b: Penalty) =>
                         new Date(b.date).getTime() - new Date(a.date).getTime()
                     )
-                    .map((penalty, index: number) => (
+                    .map((penalty: Penalty, index: number) => (
                       <tr
                         key={penalty.id}
                         className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
@@ -611,10 +694,10 @@ const EmployeeDetailsPage = async (props: {
                 <tbody>
                   {employee.bonuses
                     .sort(
-                      (a, b) =>
+                      (a: Bonus, b: Bonus) =>
                         new Date(b.date).getTime() - new Date(a.date).getTime()
                     )
-                    .map((bonus, index: number) => (
+                    .map((bonus: Bonus, index: number) => (
                       <tr
                         key={bonus.id}
                         className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
@@ -678,6 +761,107 @@ const EmployeeDetailsPage = async (props: {
           ) : (
             <div className="border border-gray-200 p-8 text-center bg-gray-50">
               <p className="text-gray-600 text-base">لا توجد علاوات مسجلة</p>
+            </div>
+          )}
+        </div>
+
+        {/* Efficiency Reports Section */}
+        <div className="mt-8">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-xl font-medium text-gray-800 bg-gray-100 p-3 rounded-t-xl">
+              تقارير الكفاءة
+            </h2>
+            <EfficiencyReportsModal
+              employeeId={employee.id}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-4 py-2 rounded-xl transition-all font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1 duration-300"
+            />
+          </div>
+          {employee.efficiencyReports &&
+          employee.efficiencyReports.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-gray-200 text-base">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-200 p-3 text-center font-medium">
+                      السنة
+                    </th>
+                    <th className="border border-gray-200 p-3 text-center font-medium">
+                      الدرجة
+                    </th>
+                    <th className="border border-gray-200 p-3 text-center font-medium">
+                      الوصف
+                    </th>
+                    <th className="border border-gray-200 p-3 text-center font-medium">
+                      المرفقات
+                    </th>
+                    <th className="border border-gray-200 p-3 text-center font-medium">
+                      الإجراءات
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {employee.efficiencyReports
+                    .sort(
+                      (a: EfficiencyReport, b: EfficiencyReport) =>
+                        b.year - a.year
+                    )
+                    .map((report: EfficiencyReport, index: number) => (
+                      <tr
+                        key={report.id}
+                        className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                      >
+                        <td className="border border-gray-200 p-3 text-center">
+                          {report.year}
+                        </td>
+                        <td className="border border-gray-200 p-3 text-center">
+                          {getEfficiencyGradeLabel(report.grade)}
+                        </td>
+                        <td className="border border-gray-200 p-3">
+                          {report.description}
+                        </td>
+                        <td className="border border-gray-200 p-3 text-center">
+                          {report.attachments ? (
+                            <a
+                              href={report.attachments}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              عرض المرفق
+                            </a>
+                          ) : (
+                            "-"
+                          )}
+                        </td>
+                        <td className="border border-gray-200 p-3 text-center">
+                          <div className="flex gap-2 justify-center">
+                            <EfficiencyReportsModal
+                              employeeId={employee.id}
+                              efficiencyReport={{
+                                id: report.id,
+                                year: report.year,
+                                grade: report.grade,
+                                description: report.description,
+                                attachments: report.attachments || undefined,
+                              }}
+                              className="text-blue-600 hover:underline"
+                            />
+                            <EfficiencyReportDeleteButton
+                              efficiencyReportId={report.id!}
+                              employeeId={employee.id}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="border border-gray-200 p-8 text-center bg-gray-50">
+              <p className="text-gray-600 text-base">
+                لا توجد تقارير كفاءة مسجلة
+              </p>
             </div>
           )}
         </div>
