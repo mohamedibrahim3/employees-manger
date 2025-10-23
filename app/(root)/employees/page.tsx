@@ -189,8 +189,6 @@ const EmployeesPage = () => {
         {/* Footer Info */}
         <div className="text-center space-y-4 pt-8">
           <div className="inline-flex items-center justify-center space-x-2 space-x-reverse text-gray-600">
-            <div className="w-2 h-2 bg-gray-700 rounded-full animate-pulse"></div>
-            <span className="text-lg">النظام يعمل بحالة ممتازة</span>
           </div>
           <p className="text-gray-500">
             آخر تحديث: {new Date().toLocaleDateString('ar-EG')} - {new Date().toLocaleTimeString('ar-EG')}

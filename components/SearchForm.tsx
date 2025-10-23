@@ -11,6 +11,10 @@ interface SearchSectionProps {
   administrations: string[];
 }
 
+const toArabicDigits = (num: number) => {
+  return num.toString().replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[Number(d)]);
+};
+
 export default function SearchSection({ administrations }: SearchSectionProps) {
   const [name, setName] = useState("");
   const [administration, setAdministration] = useState("");
@@ -20,6 +24,7 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [lastSearchedDegree, setLastSearchedDegree] = useState("");
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,6 +153,33 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
               نتائج البحث
             </h3>
           </div>
+
+          {/* 💡 عرض إجمالي عدد الموظفين */}
+          {searchResults.length > 0 && (
+            <div className="flex justify-center mb-6">
+              <div className="bg-gradient-to-br from-gray-100 to-gray-50 rounded-2xl p-6 shadow-lg border-2 border-gray-300 min-w-[300px]">
+                <div className="text-center">
+                  <p className="text-gray-700 font-medium text-lg mb-2">
+                    إجمالي عدد الموظفين
+                  </p>
+                  <div className="text-5xl font-bold bg-gradient-to-r from-gray-700 to-gray-600 bg-clip-text text-transparent mb-2">
+                    {toArabicDigits(searchResults.length)}
+                  </div>
+                  <p className="text-gray-600 font-medium">
+                    موظف
+                    {educationalDegree && (
+                      <span className="block mt-2 text-sm">
+                        حاصلين على:{" "}
+                        <span className="font-bold text-gray-800">
+                          {educationalDegree}
+                        </span>
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {searchResults.length === 0 ? (
             <div className="text-center py-8 text-gray-600 text-base font-medium">
