@@ -22,6 +22,8 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
   const [administration, setAdministration] = useState("");
   const [educationalDegree, setEducationalDegree] = useState("");
   const [functionalDegree, setFunctionalDegree] = useState("");
+  const [hasPenalties, setHasPenalties] = useState("");
+  const [hasEfficiencyReports, setHasEfficiencyReports] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -38,8 +40,12 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
       const params = new URLSearchParams();
       if (name) params.append("name", name);
       if (administration) params.append("administration", administration);
-      if (educationalDegree) params.append("educationalDegree", educationalDegree);
+      if (educationalDegree)
+        params.append("educationalDegree", educationalDegree);
       if (functionalDegree) params.append("functionalDegree", functionalDegree);
+      if (hasPenalties) params.append("hasPenalties", hasPenalties);
+      if (hasEfficiencyReports)
+        params.append("hasEfficiencyReports", hasEfficiencyReports);
 
       const res = await fetch(`/api/employees/search?${params.toString()}`, {
         method: "GET",
@@ -64,17 +70,23 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
   };
 
   const isSearchDisabled =
-    loading || (!name && !administration && !educationalDegree && !functionalDegree);
+    loading ||
+    (!name &&
+      !administration &&
+      !educationalDegree &&
+      !functionalDegree &&
+      !hasPenalties &&
+      !hasEfficiencyReports);
 
   return (
     <div className="space-y-10">
       {/* Search Form */}
       <form
         onSubmit={handleSearch}
-        className="flex flex-col md:flex-row gap-4 items-end justify-center bg-white/90 p-6 rounded-2xl shadow-md border border-gray-200"
+        className="flex flex-col md:flex-row gap-4 items-end justify-center bg-white/90 p-6 rounded-2xl shadow-md border border-gray-200 flex-wrap"
       >
         {/* حقل اسم الموظف */}
-        <div className="w-full md:w-1/4">
+        <div className="w-full md:w-1/5">
           <label className="block text-right text-gray-700 font-medium mb-2">
             اسم الموظف
           </label>
@@ -89,7 +101,7 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
         </div>
 
         {/* حقل الإدارة */}
-        <div className="w-full md:w-1/4">
+        <div className="w-full md:w-1/5">
           <label className="block text-right text-gray-700 font-medium mb-2">
             الإدارة
           </label>
@@ -109,7 +121,7 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
         </div>
 
         {/* قائمة الدرجة العلمية */}
-        <div className="w-full md:w-1/4">
+        <div className="w-full md:w-1/5">
           <label className="block text-right text-gray-700 font-medium mb-2">
             الدرجة العلمية
           </label>
@@ -128,7 +140,7 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
           </select>
         </div>
 
-        <div className="w-full md:w-1/4">
+        <div className="w-full md:w-1/5">
           <label className="block text-right text-gray-700 font-medium mb-2">
             الدرجة الوظيفية
           </label>
@@ -144,6 +156,40 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
                 {degree}
               </option>
             ))}
+          </select>
+        </div>
+
+        {/* حقل حاصل على جزاءات */}
+        <div className="w-full md:w-1/5">
+          <label className="block text-right text-gray-700 font-medium mb-2">
+            حاصل على جزاءات
+          </label>
+          <select
+            value={hasPenalties}
+            onChange={(e) => setHasPenalties(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-gray-500 focus:outline-none text-right bg-white/80 backdrop-blur-sm"
+            disabled={loading}
+          >
+            <option value="">الكل</option>
+            <option value="yes">نعم</option>
+            <option value="no">لا</option>
+          </select>
+        </div>
+
+        {/* حقل حاصل على تقارير كفاءة */}
+        <div className="w-full md:w-1/5">
+          <label className="block text-right text-gray-700 font-medium mb-2">
+            حاصل على تقارير كفاءة
+          </label>
+          <select
+            value={hasEfficiencyReports}
+            onChange={(e) => setHasEfficiencyReports(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-gray-500 focus:outline-none text-right bg-white/80 backdrop-blur-sm"
+            disabled={loading}
+          >
+            <option value="">الكل</option>
+            <option value="yes">نعم</option>
+            <option value="no">لا</option>
           </select>
         </div>
 
@@ -185,7 +231,10 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
                   </div>
                   <p className="text-gray-600 font-medium">
                     موظف
-                    {(educationalDegree || functionalDegree) && (
+                    {(educationalDegree ||
+                      functionalDegree ||
+                      hasPenalties ||
+                      hasEfficiencyReports) && (
                       <span className="block mt-2 text-sm">
                         {educationalDegree && (
                           <>
@@ -195,13 +244,35 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
                             </span>
                           </>
                         )}
-                        {educationalDegree && functionalDegree && "، "}
+                        {educationalDegree &&
+                          (functionalDegree ||
+                            hasPenalties ||
+                            hasEfficiencyReports) &&
+                          "، "}
                         {functionalDegree && (
                           <>
                             الدرجة الوظيفية:{" "}
                             <span className="font-bold text-gray-800">
                               {functionalDegree}
                             </span>
+                          </>
+                        )}
+                        {functionalDegree &&
+                          (hasPenalties || hasEfficiencyReports) &&
+                          "، "}
+                        {hasPenalties && (
+                          <>
+                            {hasPenalties === "yes"
+                              ? "حاصلين على جزاءات"
+                              : "غير حاصلين على جزاءات"}
+                          </>
+                        )}
+                        {hasPenalties && hasEfficiencyReports && "، "}
+                        {hasEfficiencyReports && (
+                          <>
+                            {hasEfficiencyReports === "yes"
+                              ? "حاصلين على تقارير كفاءة"
+                              : "غير حاصلين على تقارير كفاءة"}
                           </>
                         )}
                       </span>

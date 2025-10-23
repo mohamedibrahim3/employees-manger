@@ -8,11 +8,25 @@ export async function GET(request: Request) {
     const administration = searchParams.get("administration") || "";
     const educationalDegree = searchParams.get("educationalDegree") || "";
     const functionalDegree = searchParams.get("functionalDegree") || "";
+    const hasPenalties = searchParams.get("hasPenalties") || "";
+    const hasEfficiencyReports = searchParams.get("hasEfficiencyReports") || "";
+
+    console.log("API Route - Search params:", {
+      name,
+      administration,
+      educationalDegree,
+      functionalDegree,
+      hasPenalties,
+      hasEfficiencyReports,
+    });
+
     const result = await getEmployeesBySearch(
       name,
       administration,
       educationalDegree,
-      functionalDegree
+      functionalDegree,
+      hasPenalties,
+      hasEfficiencyReports
     );
 
     return NextResponse.json(result, { status: 200 });

@@ -331,7 +331,9 @@ export const getEmployeesBySearch = async (
   name: string,
   administration: string,
   educationalDegree: string,
-  functionalDegree: string
+  functionalDegree: string,
+  hasPenalties: string = "",
+  hasEfficiencyReports: string = ""
 ) => {
   noStore();
   try {
@@ -345,9 +347,11 @@ export const getEmployeesBySearch = async (
       cleanAdmin,
       cleanEduDegree,
       cleanFuncDegree,
+      hasPenalties,
+      hasEfficiencyReports,
     });
 
-    const whereClause: any = {};
+    const whereClause: any = {}; // build direct where object
 
     if (cleanName) {
       whereClause.name = { contains: cleanName, mode: "insensitive" };
@@ -396,6 +400,24 @@ export const getEmployeesBySearch = async (
       }
     }
 
+    // Penalties filter: use { some: {} } to check existence
+    if (hasPenalties === "yes") {
+      whereClause.penalties = { some: {} };
+      console.log("🔍 Filtering employees with penalties (some: {})");
+    } else if (hasPenalties === "no") {
+      whereClause.penalties = { none: {} };
+      console.log("🔍 Filtering employees without penalties (none)");
+    }
+
+    // Efficiency reports filter: use { some: {} } to check existence
+    if (hasEfficiencyReports === "yes") {
+      whereClause.efficiencyReports = { some: {} };
+      console.log("🔍 Filtering employees with efficiency reports (some: {})");
+    } else if (hasEfficiencyReports === "no") {
+      whereClause.efficiencyReports = { none: {} };
+      console.log("🔍 Filtering employees without efficiency reports (none)");
+    }
+
     console.log(
       "Where Clause (Optimized):",
       JSON.stringify(whereClause, null, 2)
@@ -403,13 +425,15 @@ export const getEmployeesBySearch = async (
 
     const employees = await prisma.employee.findMany({
       where: whereClause,
-      orderBy: { createdAt: "desc" },
-      include: {
-        relationships: true,
-        penalties: true,
-        bonuses: true,
-        efficiencyReports: true,
+      select: {
+        id: true,
+        name: true,
+        administration: true,
+        educationalDegree: true,
+        functionalDegree: true,
+        createdAt: true,
       },
+      orderBy: { createdAt: "desc" },
     });
 
     console.log(`✅ Found ${employees.length} employees`);
