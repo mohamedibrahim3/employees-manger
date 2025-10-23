@@ -397,7 +397,7 @@ export const getEmployeesBySearch = async (
     }
 
     console.log(
-      "🔍 Where Clause (Optimized):",
+      "Where Clause (Optimized):",
       JSON.stringify(whereClause, null, 2)
     );
 
