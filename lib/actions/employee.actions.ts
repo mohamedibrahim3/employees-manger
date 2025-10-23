@@ -368,7 +368,10 @@ export const getEmployeesBySearch = async (
 
       if (englishEduDegree) {
         whereClause.educationalDegree = englishEduDegree;
-        console.log("🔍 Searching for English educational degree:", englishEduDegree);
+        console.log(
+          "🔍 Searching for English educational degree:",
+          englishEduDegree
+        );
       } else {
         console.log("Unknown educational degree:", cleanEduDegree);
         return { success: true, employees: [] };
@@ -383,7 +386,10 @@ export const getEmployeesBySearch = async (
 
       if (englishFuncDegree) {
         whereClause.functionalDegree = englishFuncDegree;
-        console.log("🔍 Searching for English functional degree:", englishFuncDegree);
+        console.log(
+          "🔍 Searching for English functional degree:",
+          englishFuncDegree
+        );
       } else {
         console.log("Unknown functional degree:", cleanFuncDegree);
         return { success: true, employees: [] };
@@ -395,7 +401,7 @@ export const getEmployeesBySearch = async (
       JSON.stringify(whereClause, null, 2)
     );
 
-    let employees = await prisma.employee.findMany({
+    const employees = await prisma.employee.findMany({
       where: whereClause,
       orderBy: { createdAt: "desc" },
       include: {
