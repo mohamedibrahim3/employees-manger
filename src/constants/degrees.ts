@@ -1,5 +1,3 @@
-// src/constants/degrees.ts
-
 export const EDUCATIONAL_DEGREES = [
   "دكتوراة",
   "ماجستير",
@@ -13,6 +11,31 @@ export const EDUCATIONAL_DEGREES = [
   "محو أمية",
   "بدون",
 ];
+
+export const FUNCTIONAL_DEGREES = [
+  "وكيل أول وزارة",
+  "وكيل وزارة",
+  "مدير عام",
+  "مدير إدارة",
+  "رئيس قسم",
+  "أولى أ",
+  "أولى ب",
+  "ثانية أ",
+  "ثانية ب",
+  "ثالثة أ",
+  "ثالثة ب",
+  "ثالثة ج",
+  "رابعة أ",
+  "رابعة ب",
+  "رابعة ج",
+  "خامسة أ",
+  "خامسة ب",
+  "خامسة ج",
+  "سادسة أ",
+  "سادسة ب",
+  "سادسة ج",
+];
+
 export const EDUCATIONAL_DEGREE_MAPPING: Record<string, string> = {
   دكتوراة: "DOCTORATE",
   ماجستير: "MASTERS",
@@ -27,6 +50,30 @@ export const EDUCATIONAL_DEGREE_MAPPING: Record<string, string> = {
   بدون: "NONE",
 };
 
+export const FUNCTIONAL_DEGREE_MAPPING: Record<string, string> = {
+  "وكيل أول وزارة": "FIRST_DEPUTY_MINISTER",
+  "وكيل وزارة": "DEPUTY_MINISTER",
+  "مدير عام": "GENERAL_MANAGER",
+  "مدير إدارة": "DEPARTMENT_MANAGER",
+  "رئيس قسم": "DEPARTMENT_HEAD",
+  "أولى أ": "FIRST_A",
+  "أولى ب": "FIRST_B",
+  "ثانية أ": "SECOND_A",
+  "ثانية ب": "SECOND_B",
+  "ثالثة أ": "THIRD_A",
+  "ثالثة ب": "THIRD_B",
+  "ثالثة ج": "THIRD_C",
+  "رابعة أ": "FOURTH_A",
+  "رابعة ب": "FOURTH_B",
+  "رابعة ج": "FOURTH_C",
+  "خامسة أ": "FIFTH_A",
+  "خامسة ب": "FIFTH_B",
+  "خامسة ج": "FIFTH_C",
+  "سادسة أ": "SIXTH_A",
+  "سادسة ب": "SIXTH_B",
+  "سادسة ج": "SIXTH_C",
+};
+
 export const EDUCATIONAL_DEGREE_REVERSE_MAPPING: Record<string, string> = {
   DOCTORATE: "دكتوراة",
   MASTERS: "ماجستير",
@@ -39,4 +86,28 @@ export const EDUCATIONAL_DEGREE_REVERSE_MAPPING: Record<string, string> = {
   PRIMARY: "ابتدائية",
   LITERACY: "محو أمية",
   NONE: "بدون",
+};
+
+export const FUNCTIONAL_DEGREE_REVERSE_MAPPING: Record<string, string> = {
+  FIRST_DEPUTY_MINISTER: "وكيل أول وزارة",
+  DEPUTY_MINISTER: "وكيل وزارة",
+  GENERAL_MANAGER: "مدير عام",
+  DEPARTMENT_MANAGER: "مدير إدارة",
+  DEPARTMENT_HEAD: "رئيس قسم",
+  FIRST_A: "أولى أ",
+  FIRST_B: "أولى ب",
+  SECOND_A: "ثانية أ",
+  SECOND_B: "ثانية ب",
+  THIRD_A: "ثالثة أ",
+  THIRD_B: "ثالثة ب",
+  THIRD_C: "ثالثة ج",
+  FOURTH_A: "رابعة أ",
+  FOURTH_B: "رابعة ب",
+  FOURTH_C: "رابعة ج",
+  FIFTH_A: "خامسة أ",
+  FIFTH_B: "خامسة ب",
+  FIFTH_C: "خامسة ج",
+  SIXTH_A: "سادسة أ",
+  SIXTH_B: "سادسة ب",
+  SIXTH_C: "سادسة ج",
 };

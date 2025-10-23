@@ -5,6 +5,8 @@ import Link from "next/link";
 import {
   EDUCATIONAL_DEGREES,
   EDUCATIONAL_DEGREE_REVERSE_MAPPING,
+  FUNCTIONAL_DEGREES,
+  FUNCTIONAL_DEGREE_REVERSE_MAPPING,
 } from "@/src/constants/degrees";
 
 interface SearchSectionProps {
@@ -19,12 +21,12 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
   const [name, setName] = useState("");
   const [administration, setAdministration] = useState("");
   const [educationalDegree, setEducationalDegree] = useState("");
+  const [functionalDegree, setFunctionalDegree] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
-  const [lastSearchedDegree, setLastSearchedDegree] = useState("");
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,8 +38,8 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
       const params = new URLSearchParams();
       if (name) params.append("name", name);
       if (administration) params.append("administration", administration);
-      if (educationalDegree)
-        params.append("educationalDegree", educationalDegree);
+      if (educationalDegree) params.append("educationalDegree", educationalDegree);
+      if (functionalDegree) params.append("functionalDegree", functionalDegree);
 
       const res = await fetch(`/api/employees/search?${params.toString()}`, {
         method: "GET",
@@ -62,7 +64,7 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
   };
 
   const isSearchDisabled =
-    loading || (!name && !administration && !educationalDegree);
+    loading || (!name && !administration && !educationalDegree && !functionalDegree);
 
   return (
     <div className="space-y-10">
@@ -126,7 +128,25 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
           </select>
         </div>
 
-        {/* زر البحث */}
+        <div className="w-full md:w-1/4">
+          <label className="block text-right text-gray-700 font-medium mb-2">
+            الدرجة الوظيفية
+          </label>
+          <select
+            value={functionalDegree}
+            onChange={(e) => setFunctionalDegree(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-gray-500 focus:outline-none text-right bg-white/80 backdrop-blur-sm"
+            disabled={loading}
+          >
+            <option value="">اختر الدرجة الوظيفية</option>
+            {FUNCTIONAL_DEGREES.map((degree) => (
+              <option key={degree} value={degree}>
+                {degree}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <button
           type="submit"
           className={`w-full md:w-auto px-8 py-3 bg-gradient-to-r from-gray-700 to-gray-600 text-white rounded-xl font-medium text-base shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 hover:from-gray-600 hover:to-gray-700 ${
@@ -138,14 +158,12 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
         </button>
       </form>
 
-      {/* Error Message */}
       {error && (
         <div className="text-center text-red-600 text-base font-medium py-4 bg-red-50 rounded-xl border border-red-200">
           {error}
         </div>
       )}
 
-      {/* Search Results */}
       {hasSearched && (
         <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-xl overflow-hidden border border-gray-200 p-8 space-y-6">
           <div className="bg-gradient-to-r from-gray-800 to-gray-600 px-8 py-6 rounded-2xl mb-6">
@@ -167,12 +185,25 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
                   </div>
                   <p className="text-gray-600 font-medium">
                     موظف
-                    {educationalDegree && (
+                    {(educationalDegree || functionalDegree) && (
                       <span className="block mt-2 text-sm">
-                        حاصلين على:{" "}
-                        <span className="font-bold text-gray-800">
-                          {educationalDegree}
-                        </span>
+                        {educationalDegree && (
+                          <>
+                            حاصلين على:{" "}
+                            <span className="font-bold text-gray-800">
+                              {educationalDegree}
+                            </span>
+                          </>
+                        )}
+                        {educationalDegree && functionalDegree && "، "}
+                        {functionalDegree && (
+                          <>
+                            الدرجة الوظيفية:{" "}
+                            <span className="font-bold text-gray-800">
+                              {functionalDegree}
+                            </span>
+                          </>
+                        )}
                       </span>
                     )}
                   </p>
@@ -199,13 +230,23 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
                     الإدارة:{" "}
                     <span className="text-gray-800">{emp.administration}</span>
                   </p>
-                  <p className="text-gray-600 font-medium mb-4 text-sm">
+                  <p className="text-gray-600 font-medium mb-1 text-sm">
                     الدرجة العلمية:{" "}
                     <span className="text-gray-800">
                       {emp.educationalDegree
                         ? EDUCATIONAL_DEGREE_REVERSE_MAPPING[
                             emp.educationalDegree
                           ] || emp.educationalDegree
+                        : "-"}
+                    </span>
+                  </p>
+                  <p className="text-gray-600 font-medium mb-4 text-sm">
+                    الدرجة الوظيفية:{" "}
+                    <span className="text-gray-800">
+                      {emp.functionalDegree
+                        ? FUNCTIONAL_DEGREE_REVERSE_MAPPING[
+                            emp.functionalDegree
+                          ] || emp.functionalDegree
                         : "-"}
                     </span>
                   </p>

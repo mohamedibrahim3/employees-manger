@@ -330,18 +330,21 @@ export const getEmployees = async () => {
 export const getEmployeesBySearch = async (
   name: string,
   administration: string,
-  educationalDegree: string
+  educationalDegree: string,
+  functionalDegree: string
 ) => {
   noStore();
   try {
     const cleanName = name?.replace(/\s+/g, " ").trim() || "";
     const cleanAdmin = administration?.replace(/\s+/g, " ").trim() || "";
-    const cleanDegree = educationalDegree?.replace(/\s+/g, " ").trim() || "";
+    const cleanEduDegree = educationalDegree?.replace(/\s+/g, " ").trim() || "";
+    const cleanFuncDegree = functionalDegree?.replace(/\s+/g, " ").trim() || "";
 
     console.log("🔍 Search Input:", {
       cleanName,
       cleanAdmin,
-      cleanDegree,
+      cleanEduDegree,
+      cleanFuncDegree,
     });
 
     const whereClause: any = {};
@@ -357,17 +360,32 @@ export const getEmployeesBySearch = async (
       };
     }
 
-    if (cleanDegree) {
+    if (cleanEduDegree) {
       const { EDUCATIONAL_DEGREE_MAPPING } = await import(
         "@/src/constants/degrees"
       );
-      const englishDegree = EDUCATIONAL_DEGREE_MAPPING[cleanDegree];
+      const englishEduDegree = EDUCATIONAL_DEGREE_MAPPING[cleanEduDegree];
 
-      if (englishDegree) {
-        whereClause.educationalDegree = englishDegree;
-        console.log("🔍 Searching for English degree:", englishDegree);
+      if (englishEduDegree) {
+        whereClause.educationalDegree = englishEduDegree;
+        console.log("🔍 Searching for English educational degree:", englishEduDegree);
       } else {
-        console.log("Unknown degree:", cleanDegree);
+        console.log("Unknown educational degree:", cleanEduDegree);
+        return { success: true, employees: [] };
+      }
+    }
+
+    if (cleanFuncDegree) {
+      const { FUNCTIONAL_DEGREE_MAPPING } = await import(
+        "@/src/constants/degrees"
+      );
+      const englishFuncDegree = FUNCTIONAL_DEGREE_MAPPING[cleanFuncDegree];
+
+      if (englishFuncDegree) {
+        whereClause.functionalDegree = englishFuncDegree;
+        console.log("🔍 Searching for English functional degree:", englishFuncDegree);
+      } else {
+        console.log("Unknown functional degree:", cleanFuncDegree);
         return { success: true, employees: [] };
       }
     }
@@ -396,7 +414,8 @@ export const getEmployeesBySearch = async (
         employees.slice(0, 3).map((emp: any) => ({
           name: emp.name,
           admin: emp.administration,
-          degree: emp.educationalDegree,
+          eduDegree: emp.educationalDegree,
+          funcDegree: emp.functionalDegree,
         }))
       );
     } else {
@@ -568,6 +587,7 @@ export async function deletePenalty(penaltyId: string, employeeId: string) {
     return { success: false, error: "حدث خطأ أثناء حذف الجزاء" };
   }
 }
+
 export async function createBonus(
   employeeId: string,
   data: { date: string; reason: string; amount?: string; attachments?: string }

@@ -6,12 +6,13 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const name = searchParams.get("name") || "";
     const administration = searchParams.get("administration") || "";
-
     const educationalDegree = searchParams.get("educationalDegree") || "";
+    const functionalDegree = searchParams.get("functionalDegree") || "";
     const result = await getEmployeesBySearch(
       name,
       administration,
-      educationalDegree
+      educationalDegree,
+      functionalDegree
     );
 
     return NextResponse.json(result, { status: 200 });
