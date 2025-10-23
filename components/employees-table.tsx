@@ -48,7 +48,6 @@ export function EmployeesTable({
       }));
 
       if (res.ok && result.success) {
-        // انيميشن خروج بسيطة (اختفاء تدريجي)
         setDeletedIds((prev) => [...prev, id]);
         setTimeout(() => {
           setEmployees((prev) => prev.filter((emp) => emp.id !== id));
