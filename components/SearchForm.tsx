@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-// 💡 استيراد الدرجات العلمية الثابتة (عدّل المسار حسب موقع الملف في مشروعك)
-import { EDUCATIONAL_DEGREES } from "@/src/constants/degrees";
+import {
+  EDUCATIONAL_DEGREES,
+  EDUCATIONAL_DEGREE_REVERSE_MAPPING,
+} from "@/src/constants/degrees";
 
 interface SearchSectionProps {
   administrations: string[];
@@ -99,7 +101,7 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
           </select>
         </div>
 
-        {/* 💡 قائمة الدرجة العلمية الجديدة (Select) */}
+        {/* قائمة الدرجة العلمية */}
         <div className="w-full md:w-1/4">
           <label className="block text-right text-gray-700 font-medium mb-2">
             الدرجة العلمية
@@ -111,7 +113,6 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
             disabled={loading}
           >
             <option value="">اختر الدرجة العلمية</option>
-            {/* 💡 استخدام المصفوفة الثابتة لتوليد الخيارات */}
             {EDUCATIONAL_DEGREES.map((degree) => (
               <option key={degree} value={degree}>
                 {degree}
@@ -139,7 +140,7 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
         </div>
       )}
 
-      {/* Search Results (باقي الكود كما هو) */}
+      {/* Search Results */}
       {hasSearched && (
         <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-xl overflow-hidden border border-gray-200 p-8 space-y-6">
           <div className="bg-gradient-to-r from-gray-800 to-gray-600 px-8 py-6 rounded-2xl mb-6">
@@ -169,7 +170,11 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
                   <p className="text-gray-600 font-medium mb-4 text-sm">
                     الدرجة العلمية:{" "}
                     <span className="text-gray-800">
-                      {emp.educationalDegree || "-"}
+                      {emp.educationalDegree
+                        ? EDUCATIONAL_DEGREE_REVERSE_MAPPING[
+                            emp.educationalDegree
+                          ] || emp.educationalDegree
+                        : "-"}
                     </span>
                   </p>
                   <Link
