@@ -64,14 +64,16 @@ export default function RootLayout({
             </div>
           </div>
         </header>
+
         <main className="flex-1 w-full container mx-auto py-8 sm:py-10 px-4">
           <div className="bg-white/70 backdrop-blur-md border border-gray-200/50 rounded-2xl shadow-xl p-6 sm:p-8">
             <EdgeStoreProvider>{children}</EdgeStoreProvider>
           </div>
         </main>
-        <footer className="w-full mt-auto py-8 bg-blue-500/20 backdrop-blur-lg border-t border-blue-300/30">
+
+        <footer className="w-full mt-auto py-8 bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 backdrop-blur-lg border-t border-gray-300/30">
           <div className="container mx-auto px-4">
-            <div className="text-center text-sm text-blue-800">
+            <div className="text-center text-sm text-gray-700">
               © {new Date().getFullYear()} {APP_NAME_FULL}. جميع الحقوق محفوظة.
               <br />
             </div>
