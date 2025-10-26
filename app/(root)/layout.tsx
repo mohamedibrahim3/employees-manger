@@ -13,7 +13,6 @@ export default function RootLayout({
   return (
     <>
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 antialiased">
-        {/* Header */}
         <header className="sticky top-0 z-50 w-full bg-gray-500/15 backdrop-blur-xl border-b border-gray-300/30 transition-colors duration-300 shadow-md">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-20 lg:h-24">
@@ -31,7 +30,6 @@ export default function RootLayout({
                   />
                 </div>
                 <div className="flex flex-col text-right space-y-1">
-                  {/* اسم الوزارة بالكامل في الشاشات الكبيرة */}
                   <div className="hidden md:flex flex-col">
                     <h1 className="text-sm lg:text-base font-bold text-gray-800 tracking-tight">
                       وزارة الإسكان والمرافق والمجتمعات العمرانية
@@ -46,7 +44,6 @@ export default function RootLayout({
                       إعداد نظم المعلومات والتحول الرقمي
                     </p>
                   </div>
-                  {/* نسخة مختصرة للجوال */}
                   <div className="flex md:hidden flex-col">
                     <h1 className="text-sm font-bold text-gray-800 leading-tight">
                       جهاز تعمير سيناء
@@ -68,14 +65,12 @@ export default function RootLayout({
           </div>
         </header>
 
-        {/* Main */}
         <main className="flex-1 w-full container mx-auto py-8 sm:py-10 px-4">
           <div className="bg-white/70 backdrop-blur-md border border-gray-200/50 rounded-2xl shadow-xl p-6 sm:p-8">
             <EdgeStoreProvider>{children}</EdgeStoreProvider>
           </div>
         </main>
 
-        {/* Footer */}
         <footer className="w-full mt-auto py-8 bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 backdrop-blur-lg border-t border-gray-300/30">
           <div className="container mx-auto px-4">
             <div className="text-center text-sm text-gray-700">
