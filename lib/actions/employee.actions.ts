@@ -409,13 +409,19 @@ export const getEmployeesBySearch = async (
       console.log("🔍 Filtering employees without penalties (none)");
     }
 
-    // Efficiency reports filter: use { some: {} } to check existence
-    if (hasEfficiencyReports === "yes") {
-      whereClause.efficiencyReports = { some: {} };
-      console.log("🔍 Filtering employees with efficiency reports (some: {})");
-    } else if (hasEfficiencyReports === "no") {
-      whereClause.efficiencyReports = { none: {} };
-      console.log("🔍 Filtering employees without efficiency reports (none)");
+    // Efficiency reports filter: filter by grade or none for BELOW
+    if (hasEfficiencyReports && hasEfficiencyReports !== "") {
+      if (hasEfficiencyReports === "BELOW") {
+        whereClause.efficiencyReports = { none: {} };
+        console.log("🔍 Filtering employees without efficiency reports (none)");
+      } else {
+        whereClause.efficiencyReports = { 
+          some: { 
+            grade: hasEfficiencyReports 
+          } 
+        };
+        console.log(`🔍 Filtering employees with efficiency grade: ${hasEfficiencyReports}`);
+      }
     }
 
     console.log(

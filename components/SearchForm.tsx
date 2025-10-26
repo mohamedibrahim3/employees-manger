@@ -17,6 +17,20 @@ const toArabicDigits = (num: number) => {
   return num.toString().replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[Number(d)]);
 };
 
+const EFFICIENCY_GRADES = [
+  { value: "EXCELLENT", label: "ممتاز" },
+  { value: "COMPETENT", label: "كفء" },
+  { value: "AVERAGE", label: "متوسط" },
+  { value: "BELOW", label: "دون" },
+];
+
+const EFFICIENCY_GRADE_LABELS: Record<string, string> = {
+  EXCELLENT: "ممتاز",
+  COMPETENT: "كفء",
+  AVERAGE: "متوسط",
+  BELOW: "دون",
+};
+
 export default function SearchSection({ administrations }: SearchSectionProps) {
   const [name, setName] = useState("");
   const [administration, setAdministration] = useState("");
@@ -176,10 +190,10 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
           </select>
         </div>
 
-        {/* حقل حاصل على تقارير كفاءة */}
+        {/* حقل درجة تقرير الكفاءة */}
         <div className="w-full md:w-1/5">
           <label className="block text-right text-gray-700 font-medium mb-2">
-            حاصل على تقارير كفاءة
+            درجة تقرير الكفاءة
           </label>
           <select
             value={hasEfficiencyReports}
@@ -188,8 +202,11 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
             disabled={loading}
           >
             <option value="">الكل</option>
-            <option value="yes">نعم</option>
-            <option value="no">لا</option>
+            {EFFICIENCY_GRADES.map((grade) => (
+              <option key={grade.value} value={grade.value}>
+                {grade.label}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -270,9 +287,10 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
                         {hasPenalties && hasEfficiencyReports && "، "}
                         {hasEfficiencyReports && (
                           <>
-                            {hasEfficiencyReports === "yes"
-                              ? "حاصلين على تقارير كفاءة"
-                              : "غير حاصلين على تقارير كفاءة"}
+                            حاصلين على درجة تقرير كفاءة:{" "}
+                            <span className="font-bold text-gray-800">
+                              {EFFICIENCY_GRADE_LABELS[hasEfficiencyReports as keyof typeof EFFICIENCY_GRADE_LABELS]}
+                            </span>
                           </>
                         )}
                       </span>
