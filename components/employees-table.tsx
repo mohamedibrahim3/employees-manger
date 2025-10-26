@@ -48,7 +48,7 @@ export function EmployeesTable({
       }));
 
       if (res.ok && result.success) {
-        setDeletedIds((prev) => [...prev, id]);
+         setDeletedIds((prev) => [...prev, id]);
         setTimeout(() => {
           setEmployees((prev) => prev.filter((emp) => emp.id !== id));
           alert(`✅ تم حذف الموظف "${name}" بنجاح`);

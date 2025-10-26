@@ -4,7 +4,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import dayjs from "dayjs";
+import "dayjs/locale/ar";
 import { createPenalty, updatePenalty } from "@/lib/actions/employee.actions";
+
+dayjs.locale("ar");
 
 const penaltySchema = z.object({
   date: z.string().min(1, "التاريخ مطلوب"),
@@ -41,12 +45,14 @@ const PenaltiesModal: React.FC<PenaltiesModalProps> = ({ employeeId, penalty, cl
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<PenaltyForm>({
     resolver: zodResolver(penaltySchema),
     defaultValues: penalty
       ? {
-          date: new Date(penalty.date).toISOString().split("T")[0],
+          date: dayjs(penalty.date).format("DD/MM/YYYY"),
           type: penalty.type,
           description: penalty.description,
           attachments: penalty.attachments || "",
@@ -55,9 +61,13 @@ const PenaltiesModal: React.FC<PenaltiesModalProps> = ({ employeeId, penalty, cl
   });
 
   const onSubmit = async (data: PenaltyForm) => {
+    // تحويل التاريخ لصيغة ISO قبل الإرسال
+    const formattedDate = dayjs(data.date, "DD/MM/YYYY").toISOString();
+    const payload = { ...data, date: formattedDate };
+
     const action = penalty?.id
-      ? updatePenalty(penalty.id, employeeId, data)
-      : createPenalty(employeeId, data);
+      ? updatePenalty(penalty.id, employeeId, payload)
+      : createPenalty(employeeId, payload);
 
     const result = await action;
     if (result.success) {
@@ -68,39 +78,42 @@ const PenaltiesModal: React.FC<PenaltiesModalProps> = ({ employeeId, penalty, cl
     }
   };
 
+  // تنسيق الإدخال أثناء الكتابة
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, ""); // إزالة أي شيء غير أرقام
+    if (value.length >= 5) {
+      value = value.replace(/(\d{2})(\d{2})(\d{0,4})/, "$1/$2/$3");
+    } else if (value.length >= 3) {
+      value = value.replace(/(\d{2})(\d{0,2})/, "$1/$2");
+    }
+    setValue("date", value);
+  };
+
   return (
     <div className="relative">
       <button
         onClick={() => setOpen(true)}
-        className={className || "inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-4 py-2 rounded-xl transition-all font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1 duration-300"}
+        className={
+          className ||
+          "inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-4 py-2 rounded-xl transition-all font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1 duration-300"
+        }
       >
         {penalty ? "تعديل" : "إضافة جزاء"}
       </button>
+
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop with blur */}
-          <div 
+          <div
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={() => {
               setOpen(false);
               reset();
             }}
           />
-          
-          {/* Modal */}
+
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in duration-200">
-            {/* Header */}
             <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="bg-white/20 p-2 rounded-lg">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-bold">
-                  {penalty ? "تعديل الجزاء" : "إضافة جزاء جديد"}
-                </h2>
-              </div>
+              <h2 className="text-2xl font-bold">{penalty ? "تعديل الجزاء" : "إضافة جزاء جديد"}</h2>
               <button
                 onClick={() => {
                   setOpen(false);
@@ -108,45 +121,34 @@ const PenaltiesModal: React.FC<PenaltiesModalProps> = ({ employeeId, penalty, cl
                 }}
                 className="text-white/80 hover:text-white hover:bg-white/20 p-2 rounded-lg transition-all"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                ✕
               </button>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Date Field */}
+                {/* التاريخ بصيغة اليوم/الشهر/السنة */}
                 <div>
-                  <label htmlFor="date" className="block text-gray-700 font-semibold mb-2 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    التاريخ
+                  <label htmlFor="date" className="block text-gray-700 font-semibold mb-2">
+                    التاريخ (يوم / شهر / سنة)
                   </label>
                   <input
-                    type="date"
+                    type="text"
                     id="date"
-                    {...register("date")}
+                    value={watch("date")}
+                    onChange={handleDateChange}
+                    placeholder="DD/MM/YYYY"
+                    maxLength={10}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none"
                   />
                   {errors.date && (
-                    <p className="text-red-600 text-sm mt-2 flex items-center gap-1">
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
-                      {errors.date.message}
-                    </p>
+                    <p className="text-red-600 text-sm mt-2">{errors.date.message}</p>
                   )}
                 </div>
 
-                {/* Type Field */}
+                {/* نوع الجزاء */}
                 <div>
-                  <label htmlFor="type" className="block text-gray-700 font-semibold mb-2 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                    </svg>
+                  <label htmlFor="type" className="block text-gray-700 font-semibold mb-2">
                     نوع الجزاء
                   </label>
                   <select
@@ -161,48 +163,30 @@ const PenaltiesModal: React.FC<PenaltiesModalProps> = ({ employeeId, penalty, cl
                       </option>
                     ))}
                   </select>
-                  {errors.type && (
-                    <p className="text-red-600 text-sm mt-2 flex items-center gap-1">
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
-                      {errors.type.message}
-                    </p>
-                  )}
+                  {errors.type && <p className="text-red-600 text-sm mt-2">{errors.type.message}</p>}
                 </div>
               </div>
 
-              {/* Description Field */}
+              {/* الوصف */}
               <div>
-                <label htmlFor="description" className="block text-gray-700 font-semibold mb-2 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
-                  </svg>
+                <label htmlFor="description" className="block text-gray-700 font-semibold mb-2">
                   الوصف
                 </label>
                 <textarea
                   id="description"
                   rows={5}
                   {...register("description")}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none resize-none"
                   placeholder="اكتب وصف الجزاء هنا..."
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none resize-none"
                 />
                 {errors.description && (
-                  <p className="text-red-600 text-sm mt-2 flex items-center gap-1">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                    {errors.description.message}
-                  </p>
+                  <p className="text-red-600 text-sm mt-2">{errors.description.message}</p>
                 )}
               </div>
 
-              {/* Attachments Field */}
+              {/* المرفقات */}
               <div>
-                <label htmlFor="attachments" className="block text-gray-700 font-semibold mb-2 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                  </svg>
+                <label htmlFor="attachments" className="block text-gray-700 font-semibold mb-2">
                   المرفقات (رابط)
                   <span className="text-sm text-gray-500 font-normal">(اختياري)</span>
                 </label>
@@ -210,20 +194,12 @@ const PenaltiesModal: React.FC<PenaltiesModalProps> = ({ employeeId, penalty, cl
                   type="url"
                   id="attachments"
                   {...register("attachments")}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none"
                   placeholder="https://example.com/file"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none"
                 />
-                {errors.attachments && (
-                  <p className="text-red-600 text-sm mt-2 flex items-center gap-1">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                    {errors.attachments.message}
-                  </p>
-                )}
               </div>
 
-              {/* Action Buttons */}
+              {/* الأزرار */}
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="button"
@@ -231,20 +207,14 @@ const PenaltiesModal: React.FC<PenaltiesModalProps> = ({ employeeId, penalty, cl
                     setOpen(false);
                     reset();
                   }}
-                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold transition-all"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
                   إلغاء
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
                   حفظ
                 </button>
               </div>
