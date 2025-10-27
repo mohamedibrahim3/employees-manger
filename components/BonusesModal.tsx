@@ -6,12 +6,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import dayjs from "dayjs";
 import "dayjs/locale/ar";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import { createBonus, updateBonus } from "@/lib/actions/employee.actions";
 
+dayjs.extend(customParseFormat);
 dayjs.locale("ar");
 
 const bonusSchema = z.object({
-  date: z.string().min(1, "التاريخ مطلوب"),
+  date: z
+    .string()
+    .min(1, "التاريخ مطلوب")
+    .refine((val) => dayjs(val, "DD/MM/YYYY", true).isValid(), {
+      message: "صيغة التاريخ غير صحيحة (يجب أن تكون DD/MM/YYYY)",
+    }),
   reason: z.string().min(1, "الموقف مطلوب"),
   amount: z.string().optional(),
   attachments: z.string().optional(),

@@ -66,10 +66,7 @@ export default function RootLayout({
 
         <main className="flex-1 w-full container mx-auto py-8 sm:py-10 px-4">
           <div className="bg-white/70 backdrop-blur-md border border-gray-200/50 rounded-2xl shadow-xl p-6 sm:p-8">
-            {/* --- (التعديل) --- */}
-            {/* شيلنا الـ Provider من هنا لإن الـ RootLayout بيغطيه */}
             {children}
-            {/* --- (نهاية التعديل) --- */}
           </div>
         </main>
 
