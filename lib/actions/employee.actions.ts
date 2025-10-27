@@ -41,21 +41,28 @@ interface EfficiencyReport {
   attachments?: string | null;
 }
 
+const safeCreateDate = (dateInput: Date | string | null | undefined): Date => {
+  if (!dateInput) {
+    return new Date(dateInput!);
+  }
+  return new Date(dateInput);
+};
+
+
 export async function createEmployee(
   data: z.infer<typeof createEmployeeApiSchema>
 ) {
   try {
     const validatedData = createEmployeeApiSchema.parse(data);
-
     const empData = {
       name: validatedData.name,
       nickName: validatedData.nickName || "",
       profession: validatedData.profession || "",
-      birthDate: new Date(validatedData.birthDate),
+      birthDate: safeCreateDate(validatedData.birthDate),
       nationalId: validatedData.nationalId,
       maritalStatus: validatedData.maritalStatus,
       residenceLocation: validatedData.residenceLocation || "",
-      hiringDate: new Date(validatedData.hiringDate),
+      hiringDate: safeCreateDate(validatedData.hiringDate),
       hiringType: validatedData.hiringType,
       administration: validatedData.administration,
       actualWork: validatedData.actualWork || "",
@@ -166,6 +173,7 @@ export async function createEmployee(
   } catch (error) {
     console.error("Error creating employee:", error);
     if (error instanceof z.ZodError) {
+      // ده السطر اللي بيطبع الخطأ عندك في اللوج
       return { success: false, error: "بيانات غير صحيحة" };
     }
     return { success: false, error: "حدث خطأ أثناء إنشاء الموظف" };
@@ -178,16 +186,15 @@ export const updateEmployee = async (
 ) => {
   try {
     const validatedData = createEmployeeApiSchema.parse(data);
-
     const empData = {
       name: validatedData.name,
       nickName: validatedData.nickName || "",
       profession: validatedData.profession || "",
-      birthDate: new Date(validatedData.birthDate),
+      birthDate: safeCreateDate(validatedData.birthDate),
       nationalId: validatedData.nationalId,
       maritalStatus: validatedData.maritalStatus,
       residenceLocation: validatedData.residenceLocation || "",
-      hiringDate: new Date(validatedData.hiringDate),
+      hiringDate: safeCreateDate(validatedData.hiringDate),
       hiringType: validatedData.hiringType,
       email: validatedData.email || null,
       administration: validatedData.administration,
@@ -215,6 +222,7 @@ export const updateEmployee = async (
         notes: rel.notes || undefined,
       }));
     }
+
 
     let penalties: Penalty[] = [];
     if (validatedData.penalties && validatedData.penalties.length > 0) {
@@ -307,6 +315,7 @@ export const updateEmployee = async (
     return { success: false, error: "حدث خطأ أثناء تحديث الموظف" };
   }
 };
+
 
 export const getEmployees = async () => {
   noStore();
@@ -415,12 +424,14 @@ export const getEmployeesBySearch = async (
         whereClause.efficiencyReports = { none: {} };
         console.log("🔍 Filtering employees without efficiency reports (none)");
       } else {
-        whereClause.efficiencyReports = { 
-          some: { 
-            grade: hasEfficiencyReports 
-          } 
+        whereClause.efficiencyReports = {
+          some: {
+            grade: hasEfficiencyReports,
+          },
         };
-        console.log(`🔍 Filtering employees with efficiency grade: ${hasEfficiencyReports}`);
+        console.log(
+          `Filtering employees with efficiency grade: ${hasEfficiencyReports}`
+        );
       }
     }
 

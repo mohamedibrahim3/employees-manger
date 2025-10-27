@@ -150,10 +150,10 @@ export const createEmployeeFormSchema = z.object({
 
 export const createEmployeeApiSchema = z.object({
   name: z.string().min(2, "الاسم مطلوب"),
-  birthDate: z.date(),
+  birthDate: z.date().nullable(), // <-- تم التعديل هنا
   nationalId: z.string().min(1, "رقم البطاقة مطلوب"),
   maritalStatus: z.string().min(1, "الحالة الاجتماعية مطلوبة"),
-  hiringDate: z.date(),
+  hiringDate: z.date().nullable(), // <-- تم التعديل هنا
   hiringType: z.string().min(1, "نوع التوظيف مطلوب"),
   administration: z.string().min(1, "الإدارة مطلوبة"),
   nickName: z
@@ -456,22 +456,22 @@ export function transformEmployeeFormToApi(
 ): CreateEmployeeApi {
   return {
     ...data,
-    birthDate: new Date(data.birthDate),
-    hiringDate: new Date(data.hiringDate),
+    birthDate: new Date(data.birthDate), // This will throw error if data.birthDate is invalid string
+    hiringDate: new Date(data.hiringDate), // This will throw error if data.hiringDate is invalid string
     nickName: data.nickName || "",
     profession: data.profession || "",
     residenceLocation: data.residenceLocation || "",
     actualWork: data.actualWork || "",
     phoneNumber: data.phoneNumber || "",
     email: data.email && data.email !== "" ? data.email : null,
-    personalImageUrl: null,
-    idFrontImageUrl: null,
-    idBackImageUrl: null,
+    personalImageUrl: null, // Needs to be handled properly if image upload state is stored elsewhere
+    idFrontImageUrl: null, // Needs to be handled properly
+    idBackImageUrl: null, // Needs to be handled properly
     relationships:
       data.relationships?.map((r) => ({
         ...r,
         nationalId: r.nationalId || "",
-        birthDate: r.birthDate ? new Date(r.birthDate) : null,
+        birthDate: r.birthDate ? new Date(r.birthDate) : null, // This assumes birthDate string is valid
         birthPlace: r.birthPlace || "",
         profession: r.profession || "",
         spouseName: r.spouseName || "",
@@ -481,13 +481,13 @@ export function transformEmployeeFormToApi(
     penalties:
       data.penalties?.map((p) => ({
         ...p,
-        date: new Date(p.date),
+        date: new Date(p.date), // Assumes date string is valid
         attachments: p.attachments || null,
       })) ?? [],
     bonuses:
       data.bonuses?.map((b) => ({
         ...b,
-        date: new Date(b.date),
+        date: new Date(b.date), // Assumes date string is valid
         amount: b.amount || null,
         attachments: b.attachments || null,
       })) ?? [],
@@ -495,7 +495,7 @@ export function transformEmployeeFormToApi(
       data.efficiencyReports?.map((rep) => ({
         ...rep,
         year: parseInt(rep.year),
-        grade: rep.grade as EfficiencyGrade,
+        grade: rep.grade as EfficiencyGrade, // Assumes grade string is valid
         attachments: rep.attachments || null,
       })) ?? [],
     jobPosition: (data.jobPosition as CreateEmployeeApi["jobPosition"]) || null,

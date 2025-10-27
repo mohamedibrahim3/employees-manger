@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import EmployeeForm from "@/components/employee-form";
-import { EdgeStoreProvider } from "@/lib/edgestore";
 
 export const metadata: Metadata = {
   title: "Create Employee",
@@ -20,10 +19,10 @@ const page = () => {
           </div>
         </div>
 
-        {/* Employee form */}
-        <EdgeStoreProvider>
-          <EmployeeForm type="Create" />
-        </EdgeStoreProvider>
+        {/* --- (التعديل) --- */}
+        {/* شيلنا الـ Provider من هنا لإن الـ RootLayout بيغطيه */}
+        <EmployeeForm type="Create" />
+        {/* --- (نهاية التعديل) --- */}
       </div>
     </div>
   );
