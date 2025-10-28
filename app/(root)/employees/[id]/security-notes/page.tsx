@@ -6,10 +6,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { toast } from "sonner";
 import { useRouter, useParams } from "next/navigation";
-import { updateEmployeeNotes, getEmployeeById } from "@/lib/actions/employee.actions";
+import {
+  updateEmployeeNotes,
+  getEmployeeById,
+} from "@/lib/actions/employee.actions";
 
 const notesSchema = z.object({
   notes: z.string().optional(),
@@ -57,7 +67,9 @@ const SecurityNotesPage = () => {
             administration: employeeRes.employee.administration,
           });
         } else {
-          setError("خطأ في جلب بيانات الموظف: " + (employeeRes.error || "غير معروف"));
+          setError(
+            "خطأ في جلب بيانات الموظف: " + (employeeRes.error || "غير معروف")
+          );
         }
       } catch (error) {
         console.error("Fetch error:", error);
@@ -85,42 +97,52 @@ const SecurityNotesPage = () => {
   };
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">جاري التحميل...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        جاري التحميل...
+      </div>
+    );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-red-600">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 py-8 px-4">
       <div className="max-w-4xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-3xl font-semibold text-slate-800">
           الملاحظات الأمنية للموظف{employeeData ? `: ${employeeData.name}` : ""}
         </h1>
         {employeeData && (
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+          <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <span className="font-medium text-gray-700">الاسم الفعلي: </span>
-                <span className="text-gray-900">{employeeData.name}</span>
+                <span className="font-medium text-slate-600">
+                  الاسم الفعلي:{" "}
+                </span>
+                <span className="text-slate-800">{employeeData.name}</span>
               </div>
               <div>
-                <span className="font-medium text-gray-700">اسم الشهرة: </span>
-                <span className="text-gray-900">{employeeData.nickName}</span>
+                <span className="font-medium text-slate-600">اسم الشهرة: </span>
+                <span className="text-slate-800">{employeeData.nickName}</span>
               </div>
               <div>
-                <span className="font-medium text-gray-700">الإدارة: </span>
-                <span className="text-gray-900">{employeeData.administration}</span>
+                <span className="font-medium text-slate-600">الإدارة: </span>
+                <span className="text-slate-800">
+                  {employeeData.administration}
+                </span>
               </div>
             </div>
           </div>
         )}
-        <p className="text-gray-600">يمكنك تعديل الملاحظات الأمنية هنا، وسيتم حفظها تلقائياً مع الموظف.</p>
+        <p className="text-slate-600">
+          يمكنك تعديل الملاحظات الأمنية هنا، وسيتم حفظها تلقائياً مع الموظف.
+        </p>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-1">
             <FormField
@@ -128,12 +150,14 @@ const SecurityNotesPage = () => {
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-lg font-medium">الملاحظات الأمنية</FormLabel>
+                  <FormLabel className="text-lg font-medium text-slate-700">
+                    الملاحظات الأمنية
+                  </FormLabel>
                   <FormControl>
-                    <Textarea 
-                      {...field} 
-                        className="h-[85vh] w-full max-w-6xl resize-none text-xl leading-relaxed p-6"
-                        placeholder="أدخل الملاحظات الأمنية هنا... (يمكن أن تكون تفصيلية)"
+                    <Textarea
+                      {...field}
+                      className="h-[85vh] w-full max-w-6xl resize-none text-xl leading-relaxed p-6 bg-white border-slate-200 text-slate-800"
+                      placeholder="أدخل الملاحظات الأمنية هنا... (يمكن أن تكون تفصيلية)"
                     />
                   </FormControl>
                   <FormMessage />
@@ -141,15 +165,25 @@ const SecurityNotesPage = () => {
               )}
             />
             <div className="flex space-x-4 justify-end">
-              <Button type="button" variant="outline" onClick={() => router.back()}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.back()}
+                className="border-slate-300 text-slate-700 hover:bg-slate-50"
+              >
                 رجوع
               </Button>
-              <Button type="submit">حفظ التغييرات</Button>
+              <Button
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                حفظ التغييرات
+              </Button>
             </div>
           </form>
         </Form>
         {initialNotes === "" && !form.watch("notes") && (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-slate-500 bg-slate-50 rounded-xl">
             <p>لا توجد ملاحظات أمنية مسجلة بعد. أضفها الآن!</p>
           </div>
         )}

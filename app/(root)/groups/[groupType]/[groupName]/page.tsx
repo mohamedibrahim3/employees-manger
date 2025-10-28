@@ -46,9 +46,9 @@ const GroupPage = async ({ params }: any) => {
 
   if (!["administration", "region"].includes(groupType)) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-white flex items-center justify-center">
-        <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-xl p-12 text-center border border-gray-200">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-700 rounded-2xl mb-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center">
+        <div className="bg-white rounded-xl shadow-md p-12 text-center border border-slate-200">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-600 rounded-2xl mb-6">
             <svg
               className="w-10 h-10 text-white"
               fill="currentColor"
@@ -61,14 +61,14 @@ const GroupPage = async ({ params }: any) => {
               ></path>
             </svg>
           </div>
-          <h2 className="text-3xl font-medium text-gray-800 mb-4">
+          <h2 className="text-3xl font-medium text-slate-700 mb-4">
             خطأ في نوع المجموعة
           </h2>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl text-slate-600 mb-8">
             نوع المجموعة المطلوب غير مدعوم في النظام
           </p>
           <Link href="/">
-            <Button className="px-8 py-4 text-lg font-medium text-white bg-gray-700 rounded-2xl">
+            <Button className="px-8 py-4 text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-xl">
               العودة للرئيسية
             </Button>
           </Link>
@@ -114,49 +114,49 @@ const GroupPage = async ({ params }: any) => {
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-white relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gray-200/30 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gray-200/30 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-gray-100/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/3 right-1/4 w-72 h-72 bg-gray-100/20 rounded-full blur-3xl"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-slate-200/30 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-slate-200/30 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-slate-100/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-72 h-72 bg-slate-100/20 rounded-full blur-3xl"></div>
       </div>
 
       <div className="relative z-10 w-full max-w-none px-6 lg:px-12 xl:px-16 py-12 space-y-8">
         {/* Header Section */}
         <div className="text-center space-y-6 mb-12">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-700 rounded-2xl shadow-xl mb-6">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-600 rounded-2xl shadow-md mb-6">
             {groupIcon}
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent leading-tight tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-semibold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent leading-tight tracking-tight">
             موظفون {groupTitle}
           </h1>
-          <p className="text-2xl text-gray-700 font-medium">
+          <p className="text-2xl text-slate-700 font-medium">
             {decodedGroupName}
           </p>
-          <div className="w-24 h-1 bg-gray-700 rounded-full mx-auto"></div>
+          <div className="w-24 h-1 bg-blue-600 rounded-full mx-auto"></div>
         </div>
 
         {/* Stats and Navigation Bar */}
-        <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-xl overflow-hidden border border-gray-200 p-8">
+        <div className="bg-white rounded-xl shadow-md overflow-hidden border border-slate-200 p-8">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
             {/* Statistics Section */}
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-2xl mb-4">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-slate-100 rounded-2xl mb-4">
                 <svg
-                  className="w-10 h-10 text-gray-700"
+                  className="w-10 h-10 text-slate-600"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
                   <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path>
                 </svg>
               </div>
-              <div className="text-4xl font-medium bg-gradient-to-r from-gray-700 to-gray-600 bg-clip-text text-transparent mb-2">
+              <div className="text-4xl font-medium bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent mb-2">
                 {toArabicDigits(filtered.length)}
               </div>
-              <p className="text-xl text-gray-600 font-medium">
+              <p className="text-xl text-slate-600 font-medium">
                 موظف في {groupTitle}
               </p>
             </div>
@@ -166,11 +166,11 @@ const GroupPage = async ({ params }: any) => {
               <Link href="/employees">
                 <Button
                   variant="outline"
-                  className="group px-10 py-5 text-xl font-medium text-gray-700 bg-white border-2 border-gray-300 rounded-2xl hover:border-gray-500 hover:text-gray-700 hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300"
+                  className="group px-10 py-5 text-xl font-medium text-slate-600 bg-white border-2 border-slate-300 rounded-xl hover:border-blue-500 hover:text-blue-600 hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-300"
                 >
                   <span className="flex items-center">
                     <svg
-                      className="w-6 h-6 ml-3 group-hover:text-gray-700"
+                      className="w-6 h-6 ml-3 group-hover:text-blue-600"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -182,8 +182,8 @@ const GroupPage = async ({ params }: any) => {
               </Link>
 
               <Link href="/">
-                <Button className="group relative px-10 py-5 text-xl font-medium text-white bg-gradient-to-r from-gray-700 to-gray-600 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-600 to-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <Button className="group relative px-10 py-5 text-xl font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
+                  <div className="absolute inset-0 bg-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <span className="relative flex items-center">
                     <svg
                       className="w-6 h-6 ml-3"
@@ -206,8 +206,8 @@ const GroupPage = async ({ params }: any) => {
 
         {/* Table or Empty State */}
         {filtered.length > 0 ? (
-          <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-xl overflow-hidden border border-gray-200">
-            <div className="bg-gradient-to-r from-gray-800 to-gray-600 px-12 py-8">
+          <div className="bg-white rounded-xl shadow-md overflow-hidden border border-slate-200">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-12 py-8">
               <div className="flex items-center justify-center">
                 <div className="flex items-center space-x-4 space-x-reverse">
                   <h2 className="text-3xl font-medium text-white mr-4">
@@ -222,10 +222,10 @@ const GroupPage = async ({ params }: any) => {
             </div>
           </div>
         ) : (
-          <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-xl overflow-hidden border border-gray-200 p-16 text-center">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-gray-100 rounded-3xl mb-8">
+          <div className="bg-white rounded-xl shadow-md overflow-hidden border border-slate-200 p-16 text-center">
+            <div className="inline-flex items-center justify-center w-24 h-24 bg-slate-100 rounded-2xl mb-8">
               <svg
-                className="w-12 h-12 text-gray-400"
+                className="w-12 h-12 text-slate-400"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -236,14 +236,14 @@ const GroupPage = async ({ params }: any) => {
                 ></path>
               </svg>
             </div>
-            <h3 className="text-3xl font-medium text-gray-800 mb-4">
+            <h3 className="text-3xl font-medium text-slate-700 mb-4">
               لا يوجد موظفين
             </h3>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-xl text-slate-600 mb-8">
               لم يتم العثور على أي موظفين في {groupTitle} «{decodedGroupName}»
             </p>
             <Link href="/employees/create">
-              <Button className="px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-gray-700 to-gray-600 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+              <Button className="px-8 py-4 text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300">
                 إضافة موظف جديد
               </Button>
             </Link>
@@ -252,13 +252,12 @@ const GroupPage = async ({ params }: any) => {
 
         {/* Footer Info */}
         <div className="text-center space-y-4 pt-8">
-          <div className="inline-flex items-center justify-center space-x-2 space-x-reverse text-gray-600">
-            <div className="w-2 h-2 bg-gray-700 rounded-full animate-pulse"></div>
+          <div className="inline-flex items-center justify-center space-x-2 space-x-reverse text-slate-600">
             <span className="text-lg">
               عرض بيانات {groupTitle}: {decodedGroupName}
             </span>
           </div>
-          <p className="text-gray-500">
+          <p className="text-slate-500">
             آخر تحديث: {new Date().toLocaleDateString("ar-EG")} -{" "}
             {new Date().toLocaleTimeString("ar-EG")}
           </p>
