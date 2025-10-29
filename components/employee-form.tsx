@@ -54,9 +54,8 @@ import {
   createEmployeeFormSchema,
 } from "@/lib/validators";
 import { updateEmployee } from "@/lib/actions/employee.actions";
-import { useEdgeStore } from "@/lib/edgestore";
 import { SingleImageDropzone } from "./upload/single-image";
-import { UploaderProvider } from "./upload/uploader-provider";
+import { UploaderProvider, type UploadFn } from "./upload/uploader-provider"; // تم التأكد من المسار
 
 dayjs.locale("ar");
 
@@ -79,11 +78,11 @@ interface EmployeeData {
   name: string;
   nickName: string;
   profession: string;
-  birthDate: Date;
+  birthDate: Date | null;
   nationalId: string;
   maritalStatus: string;
   residenceLocation: string;
-  hiringDate: Date;
+  hiringDate: Date | null;
   hiringType: string;
   email?: string;
   administration: string;
@@ -121,7 +120,6 @@ const EmployeeForm = ({
   employeeId?: string;
 }) => {
   const router = useRouter();
-  const { edgestore } = useEdgeStore();
   const [goToNotes, setGoToNotes] = useState(false);
 
   const [personalPhotoUrl, setPersonalPhotoUrl] = useState<string | undefined>(
@@ -135,30 +133,51 @@ const EmployeeForm = ({
   );
 
   const createUploadFn =
-    (setImageUrl: (url: string | undefined) => void) =>
-    async ({
-      file,
-      signal,
-      onProgressChange,
-    }: {
-      file: File;
-      signal: AbortSignal;
-      onProgressChange: (progress: number) => void;
-    }) => {
-      try {
-        const res = await edgestore.MyEmployeesManager.upload({
-          file,
-          signal,
-          onProgressChange,
+    (setImageUrl: (url: string | undefined) => void): UploadFn =>
+    async ({ file, signal, onProgressChange }) => {
+      return new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const xhr = new XMLHttpRequest();
+
+        xhr.upload.addEventListener("progress", (event) => {
+          if (event.lengthComputable) {
+            const progress = (event.loaded / event.total) * 100;
+            onProgressChange(progress);
+          }
         });
 
-        setImageUrl(res.url);
-        return { url: res.url };
-      } catch (error) {
-        onProgressChange(0);
-        toast.error("فشل في رفع الصورة");
-        throw error;
-      }
+        xhr.addEventListener("load", () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            const response = JSON.parse(xhr.responseText);
+            onProgressChange(100);
+            setImageUrl(response.url);
+            resolve({ url: response.url });
+          } else {
+            try {
+              const response = JSON.parse(xhr.responseText);
+              reject(
+                new Error(response.error || `Upload failed: ${xhr.statusText}`)
+              );
+            } catch (e) {
+              reject(new Error(`Upload failed: ${xhr.statusText}`));
+            }
+          }
+        });
+
+        xhr.addEventListener("error", () => {
+          reject(new Error("Network error during upload."));
+        });
+
+        signal.addEventListener("abort", () => {
+          xhr.abort();
+          reject(new Error("Upload canceled"));
+        });
+
+        xhr.open("POST", "/api/upload", true);
+        xhr.send(formData);
+      });
     };
 
   const removeImage = async (
@@ -168,22 +187,8 @@ const EmployeeForm = ({
     if (imageUrl) {
       const confirmed = window.confirm("هل أنت متأكد من حذف هذه الصورة؟");
       if (!confirmed) return;
-
       setImageUrl(undefined);
       toast("تم إزالة الصورة من النموذج");
-
-      edgestore.MyEmployeesManager.delete({
-        url: imageUrl,
-      })
-        .then(() => {
-          console.log("Image deleted from EdgeStore successfully");
-        })
-        .catch((error) => {
-          console.warn(
-            "Could not delete from EdgeStore (non-critical):",
-            error
-          );
-        });
     }
   };
 
@@ -195,19 +200,19 @@ const EmployeeForm = ({
       name: employee?.name || "",
       nickName: employee?.nickName || "",
       profession: employee?.profession || "",
-      birthDate: formatDateToInput(employee?.birthDate),
+      birthDate: formatDateToInput(employee?.birthDate ?? undefined),
       nationalId: employee?.nationalId || "",
       maritalStatus: employee?.maritalStatus || "single",
       residenceLocation: employee?.residenceLocation || "",
-      hiringDate: formatDateToInput(employee?.hiringDate),
+      hiringDate: formatDateToInput(employee?.hiringDate ?? undefined),
       hiringType: employee?.hiringType || "",
       email: employee?.email || "",
       administration: employee?.administration || "",
       actualWork: employee?.actualWork || "",
       phoneNumber: employee?.phoneNumber || "",
-      personalPhoto: employee?.personalImageUrl || "",
-      frontIdCard: employee?.idFrontImageUrl || "",
-      backIdCard: employee?.idBackImageUrl || "",
+      // personalPhoto: employee?.personalImageUrl || "",
+      // frontIdCard: employee?.idFrontImageUrl || "",
+      // backIdCard: employee?.idBackImageUrl || "",
       relationships:
         employee?.relationships?.map((rel) => ({
           relationshipType: rel.relationshipType || "",
@@ -220,7 +225,6 @@ const EmployeeForm = ({
           residenceLocation: rel.residenceLocation || "",
           notes: rel.notes || "",
         })) || [],
-      status: (employee as any)?.status || "active",
       jobPosition: (() => {
         const val = employee?.jobPosition;
         const allowed = [
@@ -293,15 +297,17 @@ const EmployeeForm = ({
 
   const onSubmit: SubmitHandler<FormData> = async (values) => {
     try {
-      const transformedData: EmployeeData = {
+      const birthDateObj = dayjs(values.birthDate, "DD/MM/YYYY");
+      const hiringDateObj = dayjs(values.hiringDate, "DD/MM/YYYY");
+      const transformedData = {
         name: values.name,
         nickName: values.nickName || "",
         profession: values.profession || "",
-        birthDate: dayjs(values.birthDate, "DD/MM/YYYY").toDate(),
+        birthDate: birthDateObj.isValid() ? birthDateObj.toDate() : null,
         nationalId: values.nationalId,
         maritalStatus: values.maritalStatus as string,
         residenceLocation: values.residenceLocation || "",
-        hiringDate: dayjs(values.hiringDate, "DD/MM/YYYY").toDate(),
+        hiringDate: hiringDateObj.isValid() ? hiringDateObj.toDate() : null,
         hiringType: values.hiringType,
         email: values.email || undefined,
         administration: values.administration,
@@ -311,34 +317,44 @@ const EmployeeForm = ({
         personalImageUrl: personalPhotoUrl,
         idFrontImageUrl: idFrontUrl,
         idBackImageUrl: idBackUrl,
-        relationships: values.relationships.map((rel) => ({
-          relationshipType: rel.relationshipType,
-          name: rel.name,
-          nationalId: rel.nationalId || "",
-          birthDate: rel.birthDate
-            ? dayjs(rel.birthDate, "DD/MM/YYYY").toDate()
-            : null,
-          birthPlace: rel.birthPlace || undefined,
-          profession: rel.profession || undefined,
-          spouseName: rel.spouseName || undefined,
-          residenceLocation: rel.residenceLocation || "",
-          notes: rel.notes || undefined,
-        })),
+        relationships: values.relationships.map((rel) => {
+          const relBirthDateObj = dayjs(rel.birthDate, "DD/MM/YYYY");
+          return {
+            relationshipType: rel.relationshipType,
+            name: rel.name,
+            nationalId: rel.nationalId || null,
+            birthDate: relBirthDateObj.isValid() ? relBirthDateObj.toDate() : null,
+            birthPlace: rel.birthPlace || undefined,
+            profession: rel.profession || undefined,
+            spouseName: rel.spouseName || undefined,
+            residenceLocation: rel.residenceLocation || "",
+            notes: rel.notes || undefined,
+          };
+        }),
         jobPosition: values.jobPosition || undefined,
         educationalDegree: values.educationalDegree || undefined,
         functionalDegree: values.functionalDegree || undefined,
       };
 
+      try {
+        createEmployeeApiSchema.parse(transformedData);
+      } catch (validationError) {
+         if (validationError instanceof z.ZodError) {
+           console.error("Client-side validation failed:", validationError.issues);
+           const firstError = validationError.issues[0];
+           toast.error(`خطأ في البيانات: ${firstError.path.join('.')} - ${firstError.message}`);
+         } else {
+           console.error("Unknown validation error:", validationError);
+           toast.error("حدث خطأ غير متوقع أثناء التحقق من البيانات.");
+         }
+         return;
+      }
+
       let result;
       if (type === "Update" && employeeId) {
-        result = await updateEmployee(
-          employeeId,
-          transformedData as z.infer<typeof createEmployeeApiSchema>
-        );
+        result = await updateEmployee(employeeId, transformedData as any);
       } else {
-        result = await createEmployee(
-          transformedData as z.infer<typeof createEmployeeApiSchema>
-        );
+        result = await createEmployee(transformedData as any);
       }
 
       if (result.success && result.employee) {
@@ -530,8 +546,7 @@ const EmployeeForm = ({
             </div>
 
             <Separator className="my-6" />
-
-            <div className="space-y-6">
+             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-4">
                 <MapPin className="h-5 w-5 text-gray-500" />
                 <h3 className="text-lg font-semibold text-gray-800">
@@ -600,6 +615,7 @@ const EmployeeForm = ({
               </div>
             </div>
 
+             {/* المعلومات المهنية */}
             <Separator className="my-6" />
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-4">
@@ -908,7 +924,6 @@ const EmployeeForm = ({
             </div>
 
             <Separator className="my-6" />
-
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-4">
                 <Building2 className="h-5 w-5 text-gray-500" />
@@ -1040,6 +1055,7 @@ const EmployeeForm = ({
           </CardContent>
         </Card>
 
+         {/* العلاقات العائلية */}
         <Card className="overflow-hidden shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl font-bold">
@@ -1166,6 +1182,10 @@ const EmployeeForm = ({
                           <Input
                             placeholder="أدخل رقم البطاقة"
                             {...field}
+                             onChange={(e) => { // تأكد إنك بتحافظ على null لو فاضي
+                                const value = e.target.value.replace(/[^0-9]/g, "");
+                                field.onChange(value === "" ? null : value);
+                              }}
                             className="border-gray-300 focus:border-green-500"
                           />
                         </FormControl>
@@ -1322,32 +1342,43 @@ const EmployeeForm = ({
           <Button
             type="submit"
             onClick={() => setGoToNotes(false)}
-            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
+            disabled={form.formState.isSubmitting || !form.formState.isValid}
+            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
           >
-            {type === "Update" ? "تحديث الموظف" : "تسجيل موظف جديد"}
+            {form.formState.isSubmitting && !goToNotes ? 'جاري الحفظ...' : (type === "Update" ? "تحديث الموظف" : "تسجيل موظف جديد")}
           </Button>
           <Button
             type="submit"
             variant="secondary"
             onClick={() => setGoToNotes(true)}
-            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+            disabled={form.formState.isSubmitting || !form.formState.isValid}
+            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white disabled:opacity-50"
           >
-            {type === "Update"
+            {form.formState.isSubmitting && goToNotes ? 'جاري الحفظ...' : (type === "Update"
               ? "تحديث وإضافة ملاحظات أمنية"
-              : "تسجيل وإضافة ملاحظات أمنية"}
+              : "تسجيل وإضافة ملاحظات أمنية")}
           </Button>
           {type === "Update" && employeeId && (
             <Button
               type="button"
               variant="destructive"
               size="sm"
+              disabled={form.formState.isSubmitting}
               onClick={async () => {
-                const { success } = await deleteEmployee(employeeId);
+                const confirmed = window.confirm("هل أنت متأكد من حذف هذا الموظف؟ لا يمكن التراجع عن هذا الإجراء.");
+                if (!confirmed) return;
+                
+                toast("جاري حذف الموظف..."); // إظهار رسالة
+                const { success, error } = await deleteEmployee(employeeId);
                 if (success) {
+                  toast.success("تم حذف الموظف بنجاح");
                   router.push("/employees");
+                  router.refresh(); // تحديث الصفحة
+                } else {
+                  toast.error(error || "حدث خطأ أثناء حذف الموظف");
                 }
               }}
-              className="w-full sm:w-auto bg-red-600 hover:bg-red-700"
+              className="w-full sm:w-auto bg-red-600 hover:bg-red-700 disabled:opacity-50"
             >
               حذف الموظف
             </Button>

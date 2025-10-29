@@ -198,12 +198,12 @@ const EmployeeDetailsPage = async (props: {
 
   if (!result.success || !result.employee) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-white py-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 py-4">
         <div className="container mx-auto px-4">
-          <h1 className="text-2xl font-medium text-gray-800">
+          <h1 className="text-2xl font-medium text-slate-700">
             الموظف غير موجود
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-slate-600 mt-2">
             لا يمكن العثور على الموظف المطلوب.
           </p>
         </div>
@@ -214,26 +214,26 @@ const EmployeeDetailsPage = async (props: {
   const employee: Employee = result.employee as Employee;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-white py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 py-8">
       <div className="mx-auto px-6 space-y-6 max-w-6xl print:max-w-full">
         {/* Header */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between bg-white/95 p-6 rounded-2xl shadow-md border border-gray-200 print:hidden">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between bg-white p-6 rounded-xl shadow-sm border border-slate-200 print:hidden">
           <div className="mb-4 md:mb-0">
-            <h1 className="text-3xl font-extrabold text-gray-900">
+            <h1 className="text-3xl font-semibold text-slate-800">
               تفاصيل الموظف
             </h1>
-            <p className="text-gray-600 mt-1">عرض بيانات الموظف في المؤسسة</p>
+            <p className="text-slate-600 mt-1">عرض بيانات الموظف في المؤسسة</p>
           </div>
           <div className="print:hidden flex flex-wrap gap-4">
             <Link
               href={`/employees/${id}/security-notes`}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-xl transition-all font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1 duration-300"
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition-all font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 duration-300"
             >
               الملاحظات الأمنية
             </Link>
             <Link
               href="/employees"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-xl transition-all font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1 duration-300"
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition-all font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 duration-300"
             >
               العودة إلى قائمة الموظفين
             </Link>
@@ -244,9 +244,9 @@ const EmployeeDetailsPage = async (props: {
         {(employee.personalImageUrl ||
           employee.idFrontImageUrl ||
           employee.idBackImageUrl) && (
-          <Card className="bg-white/95 border-gray-200 shadow-xl">
+          <Card className="bg-white border-slate-200 shadow-md">
             <CardHeader>
-              <CardTitle className="text-xl text-gray-900">
+              <CardTitle className="text-xl text-slate-800">
                 صور ووثائق الموظف
               </CardTitle>
               <CardDescription>
@@ -257,7 +257,7 @@ const EmployeeDetailsPage = async (props: {
               <div className="flex flex-wrap gap-8 justify-center">
                 {employee.personalImageUrl && (
                   <div className="text-center">
-                    <h4 className="text-sm font-medium mb-3 text-gray-700">
+                    <h4 className="text-sm font-medium mb-3 text-slate-600">
                       الصورة الشخصية
                     </h4>
                     <img
@@ -265,13 +265,13 @@ const EmployeeDetailsPage = async (props: {
                       alt={`صورة ${employee.name}`}
                       width={176}
                       height={224}
-                      className="w-44 h-56 object-cover rounded-xl border-2 border-gray-200 shadow-md"
+                      className="w-44 h-56 object-cover rounded-xl border-2 border-slate-200 shadow-sm"
                     />
                   </div>
                 )}
                 {employee.idFrontImageUrl && (
                   <div className="text-center">
-                    <h4 className="text-sm font-medium mb-3 text-gray-700">
+                    <h4 className="text-sm font-medium mb-3 text-slate-600">
                       وجه البطاقة
                     </h4>
                     <img
@@ -279,13 +279,13 @@ const EmployeeDetailsPage = async (props: {
                       alt="وجه البطاقة"
                       width={288}
                       height={208}
-                      className="w-72 h-52 object-cover rounded-xl border-2 border-gray-200 shadow-md"
+                      className="w-72 h-52 object-cover rounded-xl border-2 border-slate-200 shadow-sm"
                     />
                   </div>
                 )}
                 {employee.idBackImageUrl && (
                   <div className="text-center">
-                    <h4 className="text-sm font-medium mb-3 text-gray-700">
+                    <h4 className="text-sm font-medium mb-3 text-slate-600">
                       ظهر البطاقة
                     </h4>
                     <img
@@ -293,7 +293,7 @@ const EmployeeDetailsPage = async (props: {
                       alt="ظهر البطاقة"
                       width={288}
                       height={208}
-                      className="w-72 h-52 object-cover rounded-xl border-2 border-gray-200 shadow-md"
+                      className="w-72 h-52 object-cover rounded-xl border-2 border-slate-200 shadow-sm"
                     />
                   </div>
                 )}
@@ -305,64 +305,64 @@ const EmployeeDetailsPage = async (props: {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 print:gap-4">
           {/* Personal Information Table */}
           <div>
-            <h2 className="text-xl font-medium mb-3 text-gray-800 bg-gray-100 p-3 rounded-t-xl">
+            <h2 className="text-xl font-medium mb-3 text-slate-700 bg-slate-50 p-3 rounded-t-xl">
               المعلومات الشخصية
             </h2>
-            <table className="w-full border-collapse border border-gray-200 text-base">
+            <table className="w-full border-collapse border border-slate-200 text-base">
               <tbody>
-                <tr className="border-b border-gray-200">
-                  <td className="bg-gray-50 font-medium p-3 w-1/3 border-r border-gray-200">
+                <tr className="border-b border-slate-200">
+                  <td className="bg-slate-50 font-medium p-3 w-1/3 border-r border-slate-200">
                     الاسم الكامل
                   </td>
-                  <td className="p-3">{employee.name}</td>
+                  <td className="p-3 text-slate-800">{employee.name}</td>
                 </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
+                <tr className="border-b border-slate-200">
+                  <td className="bg-slate-50 font-medium p-3 border-r border-slate-200">
                     اسم الشهرة
                   </td>
-                  <td className="p-3">{employee.nickName}</td>
+                  <td className="p-3 text-slate-800">{employee.nickName}</td>
                 </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
+                <tr className="border-b border-slate-200">
+                  <td className="bg-slate-50 font-medium p-3 border-r border-slate-200">
                     رقم البطاقة
                   </td>
-                  <td className="p-3">{employee.nationalId}</td>
+                  <td className="p-3 text-slate-800">{employee.nationalId}</td>
                 </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
+                <tr className="border-b border-slate-200">
+                  <td className="bg-slate-50 font-medium p-3 border-r border-slate-200">
                     المهنة
                   </td>
-                  <td className="p-3">{employee.profession}</td>
+                  <td className="p-3 text-slate-800">{employee.profession}</td>
                 </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
+                <tr className="border-b border-slate-200">
+                  <td className="bg-slate-50 font-medium p-3 border-r border-slate-200">
                     الوظيفة
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 text-slate-800">
                     {getJobPositionLabel(employee.jobPosition)}
                   </td>
                 </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
+                <tr className="border-b border-slate-200">
+                  <td className="bg-slate-50 font-medium p-3 border-r border-slate-200">
                     الدرجة العلمية
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 text-slate-800">
                     {getEducationalDegreeLabel(employee.educationalDegree)}
                   </td>
                 </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
+                <tr className="border-b border-slate-200">
+                  <td className="bg-slate-50 font-medium p-3 border-r border-slate-200">
                     الدرجة الوظيفية
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 text-slate-800">
                     {getFunctionalDegreeLabel(employee.functionalDegree)}
                   </td>
                 </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
+                <tr className="border-b border-slate-200">
+                  <td className="bg-slate-50 font-medium p-3 border-r border-slate-200">
                     تاريخ الميلاد
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 text-slate-800">
                     {new Date(employee.birthDate).toLocaleDateString(
                       "ar-EG-u-nu-arab",
                       {
@@ -373,33 +373,35 @@ const EmployeeDetailsPage = async (props: {
                     )}
                   </td>
                 </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
+                <tr className="border-b border-slate-200">
+                  <td className="bg-slate-50 font-medium p-3 border-r border-slate-200">
                     الحالة الاجتماعية
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 text-slate-800">
                     {formateMaritalStatus(employee.maritalStatus)}
                   </td>
                 </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
+                <tr className="border-b border-slate-200">
+                  <td className="bg-slate-50 font-medium p-3 border-r border-slate-200">
                     رقم الهاتف
                   </td>
-                  <td className="p-3">{employee.phoneNumber}</td>
+                  <td className="p-3 text-slate-800">{employee.phoneNumber}</td>
                 </tr>
                 {employee.email && (
-                  <tr className="border-b border-gray-200">
-                    <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
+                  <tr className="border-b border-slate-200">
+                    <td className="bg-slate-50 font-medium p-3 border-r border-slate-200">
                       البريد الإلكتروني
                     </td>
-                    <td className="p-3">{employee.email}</td>
+                    <td className="p-3 text-slate-800">{employee.email}</td>
                   </tr>
                 )}
                 <tr>
-                  <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
+                  <td className="bg-slate-50 font-medium p-3 border-r border-slate-200">
                     العنوان التفصيلي
                   </td>
-                  <td className="p-3">{employee.residenceLocation}</td>
+                  <td className="p-3 text-slate-800">
+                    {employee.residenceLocation}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -407,28 +409,30 @@ const EmployeeDetailsPage = async (props: {
 
           {/* Work Information Table */}
           <div>
-            <h2 className="text-xl font-medium mb-3 text-gray-800 bg-gray-100 p-3 rounded-t-xl">
+            <h2 className="text-xl font-medium mb-3 text-slate-700 bg-slate-50 p-3 rounded-t-xl">
               المعلومات الوظيفية
             </h2>
-            <table className="w-full border-collapse border border-gray-200 text-base mb-6">
+            <table className="w-full border-collapse border border-slate-200 text-base mb-6">
               <tbody>
-                <tr className="border-b border-gray-200">
-                  <td className="bg-gray-50 font-medium p-3 w-1/3 border-r border-gray-200">
+                <tr className="border-b border-slate-200">
+                  <td className="bg-slate-50 font-medium p-3 w-1/3 border-r border-slate-200">
                     الإدارة
                   </td>
-                  <td className="p-3">{employee.administration}</td>
+                  <td className="p-3 text-slate-800">
+                    {employee.administration}
+                  </td>
                 </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
+                <tr className="border-b border-slate-200">
+                  <td className="bg-slate-50 font-medium p-3 border-r border-slate-200">
                     العمل الفعلي
                   </td>
-                  <td className="p-3">{employee.actualWork}</td>
+                  <td className="p-3 text-slate-800">{employee.actualWork}</td>
                 </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
+                <tr className="border-b border-slate-200">
+                  <td className="bg-slate-50 font-medium p-3 border-r border-slate-200">
                     تاريخ التعيين
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 text-slate-800">
                     {new Date(employee.hiringDate).toLocaleDateString(
                       "ar-EG-u-nu-arab",
                       {
@@ -440,10 +444,10 @@ const EmployeeDetailsPage = async (props: {
                   </td>
                 </tr>
                 <tr>
-                  <td className="bg-gray-50 font-medium p-3 border-r border-gray-200">
+                  <td className="bg-slate-50 font-medium p-3 border-r border-slate-200">
                     نوع التعيين
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 text-slate-800">
                     {formateHiringType(employee.hiringType)}
                   </td>
                 </tr>
@@ -455,35 +459,35 @@ const EmployeeDetailsPage = async (props: {
         {/* Family Relationships Table */}
         {employee.relationships && employee.relationships.length > 0 && (
           <div className="mt-8">
-            <h2 className="text-xl font-medium mb-3 text-gray-800 bg-gray-100 p-3 rounded-t-xl">
+            <h2 className="text-xl font-medium mb-3 text-slate-700 bg-slate-50 p-3 rounded-t-xl">
               العلاقات العائلية
             </h2>
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-gray-200 text-base">
+              <table className="w-full border-collapse border border-slate-200 text-base">
                 <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                  <tr className="bg-slate-50">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       نوع القرابة
                     </th>
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       الاسم
                     </th>
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       رقم البطاقة
                     </th>
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       تاريخ الميلاد
                     </th>
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       مكان الميلاد
                     </th>
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       المهنة
                     </th>
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       محل الإقامة
                     </th>
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       ملاحظات
                     </th>
                   </tr>
@@ -493,19 +497,19 @@ const EmployeeDetailsPage = async (props: {
                     (relationship: Relationship, index: number) => (
                       <tr
                         key={relationship.id}
-                        className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                        className={index % 2 === 0 ? "bg-white" : "bg-slate-50"}
                       >
-                        <td className="border border-gray-200 p-3 text-center font-medium">
+                        <td className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                           {RELATIONSHIP_LABELS[relationship.relationshipType] ||
                             relationship.relationshipType}
                         </td>
-                        <td className="border border-gray-200 p-3">
+                        <td className="border border-slate-200 p-3 text-slate-800">
                           {relationship.name}
                         </td>
-                        <td className="border border-gray-200 p-3 text-center">
+                        <td className="border border-slate-200 p-3 text-center text-slate-600">
                           {relationship.nationalId || "-"}
                         </td>
-                        <td className="border border-gray-200 p-3 text-center">
+                        <td className="border border-slate-200 p-3 text-center text-slate-600">
                           {relationship.birthDate
                             ? new Date(
                                 relationship.birthDate
@@ -516,16 +520,16 @@ const EmployeeDetailsPage = async (props: {
                               })
                             : "-"}
                         </td>
-                        <td className="border border-gray-200 p-3">
+                        <td className="border border-slate-200 p-3 text-slate-600">
                           {relationship.birthPlace || "-"}
                         </td>
-                        <td className="border border-gray-200 p-3">
+                        <td className="border border-slate-200 p-3 text-slate-600">
                           {relationship.profession || "-"}
                         </td>
-                        <td className="border border-gray-200 p-3">
+                        <td className="border border-slate-200 p-3 text-slate-600">
                           {relationship.residenceLocation || "-"}
                         </td>
-                        <td className="border border-gray-200 p-3">
+                        <td className="border border-slate-200 p-3 text-slate-600">
                           {relationship.notes || "-"}
                         </td>
                       </tr>
@@ -540,11 +544,11 @@ const EmployeeDetailsPage = async (props: {
         {/* No Relationships Message */}
         {(!employee.relationships || employee.relationships.length === 0) && (
           <div className="mt-8">
-            <h2 className="text-xl font-medium mb-3 text-gray-800 bg-gray-100 p-3 rounded-t-xl">
+            <h2 className="text-xl font-medium mb-3 text-slate-700 bg-slate-50 p-3 rounded-t-xl">
               العلاقات العائلية
             </h2>
-            <div className="border border-gray-200 p-8 text-center bg-gray-50">
-              <p className="text-gray-600 text-base">
+            <div className="border border-slate-200 p-8 text-center bg-slate-50">
+              <p className="text-slate-600 text-base">
                 لا توجد علاقات عائلية مسجلة
               </p>
             </div>
@@ -554,32 +558,32 @@ const EmployeeDetailsPage = async (props: {
         {/* Penalties Section */}
         <div className="mt-8">
           <div className="flex justify-between items-center mb-3">
-            <h2 className="text-xl font-medium text-gray-800 bg-gray-100 p-3 rounded-t-xl">
+            <h2 className="text-xl font-medium text-slate-700 bg-slate-50 p-3 rounded-t-xl">
               الجزاءات
             </h2>
             <PenaltiesModal
               employeeId={employee.id}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-4 py-2 rounded-xl transition-all font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1 duration-300"
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition-all font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 duration-300"
             />
           </div>
           {employee.penalties && employee.penalties.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-gray-200 text-base">
+              <table className="w-full border-collapse border border-slate-200 text-base">
                 <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                  <tr className="bg-slate-50">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       التاريخ
                     </th>
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       نوع الجزاء
                     </th>
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       الوصف
                     </th>
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       المرفقات
                     </th>
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       الإجراءات
                     </th>
                   </tr>
@@ -593,9 +597,9 @@ const EmployeeDetailsPage = async (props: {
                     .map((penalty: Penalty, index: number) => (
                       <tr
                         key={penalty.id}
-                        className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                        className={index % 2 === 0 ? "bg-white" : "bg-slate-50"}
                       >
-                        <td className="border border-gray-200 p-3 text-center">
+                        <td className="border border-slate-200 p-3 text-center text-slate-600">
                           {new Date(penalty.date).toLocaleDateString(
                             "ar-EG-u-nu-arab",
                             {
@@ -605,13 +609,13 @@ const EmployeeDetailsPage = async (props: {
                             }
                           )}
                         </td>
-                        <td className="border border-gray-200 p-3 text-center">
+                        <td className="border border-slate-200 p-3 text-center text-slate-600">
                           {getPenaltyTypeLabel(penalty.type)}
                         </td>
-                        <td className="border border-gray-200 p-3">
+                        <td className="border border-slate-200 p-3 text-slate-800">
                           {penalty.description}
                         </td>
-                        <td className="border border-gray-200 p-3 text-center">
+                        <td className="border border-slate-200 p-3 text-center">
                           {penalty.attachments ? (
                             <a
                               href={penalty.attachments}
@@ -625,7 +629,7 @@ const EmployeeDetailsPage = async (props: {
                             "-"
                           )}
                         </td>
-                        <td className="border border-gray-200 p-3 text-center">
+                        <td className="border border-slate-200 p-3 text-center">
                           <div className="flex gap-2 justify-center">
                             <PenaltiesModal
                               employeeId={employee.id}
@@ -652,8 +656,8 @@ const EmployeeDetailsPage = async (props: {
               </table>
             </div>
           ) : (
-            <div className="border border-gray-200 p-8 text-center bg-gray-50">
-              <p className="text-gray-600 text-base">لا توجد جزاءات مسجلة</p>
+            <div className="border border-slate-200 p-8 text-center bg-slate-50">
+              <p className="text-slate-600 text-base">لا توجد جزاءات مسجلة</p>
             </div>
           )}
         </div>
@@ -661,32 +665,32 @@ const EmployeeDetailsPage = async (props: {
         {/* Bonuses Section */}
         <div className="mt-8">
           <div className="flex justify-between items-center mb-3">
-            <h2 className="text-xl font-medium text-gray-800 bg-gray-100 p-3 rounded-t-xl">
+            <h2 className="text-xl font-medium text-slate-700 bg-slate-50 p-3 rounded-t-xl">
               العلاوات التشجيعية
             </h2>
             <BonusesModal
               employeeId={employee.id}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white px-4 py-2 rounded-xl transition-all font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1 duration-300"
+              className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl transition-all font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 duration-300"
             />
           </div>
           {employee.bonuses && employee.bonuses.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-gray-200 text-base">
+              <table className="w-full border-collapse border border-slate-200 text-base">
                 <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                  <tr className="bg-slate-50">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       التاريخ
                     </th>
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       الموقف/السبب
                     </th>
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       قيمة العلاوة
                     </th>
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       المرفقات
                     </th>
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       الإجراءات
                     </th>
                   </tr>
@@ -700,9 +704,9 @@ const EmployeeDetailsPage = async (props: {
                     .map((bonus: Bonus, index: number) => (
                       <tr
                         key={bonus.id}
-                        className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                        className={index % 2 === 0 ? "bg-white" : "bg-slate-50"}
                       >
-                        <td className="border border-gray-200 p-3 text-center">
+                        <td className="border border-slate-200 p-3 text-center text-slate-600">
                           {new Date(bonus.date).toLocaleDateString(
                             "ar-EG-u-nu-arab",
                             {
@@ -712,13 +716,13 @@ const EmployeeDetailsPage = async (props: {
                             }
                           )}
                         </td>
-                        <td className="border border-gray-200 p-3">
+                        <td className="border border-slate-200 p-3 text-slate-800">
                           {bonus.reason}
                         </td>
-                        <td className="border border-gray-200 p-3 text-center">
+                        <td className="border border-slate-200 p-3 text-center text-slate-600">
                           {bonus.amount || "-"}
                         </td>
-                        <td className="border border-gray-200 p-3 text-center">
+                        <td className="border border-slate-200 p-3 text-center">
                           {bonus.attachments ? (
                             <a
                               href={bonus.attachments}
@@ -732,7 +736,7 @@ const EmployeeDetailsPage = async (props: {
                             "-"
                           )}
                         </td>
-                        <td className="border border-gray-200 p-3 text-center">
+                        <td className="border border-slate-200 p-3 text-center">
                           <div className="flex gap-2 justify-center">
                             <BonusesModal
                               employeeId={employee.id}
@@ -759,8 +763,8 @@ const EmployeeDetailsPage = async (props: {
               </table>
             </div>
           ) : (
-            <div className="border border-gray-200 p-8 text-center bg-gray-50">
-              <p className="text-gray-600 text-base">لا توجد علاوات مسجلة</p>
+            <div className="border border-slate-200 p-8 text-center bg-slate-50">
+              <p className="text-slate-600 text-base">لا توجد علاوات مسجلة</p>
             </div>
           )}
         </div>
@@ -768,33 +772,33 @@ const EmployeeDetailsPage = async (props: {
         {/* Efficiency Reports Section */}
         <div className="mt-8">
           <div className="flex justify-between items-center mb-3">
-            <h2 className="text-xl font-medium text-gray-800 bg-gray-100 p-3 rounded-t-xl">
+            <h2 className="text-xl font-medium text-slate-700 bg-slate-50 p-3 rounded-t-xl">
               تقارير الكفاءة
             </h2>
             <EfficiencyReportsModal
               employeeId={employee.id}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-4 py-2 rounded-xl transition-all font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1 duration-300"
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition-all font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 duration-300"
             />
           </div>
           {employee.efficiencyReports &&
           employee.efficiencyReports.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-gray-200 text-base">
+              <table className="w-full border-collapse border border-slate-200 text-base">
                 <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                  <tr className="bg-slate-50">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       السنة
                     </th>
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       الدرجة
                     </th>
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       الوصف
                     </th>
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       المرفقات
                     </th>
-                    <th className="border border-gray-200 p-3 text-center font-medium">
+                    <th className="border border-slate-200 p-3 text-center font-medium text-slate-700">
                       الإجراءات
                     </th>
                   </tr>
@@ -808,18 +812,18 @@ const EmployeeDetailsPage = async (props: {
                     .map((report: EfficiencyReport, index: number) => (
                       <tr
                         key={report.id}
-                        className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                        className={index % 2 === 0 ? "bg-white" : "bg-slate-50"}
                       >
-                        <td className="border border-gray-200 p-3 text-center">
+                        <td className="border border-slate-200 p-3 text-center text-slate-600">
                           {report.year}
                         </td>
-                        <td className="border border-gray-200 p-3 text-center">
+                        <td className="border border-slate-200 p-3 text-center text-slate-600">
                           {getEfficiencyGradeLabel(report.grade)}
                         </td>
-                        <td className="border border-gray-200 p-3">
+                        <td className="border border-slate-200 p-3 text-slate-800">
                           {report.description}
                         </td>
-                        <td className="border border-gray-200 p-3 text-center">
+                        <td className="border border-slate-200 p-3 text-center">
                           {report.attachments ? (
                             <a
                               href={report.attachments}
@@ -833,7 +837,7 @@ const EmployeeDetailsPage = async (props: {
                             "-"
                           )}
                         </td>
-                        <td className="border border-gray-200 p-3 text-center">
+                        <td className="border border-slate-200 p-3 text-center">
                           <div className="flex gap-2 justify-center">
                             <EfficiencyReportsModal
                               employeeId={employee.id}
@@ -858,8 +862,8 @@ const EmployeeDetailsPage = async (props: {
               </table>
             </div>
           ) : (
-            <div className="border border-gray-200 p-8 text-center bg-gray-50">
-              <p className="text-gray-600 text-base">
+            <div className="border border-slate-200 p-8 text-center bg-slate-50">
+              <p className="text-slate-600 text-base">
                 لا توجد تقارير كفاءة مسجلة
               </p>
             </div>

@@ -6,12 +6,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import dayjs from "dayjs";
 import "dayjs/locale/ar";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import { createBonus, updateBonus } from "@/lib/actions/employee.actions";
 
+dayjs.extend(customParseFormat);
 dayjs.locale("ar");
 
 const bonusSchema = z.object({
-  date: z.string().min(1, "التاريخ مطلوب"),
+  date: z
+    .string()
+    .min(1, "التاريخ مطلوب")
+    .refine((val) => dayjs(val, "DD/MM/YYYY", true).isValid(), {
+      message: "صيغة التاريخ غير صحيحة (يجب أن تكون DD/MM/YYYY)",
+    }),
   reason: z.string().min(1, "الموقف مطلوب"),
   amount: z.string().optional(),
   attachments: z.string().optional(),
@@ -57,9 +64,8 @@ const BonusesModal: React.FC<BonusesModalProps> = ({
       : { date: "", reason: "", amount: "", attachments: "" },
   });
 
-  // تنسيق الإدخال أثناء الكتابة (مثل PenaltiesModal)
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, ""); // إزالة أي شيء غير رقم
+    let value = e.target.value.replace(/\D/g, "");
     if (value.length >= 5) {
       value = value.replace(/(\d{2})(\d{2})(\d{0,4})/, "$1/$2/$3");
     } else if (value.length >= 3) {
@@ -69,7 +75,6 @@ const BonusesModal: React.FC<BonusesModalProps> = ({
   };
 
   const onSubmit = async (data: BonusForm) => {
-    // تحويل التاريخ لصيغة ISO
     const formattedDate = dayjs(data.date, "DD/MM/YYYY").toISOString();
     const payload = { ...data, date: formattedDate };
 
@@ -126,7 +131,6 @@ const BonusesModal: React.FC<BonusesModalProps> = ({
 
             <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* التاريخ بصيغة يوم/شهر/سنة */}
                 <div>
                   <label
                     htmlFor="date"
@@ -149,8 +153,6 @@ const BonusesModal: React.FC<BonusesModalProps> = ({
                     </p>
                   )}
                 </div>
-
-                {/* قيمة العلاوة */}
                 <div>
                   <label
                     htmlFor="amount"
@@ -167,8 +169,6 @@ const BonusesModal: React.FC<BonusesModalProps> = ({
                   />
                 </div>
               </div>
-
-              {/* السبب */}
               <div>
                 <label
                   htmlFor="reason"
@@ -190,7 +190,6 @@ const BonusesModal: React.FC<BonusesModalProps> = ({
                 )}
               </div>
 
-              {/* المرفقات */}
               <div>
                 <label
                   htmlFor="attachments"
@@ -206,8 +205,6 @@ const BonusesModal: React.FC<BonusesModalProps> = ({
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/20 transition-all outline-none"
                 />
               </div>
-
-              {/* الأزرار */}
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="button"

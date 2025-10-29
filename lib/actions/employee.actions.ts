@@ -41,21 +41,27 @@ interface EfficiencyReport {
   attachments?: string | null;
 }
 
+const safeCreateDate = (dateInput: Date | string | null | undefined): Date => {
+  if (!dateInput) {
+    return new Date(dateInput!);
+  }
+  return new Date(dateInput);
+};
+
 export async function createEmployee(
   data: z.infer<typeof createEmployeeApiSchema>
 ) {
   try {
     const validatedData = createEmployeeApiSchema.parse(data);
-
     const empData = {
       name: validatedData.name,
       nickName: validatedData.nickName || "",
       profession: validatedData.profession || "",
-      birthDate: new Date(validatedData.birthDate),
+      birthDate: safeCreateDate(validatedData.birthDate),
       nationalId: validatedData.nationalId,
       maritalStatus: validatedData.maritalStatus,
       residenceLocation: validatedData.residenceLocation || "",
-      hiringDate: new Date(validatedData.hiringDate),
+      hiringDate: safeCreateDate(validatedData.hiringDate),
       hiringType: validatedData.hiringType,
       administration: validatedData.administration,
       actualWork: validatedData.actualWork || "",
@@ -166,6 +172,7 @@ export async function createEmployee(
   } catch (error) {
     console.error("Error creating employee:", error);
     if (error instanceof z.ZodError) {
+      // ده السطر اللي بيطبع الخطأ عندك في اللوج
       return { success: false, error: "بيانات غير صحيحة" };
     }
     return { success: false, error: "حدث خطأ أثناء إنشاء الموظف" };
@@ -178,16 +185,15 @@ export const updateEmployee = async (
 ) => {
   try {
     const validatedData = createEmployeeApiSchema.parse(data);
-
     const empData = {
       name: validatedData.name,
       nickName: validatedData.nickName || "",
       profession: validatedData.profession || "",
-      birthDate: new Date(validatedData.birthDate),
+      birthDate: safeCreateDate(validatedData.birthDate),
       nationalId: validatedData.nationalId,
       maritalStatus: validatedData.maritalStatus,
       residenceLocation: validatedData.residenceLocation || "",
-      hiringDate: new Date(validatedData.hiringDate),
+      hiringDate: safeCreateDate(validatedData.hiringDate),
       hiringType: validatedData.hiringType,
       email: validatedData.email || null,
       administration: validatedData.administration,
@@ -333,6 +339,7 @@ export const getEmployeesBySearch = async (
   educationalDegree: string,
   functionalDegree: string,
   hasPenalties: string = "",
+  hasBonuses: string = "",
   hasEfficiencyReports: string = ""
 ) => {
   noStore();
@@ -348,6 +355,7 @@ export const getEmployeesBySearch = async (
       cleanEduDegree,
       cleanFuncDegree,
       hasPenalties,
+      hasBonuses,
       hasEfficiencyReports,
     });
 
@@ -409,18 +417,29 @@ export const getEmployeesBySearch = async (
       console.log("🔍 Filtering employees without penalties (none)");
     }
 
+    // Bonuses filter: use { some: {} } to check existence
+    if (hasBonuses === "yes") {
+      whereClause.bonuses = { some: {} };
+      console.log("🔍 Filtering employees with bonuses (some: {})");
+    } else if (hasBonuses === "no") {
+      whereClause.bonuses = { none: {} };
+      console.log("🔍 Filtering employees without bonuses (none)");
+    }
+
     // Efficiency reports filter: filter by grade or none for BELOW
     if (hasEfficiencyReports && hasEfficiencyReports !== "") {
       if (hasEfficiencyReports === "BELOW") {
         whereClause.efficiencyReports = { none: {} };
         console.log("🔍 Filtering employees without efficiency reports (none)");
       } else {
-        whereClause.efficiencyReports = { 
-          some: { 
-            grade: hasEfficiencyReports 
-          } 
+        whereClause.efficiencyReports = {
+          some: {
+            grade: hasEfficiencyReports,
+          },
         };
-        console.log(`🔍 Filtering employees with efficiency grade: ${hasEfficiencyReports}`);
+        console.log(
+          `Filtering employees with efficiency grade: ${hasEfficiencyReports}`
+        );
       }
     }
 

@@ -6,12 +6,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import dayjs from "dayjs";
 import "dayjs/locale/ar";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import { createPenalty, updatePenalty } from "@/lib/actions/employee.actions";
-
+dayjs.extend(customParseFormat);
 dayjs.locale("ar");
 
 const penaltySchema = z.object({
-  date: z.string().min(1, "التاريخ مطلوب"),
+  date: z
+    .string()
+    .min(1, "التاريخ مطلوب")
+    .refine((val) => dayjs(val, "DD/MM/YYYY", true).isValid(), {
+      message: "صيغة التاريخ غير صحيحة (يجب أن تكون DD/MM/YYYY)",
+    }),
   type: z.string().min(1, "نوع الجزاء مطلوب"),
   description: z.string().min(1, "الوصف مطلوب"),
   attachments: z.string().optional(),
@@ -39,7 +45,11 @@ const PENALTY_TYPES = [
   { value: "TERMINATION", label: "فصل" },
 ];
 
-const PenaltiesModal: React.FC<PenaltiesModalProps> = ({ employeeId, penalty, className }) => {
+const PenaltiesModal: React.FC<PenaltiesModalProps> = ({
+  employeeId,
+  penalty,
+  className,
+}) => {
   const [open, setOpen] = useState(false);
   const {
     register,
@@ -61,7 +71,6 @@ const PenaltiesModal: React.FC<PenaltiesModalProps> = ({ employeeId, penalty, cl
   });
 
   const onSubmit = async (data: PenaltyForm) => {
-    // تحويل التاريخ لصيغة ISO قبل الإرسال
     const formattedDate = dayjs(data.date, "DD/MM/YYYY").toISOString();
     const payload = { ...data, date: formattedDate };
 
@@ -78,7 +87,6 @@ const PenaltiesModal: React.FC<PenaltiesModalProps> = ({ employeeId, penalty, cl
     }
   };
 
-  // تنسيق الإدخال أثناء الكتابة
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, ""); // إزالة أي شيء غير أرقام
     if (value.length >= 5) {
@@ -113,7 +121,9 @@ const PenaltiesModal: React.FC<PenaltiesModalProps> = ({ employeeId, penalty, cl
 
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in duration-200">
             <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
-              <h2 className="text-2xl font-bold">{penalty ? "تعديل الجزاء" : "إضافة جزاء جديد"}</h2>
+              <h2 className="text-2xl font-bold">
+                {penalty ? "تعديل الجزاء" : "إضافة جزاء جديد"}
+              </h2>
               <button
                 onClick={() => {
                   setOpen(false);
@@ -127,9 +137,11 @@ const PenaltiesModal: React.FC<PenaltiesModalProps> = ({ employeeId, penalty, cl
 
             <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* التاريخ بصيغة اليوم/الشهر/السنة */}
                 <div>
-                  <label htmlFor="date" className="block text-gray-700 font-semibold mb-2">
+                  <label
+                    htmlFor="date"
+                    className="block text-gray-700 font-semibold mb-2"
+                  >
                     التاريخ (يوم / شهر / سنة)
                   </label>
                   <input
@@ -142,13 +154,17 @@ const PenaltiesModal: React.FC<PenaltiesModalProps> = ({ employeeId, penalty, cl
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none"
                   />
                   {errors.date && (
-                    <p className="text-red-600 text-sm mt-2">{errors.date.message}</p>
+                    <p className="text-red-600 text-sm mt-2">
+                      {errors.date.message}
+                    </p>
                   )}
                 </div>
 
-                {/* نوع الجزاء */}
                 <div>
-                  <label htmlFor="type" className="block text-gray-700 font-semibold mb-2">
+                  <label
+                    htmlFor="type"
+                    className="block text-gray-700 font-semibold mb-2"
+                  >
                     نوع الجزاء
                   </label>
                   <select
@@ -163,13 +179,19 @@ const PenaltiesModal: React.FC<PenaltiesModalProps> = ({ employeeId, penalty, cl
                       </option>
                     ))}
                   </select>
-                  {errors.type && <p className="text-red-600 text-sm mt-2">{errors.type.message}</p>}
+                  {errors.type && (
+                    <p className="text-red-600 text-sm mt-2">
+                      {errors.type.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
-              {/* الوصف */}
               <div>
-                <label htmlFor="description" className="block text-gray-700 font-semibold mb-2">
+                <label
+                  htmlFor="description"
+                  className="block text-gray-700 font-semibold mb-2"
+                >
                   الوصف
                 </label>
                 <textarea
@@ -180,15 +202,22 @@ const PenaltiesModal: React.FC<PenaltiesModalProps> = ({ employeeId, penalty, cl
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none resize-none"
                 />
                 {errors.description && (
-                  <p className="text-red-600 text-sm mt-2">{errors.description.message}</p>
+                  <p className="text-red-600 text-sm mt-2">
+                    {errors.description.message}
+                  </p>
                 )}
               </div>
 
               {/* المرفقات */}
               <div>
-                <label htmlFor="attachments" className="block text-gray-700 font-semibold mb-2">
+                <label
+                  htmlFor="attachments"
+                  className="block text-gray-700 font-semibold mb-2"
+                >
                   المرفقات (رابط)
-                  <span className="text-sm text-gray-500 font-normal">(اختياري)</span>
+                  <span className="text-sm text-gray-500 font-normal">
+                    (اختياري)
+                  </span>
                 </label>
                 <input
                   type="url"
