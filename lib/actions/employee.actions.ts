@@ -48,7 +48,6 @@ const safeCreateDate = (dateInput: Date | string | null | undefined): Date => {
   return new Date(dateInput);
 };
 
-
 export async function createEmployee(
   data: z.infer<typeof createEmployeeApiSchema>
 ) {
@@ -223,7 +222,6 @@ export const updateEmployee = async (
       }));
     }
 
-
     let penalties: Penalty[] = [];
     if (validatedData.penalties && validatedData.penalties.length > 0) {
       penalties = validatedData.penalties.map((pen) => ({
@@ -316,7 +314,6 @@ export const updateEmployee = async (
   }
 };
 
-
 export const getEmployees = async () => {
   noStore();
   try {
@@ -342,6 +339,7 @@ export const getEmployeesBySearch = async (
   educationalDegree: string,
   functionalDegree: string,
   hasPenalties: string = "",
+  hasBonuses: string = "",
   hasEfficiencyReports: string = ""
 ) => {
   noStore();
@@ -357,6 +355,7 @@ export const getEmployeesBySearch = async (
       cleanEduDegree,
       cleanFuncDegree,
       hasPenalties,
+      hasBonuses,
       hasEfficiencyReports,
     });
 
@@ -416,6 +415,15 @@ export const getEmployeesBySearch = async (
     } else if (hasPenalties === "no") {
       whereClause.penalties = { none: {} };
       console.log("🔍 Filtering employees without penalties (none)");
+    }
+
+    // Bonuses filter: use { some: {} } to check existence
+    if (hasBonuses === "yes") {
+      whereClause.bonuses = { some: {} };
+      console.log("🔍 Filtering employees with bonuses (some: {})");
+    } else if (hasBonuses === "no") {
+      whereClause.bonuses = { none: {} };
+      console.log("🔍 Filtering employees without bonuses (none)");
     }
 
     // Efficiency reports filter: filter by grade or none for BELOW

@@ -9,6 +9,7 @@ export async function GET(request: Request) {
     const educationalDegree = searchParams.get("educationalDegree") || "";
     const functionalDegree = searchParams.get("functionalDegree") || "";
     const hasPenalties = searchParams.get("hasPenalties") || "";
+    const hasBonuses = searchParams.get("hasBonuses") || "";
     const hasEfficiencyReports = searchParams.get("hasEfficiencyReports") || "";
 
     console.log("API Route - Search params:", {
@@ -17,6 +18,7 @@ export async function GET(request: Request) {
       educationalDegree,
       functionalDegree,
       hasPenalties,
+      hasBonuses,
       hasEfficiencyReports,
     });
 
@@ -26,6 +28,7 @@ export async function GET(request: Request) {
       educationalDegree,
       functionalDegree,
       hasPenalties,
+      hasBonuses,
       hasEfficiencyReports
     );
 

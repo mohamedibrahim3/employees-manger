@@ -37,6 +37,7 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
   const [educationalDegree, setEducationalDegree] = useState("");
   const [functionalDegree, setFunctionalDegree] = useState("");
   const [hasPenalties, setHasPenalties] = useState("");
+  const [hasBonuses, setHasBonuses] = useState("");
   const [hasEfficiencyReports, setHasEfficiencyReports] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -58,6 +59,7 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
         params.append("educationalDegree", educationalDegree);
       if (functionalDegree) params.append("functionalDegree", functionalDegree);
       if (hasPenalties) params.append("hasPenalties", hasPenalties);
+      if (hasBonuses) params.append("hasBonuses", hasBonuses);
       if (hasEfficiencyReports)
         params.append("hasEfficiencyReports", hasEfficiencyReports);
 
@@ -90,6 +92,7 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
       !educationalDegree &&
       !functionalDegree &&
       !hasPenalties &&
+      !hasBonuses &&
       !hasEfficiencyReports);
 
   return (
@@ -100,7 +103,7 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
         className="flex flex-col md:flex-row gap-4 items-end justify-center bg-white p-6 rounded-xl shadow-md border border-slate-200 flex-wrap"
       >
         {/* حقل اسم الموظف */}
-        <div className="w-full md:w-1/5">
+        <div className="w-full md:w-1/6">
           <label className="block text-right text-slate-700 font-medium mb-2">
             اسم الموظف
           </label>
@@ -115,7 +118,7 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
         </div>
 
         {/* حقل الإدارة */}
-        <div className="w-full md:w-1/5">
+        <div className="w-full md:w-1/6">
           <label className="block text-right text-slate-700 font-medium mb-2">
             الإدارة
           </label>
@@ -135,7 +138,7 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
         </div>
 
         {/* قائمة الدرجة العلمية */}
-        <div className="w-full md:w-1/5">
+        <div className="w-full md:w-1/6">
           <label className="block text-right text-slate-700 font-medium mb-2">
             الدرجة العلمية
           </label>
@@ -154,7 +157,7 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
           </select>
         </div>
 
-        <div className="w-full md:w-1/5">
+        <div className="w-full md:w-1/6">
           <label className="block text-right text-slate-700 font-medium mb-2">
             الدرجة الوظيفية
           </label>
@@ -174,7 +177,7 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
         </div>
 
         {/* حقل حاصل على جزاءات */}
-        <div className="w-full md:w-1/5">
+        <div className="w-full md:w-1/6">
           <label className="block text-right text-slate-700 font-medium mb-2">
             حاصل على جزاءات
           </label>
@@ -190,8 +193,25 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
           </select>
         </div>
 
+        {/* حقل حاصل على علاوات تشجيعية */}
+        <div className="w-full md:w-1/6">
+          <label className="block text-right text-slate-700 font-medium mb-2">
+            حاصل على علاوات تشجيعية
+          </label>
+          <select
+            value={hasBonuses}
+            onChange={(e) => setHasBonuses(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-blue-500 focus:outline-none text-right bg-white"
+            disabled={loading}
+          >
+            <option value="">الكل</option>
+            <option value="yes">نعم</option>
+            <option value="no">لا</option>
+          </select>
+        </div>
+
         {/* حقل درجة تقرير الكفاءة */}
-        <div className="w-full md:w-1/5">
+        <div className="w-full md:w-1/6">
           <label className="block text-right text-slate-700 font-medium mb-2">
             درجة تقرير الكفاءة
           </label>
@@ -251,6 +271,7 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
                     {(educationalDegree ||
                       functionalDegree ||
                       hasPenalties ||
+                      hasBonuses ||
                       hasEfficiencyReports) && (
                       <span className="block mt-2 text-sm">
                         {educationalDegree && (
@@ -264,6 +285,7 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
                         {educationalDegree &&
                           (functionalDegree ||
                             hasPenalties ||
+                            hasBonuses ||
                             hasEfficiencyReports) &&
                           "، "}
                         {functionalDegree && (
@@ -275,7 +297,9 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
                           </>
                         )}
                         {functionalDegree &&
-                          (hasPenalties || hasEfficiencyReports) &&
+                          (hasPenalties ||
+                            hasBonuses ||
+                            hasEfficiencyReports) &&
                           "، "}
                         {hasPenalties && (
                           <>
@@ -284,7 +308,17 @@ export default function SearchSection({ administrations }: SearchSectionProps) {
                               : "غير حاصلين على جزاءات"}
                           </>
                         )}
-                        {hasPenalties && hasEfficiencyReports && "، "}
+                        {hasPenalties &&
+                          (hasBonuses || hasEfficiencyReports) &&
+                          "، "}
+                        {hasBonuses && (
+                          <>
+                            {hasBonuses === "yes"
+                              ? "حاصلين على علاوات تشجيعية"
+                              : "غير حاصلين على علاوات تشجيعية"}
+                          </>
+                        )}
+                        {hasBonuses && hasEfficiencyReports && "، "}
                         {hasEfficiencyReports && (
                           <>
                             حاصلين على درجة تقرير كفاءة:{" "}
